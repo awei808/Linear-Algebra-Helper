@@ -37,13 +37,39 @@ const state = {
 
 // DOM元素引用
 const elements = {
+    // 主要界面元素
     windowDiv: document.getElementById('window'),
     coordinatesDiv: document.getElementById('coordinates'),
     undoButton: document.getElementById('undoButton'),
     nextButton: document.getElementById('nextButton'),
     inputMatrixDiv: document.getElementById('InputMatrix'),
     buttonInputMatrix: document.getElementById('ButtonInputMartix'),
-    tipDiv: document.getElementById('tip')
+    tipDiv: document.getElementById('tip'),
+    
+    // 更多菜单相关
+    moreButton: document.getElementById('moreButton'),
+    moreDropdown: document.getElementById('moreDropdown'),
+    exportMatrixButton: document.getElementById('exportMatrixButton'),
+    
+    // 快速录入相关
+    quickInput: document.getElementById('input'),
+    
+    // 矩阵数据显示
+    matrixDataDisplay: document.getElementById('matrixDataDisplay'),
+    
+    // 初等变换界面
+    operatorButtons: document.querySelector('.operator-buttons'),
+    transformTarget: document.getElementById('transform-target'),
+    transformCoefficient: document.getElementById('transform-coefficient'),
+    transformParam: document.getElementById('transform-param'),
+    buttonChange: document.getElementById('button-change'),
+    buttonAdd: document.getElementById('button-add'),
+    buttonSub: document.getElementById('button-sub'),
+    buttonMul: document.getElementById('button-mul'),
+    buttonTranslate: document.getElementById('button-translate'),
+    
+    // 调试相关
+    buttonTest: document.getElementById('ButtonTest')
 };
 
 // ==================== 初始化函数 ====================
@@ -345,10 +371,8 @@ function Undo() {
  * 切换输入矩阵区域的显示/隐藏；支持快速录入功能
  */
 function startMatrixInput() {
-    const quickInput = document.getElementById('input');
-
     // 如果快速录入输入框存在且不为空，则优先处理快速录入
-    if (quickInput && quickInput.value.trim() !== '') {
+    if (elements.quickInput && elements.quickInput.value.trim() !== '') {
         handleQuickInputMatrix();
         return;
     }
@@ -413,14 +437,14 @@ function exportMatrixToArray() {
         return;
     }
 
-    const { rows, cols, elements } = state.matrixData;
+    const { rows, cols, elements: matrixElements } = state.matrixData;
     
     // 将矩阵元素转换为二维数组字符串
     const matrixArray = [];
     for (let i = 0; i < rows; i++) {
         const row = [];
         for (let j = 0; j < cols; j++) {
-            row.push(elements[i][j] || '0');
+            row.push(matrixElements[i][j] || '0');
         }
         matrixArray.push(`[${row.join(', ')}]`);
     }
@@ -433,16 +457,14 @@ function exportMatrixToArray() {
         showSuccess('矩阵数据已复制到剪贴板！');
         
         // 显示矩阵数据
-        const matrixDataDisplay = document.getElementById('matrixDataDisplay');
-        if (matrixDataDisplay) {
-            matrixDataDisplay.textContent = `矩阵数据: ${matrixString}`;
-            matrixDataDisplay.style.display = 'block';
+        if (elements.matrixDataDisplay) {
+            elements.matrixDataDisplay.textContent = `矩阵数据: ${matrixString}`;
+            elements.matrixDataDisplay.style.display = 'block';
         }
         
         // 关闭下拉菜单
-        const moreDropdown = document.getElementById('moreDropdown');
-        if (moreDropdown) {
-            moreDropdown.classList.remove('show');
+        if (elements.moreDropdown) {
+            elements.moreDropdown.classList.remove('show');
         }
         
     }).catch(err => {
@@ -450,10 +472,9 @@ function exportMatrixToArray() {
         showError('复制失败，请手动复制以下内容: ' + matrixString);
         
         // 即使复制失败也显示数据
-        const matrixDataDisplay = document.getElementById('matrixDataDisplay');
-        if (matrixDataDisplay) {
-            matrixDataDisplay.textContent = `矩阵数据: ${matrixString}`;
-            matrixDataDisplay.style.display = 'block';
+        if (elements.matrixDataDisplay) {
+            elements.matrixDataDisplay.textContent = `矩阵数据: ${matrixString}`;
+            elements.matrixDataDisplay.style.display = 'block';
         }
     });
 }
@@ -501,23 +522,20 @@ function setupEventListeners() {
     elements.buttonInputMatrix.addEventListener('click', startMatrixInput);
     
     // 添加更多按钮点击事件
-    const moreButton = document.getElementById('moreButton');
-    const moreDropdown = document.getElementById('moreDropdown');
-    if (moreButton && moreDropdown) {
-        moreButton.addEventListener('click', toggleMoreDropdown);
+    if (elements.moreButton && elements.moreDropdown) {
+        elements.moreButton.addEventListener('click', toggleMoreDropdown);
         
         // 点击页面其他区域时关闭下拉菜单
         document.addEventListener('click', function(event) {
-            if (!moreButton.contains(event.target) && !moreDropdown.contains(event.target)) {
-                moreDropdown.classList.remove('show');
+            if (!elements.moreButton.contains(event.target) && !elements.moreDropdown.contains(event.target)) {
+                elements.moreDropdown.classList.remove('show');
             }
         });
     }
     
     // 添加导出矩阵按钮点击事件
-    const exportMatrixButton = document.getElementById('exportMatrixButton');
-    if (exportMatrixButton) {
-        exportMatrixButton.addEventListener('click', function(event) {
+    if (elements.exportMatrixButton) {
+        elements.exportMatrixButton.addEventListener('click', function(event) {
             event.preventDefault();
             exportMatrixToArray();
         });
