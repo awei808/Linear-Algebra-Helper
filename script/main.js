@@ -1,40 +1,5 @@
-// ==================== 配置和状态定义 ====================
-// 配置常量
-const CONFIG = {
-    GRID_SIZE: 10,
-    INITIAL_DIMENSION: '0×0',
-    // 屏幕大小定义（与CSS断点一致）
-    SCREEN_SIZES: {
-        MOBILE_MAX: 768,
-        TABLET_MAX: 1024,
-        DESKTOP_MIN: 1025
-    },
-    // 输入框默认尺寸（备用）
-    DEFAULT_INPUT_DIMENSIONS: {
-        width: 60,
-        height: 50
-    },
-    // 状态定义
-    STATES: {
-        INIT: 'init', // 新增：初始状态
-        SELECT_DIMENSION: 'select_dimension',
-        INPUT_ELEMENTS: 'input_elements',
-        ELEMENTARY_TRANSFORMATION: 'elementary_transformation'  // 新增初等变换状态
-    }
-};
-
-// 状态管理
-const state = {
-    currentHoverCell: null,
-    lastSelectedDimension: CONFIG.INITIAL_DIMENSION,
-    gridCells: [], // 缓存网格元素引用
-    gridInputs: [], // 缓存输入框元素引用
-    currentState: CONFIG.STATES.INIT, // 修改：默认状态为INIT
-    matrixData: null, // 存储矩阵数据，预期格式{rows，cols，elements}
-    previousStates: [],// 状态历史，用于撤销
-    rowColumnIndexEventListener: null // 新增：存储行列索引事件监听器引用
-};
-
+// ==================== 应用核心逻辑 ====================
+// 注意：配置项已移至 config.js，状态机已移至 state.js
 // DOM元素引用
 const elements = {
     // 主要界面元素
@@ -45,18 +10,18 @@ const elements = {
     inputMatrixDiv: document.getElementById('InputMatrix'),
     buttonInputMatrix: document.getElementById('ButtonInputMartix'),
     tipDiv: document.getElementById('tip'),
-    
+
     // 更多菜单相关
     moreButton: document.getElementById('moreButton'),
     moreDropdown: document.getElementById('moreDropdown'),
     exportMatrixButton: document.getElementById('exportMatrixButton'),
-    
+
     // 快速录入相关
     quickInput: document.getElementById('input'),
-    
+
     // 矩阵数据显示
     matrixDataDisplay: document.getElementById('matrixDataDisplay'),
-    
+
     // 初等变换界面
     operatorButtons: document.querySelector('.operator-buttons'),
     transformTarget: document.getElementById('transform-target'),
@@ -67,7 +32,7 @@ const elements = {
     buttonSub: document.getElementById('button-sub'),
     buttonMul: document.getElementById('button-mul'),
     buttonTranslate: document.getElementById('button-translate'),
-    
+
     // 调试相关
     buttonTest: document.getElementById('ButtonTest')
 };
@@ -79,7 +44,7 @@ const elements = {
 function init() {
     createGrid();
     setupEventListeners();
-    
+
     // 确保初始状态为INIT
     state.currentState = CONFIG.STATES.INIT;
     updateUIForCurrentState();
@@ -95,71 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// ==================== 状态机函数 ====================
-/**
- * 更新UI以反映当前状态
- */
-function updateUIForCurrentState() {
-    switch (state.currentState) {
-        case CONFIG.STATES.INIT: // 新增：初始状态
-            console.log('to 初始状态');
-            elements.tipDiv.textContent = '请点击"录入矩阵"按钮开始';
-            elements.nextButton.textContent = '下一步';
-            elements.nextButton.disabled = true;
-            elements.nextButton.style.opacity = '0.6';
-            elements.nextButton.style.cursor = 'not-allowed';
-            elements.undoButton.disabled = true;
-            elements.undoButton.style.opacity = '0.6';
-            elements.undoButton.style.cursor = 'not-allowed';
-            disableGridInteraction();
-            break;
-
-        case CONFIG.STATES.SELECT_DIMENSION:
-            console.log('to 维度选择');
-            elements.tipDiv.textContent = '点击网格选择矩阵大小';
-            elements.nextButton.textContent = '下一步';
-            elements.nextButton.disabled = false;
-            elements.nextButton.style.opacity = '1';
-            elements.nextButton.style.cursor = 'pointer';
-            elements.undoButton.disabled = true;
-            elements.undoButton.style.opacity = '0.6';
-            elements.undoButton.style.cursor = 'not-allowed'; 
-            enableGridInteraction();
-            break;
-
-        case CONFIG.STATES.INPUT_ELEMENTS:
-            console.log('to 输入元素');
-            console.log(`矩阵维度: ${state.lastSelectedDimension}`);
-            elements.tipDiv.textContent = '请在输入框中输入矩阵元素（非‘0’），点击下一步后，空白处将用‘0’填充';
-            elements.nextButton.textContent = '下一步';
-            elements.nextButton.disabled = false;
-            elements.nextButton.style.opacity = '1'; // 补充nextButton的opacity属性
-            elements.nextButton.style.cursor = 'pointer'; // 补充nextButton的cursor属性
-            elements.undoButton.disabled = false;
-            elements.undoButton.style.opacity = '1';
-            elements.undoButton.style.cursor = 'pointer'; // 补充undoButton的cursor属性
-            enableInputInteraction();
-            disableGridInteraction();
-            break;
-
-
-
-        case CONFIG.STATES.ELEMENTARY_TRANSFORMATION:  // 新增初等变换状态
-            console.log('to 初等变换');
-            console.table(`矩阵数据: ${JSON.stringify(state.matrixData.elements)}`);
-            elements.tipDiv.textContent = '可以进行初等变换操作';
-            elements.nextButton.textContent = '完成';
-            elements.nextButton.disabled = true;
-            elements.nextButton.style.opacity = '0.6';
-            elements.nextButton.style.cursor = 'not-allowed'; // 补充nextButton的cursor属性
-            elements.undoButton.disabled = false;
-            elements.undoButton.style.opacity = '1';
-            elements.undoButton.style.cursor = 'pointer'; // 补充undoButton的cursor属性
-            showElementaryTransformationUI();
-            disableGridInteraction();
-            break;
-    }
-}
+// 状态机函数已移至 state.js
 
 /**
  * 处理矩阵维度选择
@@ -278,94 +179,7 @@ function resetToInitialState() {
     state.lastSelectedDimension = '0×0';
 }
 
-// ==================== 事件处理函数 ====================
-/**
- * 处理下一步按钮点击
- */
-function Next() {
-    state.previousStates.push({
-        state: state.currentState,
-        matrixData: state.matrixData ? JSON.parse(JSON.stringify(state.matrixData)) : null
-    });
-
-    let success = true;
-    switch (state.currentState) {
-        case CONFIG.STATES.SELECT_DIMENSION:
-            console.log('维度选择下, next');
-            success = handleDimensionSelection();
-            if (success) {
-                state.currentState = CONFIG.STATES.INPUT_ELEMENTS;
-            }
-            break;
-
-        case CONFIG.STATES.INPUT_ELEMENTS:
-            console.log('输入元素下, next');
-            success = handleDataValidation();  // 使用新的处理函数
-            if (success) {
-                state.currentState = CONFIG.STATES.ELEMENTARY_TRANSFORMATION;
-            }
-            break;
-
-        /*case CONFIG.STATES.ELEMENTARY_TRANSFORMATION:  // 新增初等变换状态
-            console.log('in elementary transformation state, next');
-            success = handleElementaryTransformation();
-            if (success) {
-                state.currentState = CONFIG.STATES.NEXT_STATE;
-            }
-            break;
-            */
-    }
-
-    if (success) {
-        updateUIForCurrentState();
-    } else {
-        // 如果处理失败，可能需要移除刚刚保存的状态
-        state.previousStates.pop();
-    }
-}
-
-/**
- * 处理撤销按钮点击
- */
-function Undo() {
-    if (state.previousStates.length === 0) {
-        showWarning('没有可撤销的操作');
-        return;
-    }
-
-    // 弹出最后一次保存的状态
-    const previousState = state.previousStates.pop();
-    const prevStateType = previousState.state;
-    const prevMatrixData = previousState.matrixData ? JSON.parse(JSON.stringify(previousState.matrixData)) : null;
-
-    // 1. 清理当前状态的特殊UI（包括事件监听器）
-    if (state.currentState === CONFIG.STATES.ELEMENTARY_TRANSFORMATION) {
-        hideElementaryTransformationUI(); // 这会移除事件监听器
-    }
-
-    // 2. 恢复前一个状态
-    switch (state.currentState) {
-        case CONFIG.STATES.INPUT_ELEMENTS:
-            console.log('输入元素下, undo');
-            restoreOriginalGrid();
-            break;
-
-        case CONFIG.STATES.ELEMENTARY_TRANSFORMATION:
-            console.log('初等变换下, undo');
-            restoreGridForInputElements();
-            break;
-    }
-
-    // 3. 全局状态回滚
-    state.currentState = prevStateType;
-    state.matrixData = prevMatrixData;
-
-    // 4. 恢复坐标显示和UI
-    const dim = state.matrixData ? `${state.matrixData.rows}×${state.matrixData.cols}` : CONFIG.INITIAL_DIMENSION;
-    updateCoordinatesDisplay(dim);
-    state.lastSelectedDimension = dim;
-    updateUIForCurrentState();
-}
+// Next() 和 Undo() 函数已移至 state.js
 
 /**
  * 切换输入矩阵区域的显示/隐藏；支持快速录入功能
@@ -384,7 +198,7 @@ function startMatrixInput() {
             state: state.currentState,
             matrixData: state.matrixData ? JSON.parse(JSON.stringify(state.matrixData)) : null
         });
-        
+
         // 切换到维度选择状态
         state.currentState = CONFIG.STATES.SELECT_DIMENSION;
         updateUIForCurrentState();
@@ -438,7 +252,7 @@ function exportMatrixToArray() {
     }
 
     const { rows, cols, elements: matrixElements } = state.matrixData;
-    
+
     // 将矩阵元素转换为二维数组字符串
     const matrixArray = [];
     for (let i = 0; i < rows; i++) {
@@ -448,29 +262,29 @@ function exportMatrixToArray() {
         }
         matrixArray.push(`[${row.join(', ')}]`);
     }
-    
+
     const matrixString = `[${matrixArray.join(', ')}]`;
-    
+
     // 复制到剪贴板
     navigator.clipboard.writeText(matrixString).then(() => {
         // 显示成功消息
         showSuccess('矩阵数据已复制到剪贴板！');
-        
+
         // 显示矩阵数据
         if (elements.matrixDataDisplay) {
             elements.matrixDataDisplay.textContent = `矩阵数据: ${matrixString}`;
             elements.matrixDataDisplay.style.display = 'block';
         }
-        
+
         // 关闭下拉菜单
         if (elements.moreDropdown) {
             elements.moreDropdown.classList.remove('show');
         }
-        
+
     }).catch(err => {
         console.error('复制失败:', err);
         showError('复制失败，请手动复制以下内容: ' + matrixString);
-        
+
         // 即使复制失败也显示数据
         if (elements.matrixDataDisplay) {
             elements.matrixDataDisplay.textContent = `矩阵数据: ${matrixString}`;
@@ -520,22 +334,22 @@ function setupEventListeners() {
     elements.nextButton.addEventListener('click', Next);
     // 添加录入矩阵按钮点击事件
     elements.buttonInputMatrix.addEventListener('click', startMatrixInput);
-    
+
     // 添加更多按钮点击事件
     if (elements.moreButton && elements.moreDropdown) {
         elements.moreButton.addEventListener('click', toggleMoreDropdown);
-        
+
         // 点击页面其他区域时关闭下拉菜单
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             if (!elements.moreButton.contains(event.target) && !elements.moreDropdown.contains(event.target)) {
                 elements.moreDropdown.classList.remove('show');
             }
         });
     }
-    
+
     // 添加导出矩阵按钮点击事件
     if (elements.exportMatrixButton) {
-        elements.exportMatrixButton.addEventListener('click', function(event) {
+        elements.exportMatrixButton.addEventListener('click', function (event) {
             event.preventDefault();
             exportMatrixToArray();
         });

@@ -5,8 +5,6 @@ let symbolStatus = {
     activeButton: null
 };
 
-const allowedVariables = ['a', 'b', 'c', 'd', 'm', 'n', 'x', 'y', 'z', 'λ'];
-
 // 设置活动符号和按钮样式
 function setActiveSymbol(symbol, activeButton) {
     // 更新状态
