@@ -22,16 +22,6 @@ const elements = {
     // 矩阵数据显示
     matrixDataDisplay: document.getElementById('matrixDataDisplay'),
 
-    // 初等变换界面
-    operatorButtons: document.querySelector('.operator-buttons'),
-    transformTarget: document.getElementById('transform-target'),
-    transformCoefficient: document.getElementById('transform-coefficient'),
-    transformParam: document.getElementById('transform-param'),
-    buttonChange: document.getElementById('button-change'),
-    buttonAdd: document.getElementById('button-add'),
-    buttonSub: document.getElementById('button-sub'),
-    buttonMul: document.getElementById('button-mul'),
-    buttonTranslate: document.getElementById('button-translate'),
 
     // 调试相关
     buttonTest: document.getElementById('ButtonTest')

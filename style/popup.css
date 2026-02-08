@@ -50,9 +50,9 @@
     content: '';
     position: absolute;
     top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
+    left: 8px;
+    right: 8px;
+    height: 4px;
     border-radius: 12px 12px 0 0;
 }
 

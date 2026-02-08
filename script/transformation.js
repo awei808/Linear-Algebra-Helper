@@ -14,18 +14,16 @@ function setActiveSymbol(symbol, activeButton) {
     // 重置所有按钮样式
     resetButtonStyles();
 
-    // 设置活动按钮样式
-    activeButton.style.backgroundColor = '#4a6fa5'; // 主色调
-    activeButton.style.color = 'white';
-    activeButton.style.border = '2px solid #4a6fa5';
+    // 设置活动按钮样式（使用CSS类名）
+    activeButton.classList.add(CONFIG.TRANSFORMATION_CONFIG.BUTTON_STYLES.ACTIVE);
+    activeButton.classList.remove(CONFIG.TRANSFORMATION_CONFIG.BUTTON_STYLES.INACTIVE);
 
-    // 设置其他按钮为灰色
+    // 设置其他按钮为非活动样式
     const allButtons = document.querySelectorAll('#arithmetic-symbols button');
     allButtons.forEach(button => {
         if (button !== activeButton) {
-            button.style.backgroundColor = '#cccccc';
-            button.style.color = '#666666';
-            button.style.border = '1px solid #999999';
+            button.classList.add(CONFIG.TRANSFORMATION_CONFIG.BUTTON_STYLES.INACTIVE);
+            button.classList.remove(CONFIG.TRANSFORMATION_CONFIG.BUTTON_STYLES.ACTIVE);
         }
     });
 }

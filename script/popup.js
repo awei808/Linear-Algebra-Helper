@@ -2,10 +2,12 @@
 class PopupManager {
     constructor() {
         this.popupBox = document.getElementById('popupBox');
-        this.maxPopups = 3; // 最多同时存在3个弹窗
-        this.popupTimeout = 3500; // 3.5秒后自动消失
+        // 从配置中读取弹窗配置
+        this.maxPopups = CONFIG.POPUP_CONFIG.MAX_POPUPS;
+        this.popupTimeout = CONFIG.POPUP_CONFIG.TIMEOUT;
+        this.animationDuration = CONFIG.POPUP_CONFIG.ANIMATION.DURATION;
+        this.animationEasing = CONFIG.POPUP_CONFIG.ANIMATION.EASING;        
         this.currentPopups = new Map(); // 存储弹窗ID和对应的元素
-        
         this.init();
     }
     
@@ -49,7 +51,7 @@ class PopupManager {
             });
         }
         
-        // 绑定warning测试按钮 v x 
+        // 绑定warning测试按钮
         const debugWarningBtn = document.getElementById('debugWarning');
         if (debugWarningBtn) {
             debugWarningBtn.addEventListener('click', () => {
@@ -65,7 +67,7 @@ class PopupManager {
      */
     showPopup(message, type = 'error') {
         // 生成唯一ID
-        const popupId = 'popup-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        const popupId = 'popup-' + Date.now() + '-' + Math.random().toString(36).substring(2, 11);
         
         // 创建弹窗div
         const popupDiv = this.createPopup(message, type, popupId);
@@ -93,18 +95,13 @@ class PopupManager {
      */
     createPopup(message, type, popupId) {
         const popupDiv = document.createElement('div');
-        popupDiv.className = `popup ${type}-popup`;
+        // 从配置中读取对应的样式类名
+        const styleClass = CONFIG.POPUP_CONFIG.STYLES[type.toUpperCase()] || 'popup-error';
+        popupDiv.className = `popup ${styleClass}`;
         popupDiv.id = popupId;
-        
-        // 根据类型设置图标和样式
-        let icon = '⚠️';
-        if (type === 'success') icon = '✅';
-        if (type === 'warning') icon = '⚠️';
-        if (type === 'error') icon = '❌';
         
         popupDiv.innerHTML = `
             <div class="popup-content">
-                <div class="popup-icon">${icon}</div>
                 <p class="popup-message">${this.escapeHtml(message)}</p>
                 <button class="popup-close" title="关闭">×</button>
             </div>
@@ -170,7 +167,7 @@ class PopupManager {
             if (popupDiv.parentNode) {
                 popupDiv.parentNode.removeChild(popupDiv);
             }
-        }, 300);
+        }, this.animationDuration);
     }
     
     /**

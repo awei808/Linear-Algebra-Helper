@@ -29,27 +29,20 @@ const CONFIG = {
         MAX_POPUPS: 3,
         TIMEOUT: 3500,
         STYLES: {
-            SUCCESS: {
-                background: '#d4edda',
-                color: '#155724',
-                border: '1px solid #c3e6cb'
-            },
-            ERROR: {
-                background: '#f8d7da',
-                color: '#721c24',
-                border: '1px solid #f5c6cb'
-            },
-            WARNING: {
-                background: '#fff3cd',
-                color: '#856404',
-                border: '1px solid #ffeaa7'
-            }
-        }
+            SUCCESS: 'success-popup',
+            ERROR: 'error-popup',
+            WARNING: 'warning-popup'
+        },
+        // 新增配置项
+        ANIMATION: {
+            DURATION: 300,
+            EASING: 'ease-out'
+        },
     },
 
     // 快速录入配置
     QUICK_INPUT_CONFIG: {
-        MAX_LENGTH: 50
+        MAX_LENGTH: 200
     },
 
     // 初等变换配置
@@ -61,6 +54,11 @@ const CONFIG = {
             ADD: '+',
             SUBTRACT: '−',
             MULTIPLY: '×'
+        },
+        // 按钮样式类名配置
+        BUTTON_STYLES: {
+            ACTIVE: 'activeButton',
+            INACTIVE: 'inactiveButton'
         }
     },
 
