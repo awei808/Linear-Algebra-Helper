@@ -52,60 +52,52 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // 更新初始化函数，添加执行按钮的初始化
 function initTransformationButtons() {
-    // 获取所有按钮和输入框
-    const buttonChange = document.getElementById('button-change');
-    const buttonAdd = document.getElementById('button-add');
-    const buttonSub = document.getElementById('button-sub');
-    const buttonMul = document.getElementById('button-mul');
-    const transformCoefficient = document.getElementById('transform-coefficient');
-    const transformParam = document.getElementById('transform-param');
-    const transformOperator = document.getElementById('transform-operator');
 
-    // 交换按钮
-    buttonChange.addEventListener('click', function () {
-        setActiveSymbol('↔', buttonChange);
+        // 交换按钮
+    elements.buttonChange.addEventListener('click', function () {
+        setActiveSymbol('↔', elements.buttonChange);
         // 使用空白占位方式隐藏系数输入框和参数框
-        transformCoefficient.style.visibility = 'hidden';
-        transformCoefficient.style.opacity = '0';
-        transformCoefficient.style.pointerEvents = 'none';
+        elements.transformCoefficient.style.visibility = 'hidden';
+        elements.transformCoefficient.style.opacity = '0';
+        elements.transformCoefficient.style.pointerEvents = 'none';
 
-        transformParam.style.visibility = 'visible';
-        transformParam.style.opacity = '1';
-        transformParam.style.pointerEvents = 'auto';
+        elements.transformParam.style.visibility = 'visible';
+        elements.transformParam.style.opacity = '1';
+        elements.transformParam.style.pointerEvents = 'auto';
         // 设置运算符值
-        if (transformOperator) {
-            transformOperator.value = '↔';
+        if (elements.transformOperator) {
+            elements.transformOperator.value = '↔';
         }
     });
 
     //加法按钮
-    buttonAdd.addEventListener('click', function () {
-        setActiveSymbol('+', buttonAdd);
+    elements.buttonAdd.addEventListener('click', function () {
+        setActiveSymbol('+', elements.buttonAdd);
         // 显示系数输入框和参数框
-        transformCoefficient.style.visibility = 'visible';
-        transformCoefficient.style.opacity = '1';
-        transformCoefficient.style.pointerEvents = 'auto';
+        elements.transformCoefficient.style.visibility = 'visible';
+        elements.transformCoefficient.style.opacity = '1';
+        elements.transformCoefficient.style.pointerEvents = 'auto';
 
-        transformParam.style.visibility = 'visible';
-        transformParam.style.opacity = '1';
-        transformParam.style.pointerEvents = 'auto';
+        elements.transformParam.style.visibility = 'visible';
+        elements.transformParam.style.opacity = '1';
+        elements.transformParam.style.pointerEvents = 'auto';
         // 设置运算符值
-        if (transformOperator) {
-            transformOperator.value = '+';
+        if (elements.transformOperator) {
+            elements.transformOperator.value = '+';
         }
     });
 
     //减法按钮
-    buttonSub.addEventListener('click', function () {
-        setActiveSymbol('−', buttonSub);
+    elements.buttonSub.addEventListener('click', function () {
+        setActiveSymbol('−', elements.buttonSub);
         // 显示系数输入框和参数框
-        transformCoefficient.style.visibility = 'visible';
-        transformCoefficient.style.opacity = '1';
-        transformCoefficient.style.pointerEvents = 'auto';
+        elements.transformCoefficient.style.visibility = 'visible';
+        elements.transformCoefficient.style.opacity = '1';
+        elements.transformCoefficient.style.pointerEvents = 'auto';
 
-        transformParam.style.visibility = 'visible';
-        transformParam.style.opacity = '1';
-        transformParam.style.pointerEvents = 'auto';
+        elements.transformParam.style.visibility = 'visible';
+        elements.transformParam.style.opacity = '1';
+        elements.transformParam.style.pointerEvents = 'auto';
         // 设置运算符值
         if (transformOperator) {
             transformOperator.value = '−';
@@ -113,20 +105,20 @@ function initTransformationButtons() {
     });
 
     //倍乘按钮
-    buttonMul.addEventListener('click', function () {
-        setActiveSymbol('×', buttonMul);
+    elements.buttonMul.addEventListener('click', function () {
+        setActiveSymbol('×', elements.buttonMul);
         // 显示系数输入框
-        transformCoefficient.style.visibility = 'visible';
-        transformCoefficient.style.opacity = '1';
-        transformCoefficient.style.pointerEvents = 'auto';
+        elements.transformCoefficient.style.visibility = 'visible';
+        elements.transformCoefficient.style.opacity = '1';
+        elements.transformCoefficient.style.pointerEvents = 'auto';
 
         // 使用空白占位方式隐藏参数框
-        transformParam.style.visibility = 'hidden';
-        transformParam.style.opacity = '0';
-        transformParam.style.pointerEvents = 'none';
+        elements.transformParam.style.visibility = 'hidden';
+        elements.transformParam.style.opacity = '0';
+        elements.transformParam.style.pointerEvents = 'none';
         // 设置运算符值
-        if (transformOperator) {
-            transformOperator.value = '×';
+        if (elements.transformOperator) {
+            elements.transformOperator.value = '×';
         }
     });
 
@@ -138,9 +130,8 @@ function initTransformationButtons() {
 }
 // 为执行按钮绑定点击事件
 function initTranslateButton() {
-    const translateButton = document.getElementById('button-translate');
-    if (translateButton) {
-        translateButton.addEventListener('click', executeElementaryTransformation);
+    if (elements && elements.buttonTranslate) {
+        elements.buttonTranslate.addEventListener('click', executeElementaryTransformation);
     }
 }
 
@@ -149,9 +140,9 @@ function initTranslateButton() {
 function executeElementaryTransformation() {
     try {
         // 1. 获取三个输入框的值
-        const targetInput = document.getElementById('transform-target').value.trim();
-        const coefficientInput = document.getElementById('transform-coefficient').value.trim();
-        const paramInput = document.getElementById('transform-param').value.trim();
+        const targetInput = elements.transformTarget.value.trim();
+        const coefficientInput = elements.transformCoefficient.value.trim();
+        const paramInput = elements.transformParam.value.trim();
 
         // 2. 获取当前符号
         const currentSymbol = getCurrentSymbol();

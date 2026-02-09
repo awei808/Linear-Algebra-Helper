@@ -1,6 +1,7 @@
 // ==================== 应用核心逻辑 ====================
 // 注意：配置项已移至 config.js，状态机已移至 state.js
 // DOM元素引用
+// 网格内的dom元素不在elements中，其他dom都在这里，动态添加的dom也会进入elements
 const elements = {
     // 主要界面元素
     windowDiv: document.getElementById('window'),
@@ -10,21 +11,35 @@ const elements = {
     inputMatrixDiv: document.getElementById('InputMatrix'),
     buttonInputMatrix: document.getElementById('ButtonInputMartix'),
     tipDiv: document.getElementById('tip'),
+    header: document.querySelector('header'),
 
     // 更多菜单相关
     moreButton: document.getElementById('moreButton'),
     moreDropdown: document.getElementById('moreDropdown'),
     exportMatrixButton: document.getElementById('exportMatrixButton'),
 
-    // 快速录入相关
-    quickInput: document.getElementById('input'),
-
     // 矩阵数据显示
     matrixDataDisplay: document.getElementById('matrixDataDisplay'),
 
+    // 初等变换界面
+    operatorButtons: document.querySelector('.operator-buttons'),
+    transformTarget: document.getElementById('transform-target'),
+    transformCoefficient: document.getElementById('transform-coefficient'),
+    transformParam: document.getElementById('transform-param'),
+    buttonChange: document.getElementById('button-change'),
+    buttonAdd: document.getElementById('button-add'),
+    buttonSub: document.getElementById('button-sub'),
+    buttonMul: document.getElementById('button-mul'),
+    buttonTranslate: document.getElementById('button-translate'),
 
     // 调试相关
-    buttonTest: document.getElementById('ButtonTest')
+    buttonTest: document.getElementById('ButtonTest'),
+
+    //导入矩阵
+    buttonQuickInput:document.getElementById('ButtonQuickInput'),
+
+    //杂项
+
 };
 
 // ==================== 初始化函数 ====================

@@ -1,7 +1,8 @@
 // 弹窗管理器
 class PopupManager {
     constructor() {
-        this.popupBox = document.getElementById('popupBox');
+        // 使用elements对象中的popupBox引用
+        this.popupBox = elements ? elements.popupBox : null;
         // 从配置中读取弹窗配置
         this.maxPopups = CONFIG.POPUP_CONFIG.MAX_POPUPS;
         this.popupTimeout = CONFIG.POPUP_CONFIG.TIMEOUT;
@@ -36,7 +37,7 @@ class PopupManager {
      */
     /*bindTestButtons() {
         // 绑定error测试按钮
-        const debugErrorBtn = document.getElementById('debugError');
+        const debugErrorBtn = elements ? elements.debugError : null;
         if (debugErrorBtn) {
             debugErrorBtn.addEventListener('click', () => {
                 this.showPopup('这是一个错误测试信息，用于调试弹窗功能。', 'error');
@@ -44,7 +45,7 @@ class PopupManager {
         }
         
         // 绑定success测试按钮
-        const debugSuccessBtn = document.getElementById('debugSuccess');
+        const debugSuccessBtn = elements ? elements.debugSuccess : null;
         if (debugSuccessBtn) {
             debugSuccessBtn.addEventListener('click', () => {
                 this.showPopup('操作成功完成！数据已保存。', 'success');
@@ -52,7 +53,7 @@ class PopupManager {
         }
         
         // 绑定warning测试按钮
-        const debugWarningBtn = document.getElementById('debugWarning');
+        const debugWarningBtn = elements ? elements.debugWarning : null;
         if (debugWarningBtn) {
             debugWarningBtn.addEventListener('click', () => {
                 this.showPopup('警告：内存使用率较高，建议优化。', 'warning');

@@ -7,9 +7,8 @@ let quickInputAdded = false;
  */
 function initQuickInput() {
     // 为快速录入按钮绑定点击事件
-    const buttonQuickInput = document.getElementById('ButtonQuickInput');
-    if (buttonQuickInput) {
-        buttonQuickInput.addEventListener('click', handleQuickInputClick);
+    if (elements.buttonQuickInput) {
+        elements.buttonQuickInput.addEventListener('click', handleQuickInputClick);
     }
 }
 
@@ -17,7 +16,7 @@ function initQuickInput() {
  * 处理快速录入按钮点击事件
  */
 function handleQuickInputClick() {
-    const header = document.querySelector('header');
+    
 
     // 如果输入框已经存在，则不再添加
     if (quickInputAdded) {
@@ -37,14 +36,20 @@ function handleQuickInputClick() {
     input.style.width = '200px';
 
     // 添加到header中
-    header.appendChild(input);
+    elements.header.appendChild(input);
     quickInputAdded = true;
+    
+    // 必须更新elements对象中的引用，确保所有DOM访问都通过elements
+    if (typeof elements !== 'undefined') {
+        elements.quickInput = input;
+        console.log('快速录入输入框已添加到elements对象');
+    } else {
+        console.error('elements对象未定义，无法更新DOM引用');
+    }
 
-    // 获取"录入矩阵"按钮
-    const buttonInputMatrix = document.getElementById('ButtonInputMartix');
-    if (buttonInputMatrix) {
-        // 将"录入矩阵"按钮移动到header的最后面
-        header.appendChild(buttonInputMatrix);
+    // 将"录入矩阵"按钮移动到header的最后面
+    if (elements.buttonInputMatrix) {
+        elements.header.appendChild(elements.buttonInputMatrix);
     }
 
 }
@@ -53,13 +58,13 @@ function handleQuickInputClick() {
  * 处理快速录入矩阵功能（由main.js调用）
  */
 function handleQuickInputMatrix() {
-    const quickInput = document.getElementById('input');
-    if (!quickInput) {
-        showError('快速录入输入框不存在');
+    // 严格通过elements对象访问，不直接获取DOM元素
+    if (!elements || !elements.quickInput) {
+        showError('快速录入输入框不存在，请先点击"快速录入"按钮创建输入框');
         return false;
     }
 
-    const inputValue = quickInput.value.trim();
+    const inputValue = elements.quickInput.value.trim();
     if (inputValue === '') {
         showError('请输入二维数组');
         return false;
