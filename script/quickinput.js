@@ -108,7 +108,7 @@ function validateAndParseMatrix(input) {
         // 步骤1: 以字符串形式解析整个输入框传来的值
         const cleanedInput = input.replace(/\s+/g, ' ').trim();
 
-// 检查是否为有效的二维数组格式
+        // 检查是否为有效的二维数组格式
         if (!cleanedInput.startsWith('[') || !cleanedInput.endsWith(']')) {
             return {
                 isValid: false,
@@ -116,70 +116,65 @@ function validateAndParseMatrix(input) {
             };
         }
 
-        // 步骤2: 将小数转为分数（在整个字符串层面处理）
-        let processedInput = cleanedInput;
-        
-        // 匹配并转换所有小数格式
-        const decimalPattern = /-?\d+\.\d+/g;
-        const decimalMatches = cleanedInput.match(decimalPattern);
-        
-        if (decimalMatches) {
-            for (const decimal of decimalMatches) {
-                try {
-                    const decimalValue = parseFloat(decimal);
-                    const fraction = math.fraction(decimalValue);
-                    let fractionString;
-                    
-                    if (fraction.d === 1) {
-                        fractionString = fraction.n.toString();
-                    } else {
-                        fractionString = math.format(fraction, { fraction: 'ratio' });
-                    }
-                    
-                    // 替换原字符串中的小数
-                    processedInput = processedInput.replace(decimal, fractionString);
-                } catch (error) {
-                    // 如果转换失败，保持原样
-                    console.warn(`小数转换失败: ${decimal}`, error);
-                }
-            }
-        }
-
-        // 步骤3: 对字母进行校验，检验是否是未知数
-        const allowedVariables = ['a', 'b', 'c', 'd', 'm', 'n', 'x', 'y', 'z', 'λ'];
-        const variablePattern = new RegExp(`[^${allowedVariables.join('')}a-zA-Z]`, 'g');
-        const allLetters = processedInput.match(/[a-zA-Zλ]/g) || [];
-        const invalidLetters = [...new Set(allLetters)].filter(letter => 
-            !allowedVariables.includes(letter.toLowerCase())
+        // 步骤2: 对字母进行校验，检验是否是未知数
+        const allLetters = cleanedInput.match(PATTERNS.LETTERS) || [];
+        const invalidLetters = [...new Set(allLetters)].filter(letter =>
+            !ALLOWED_VARIABLES.includes(letter.toLowerCase())
         );
-        
+
         if (invalidLetters.length > 0) {
             return {
                 isValid: false,
-                message: `发现不允许的未知数: ${invalidLetters.join(', ')}。允许的未知数: ${allowedVariables.join(', ')}`
+                message: `发现不允许的未知数: ${invalidLetters.join(', ')}。允许的未知数: ${ALLOWED_VARIABLES.join(', ')}`
             };
         }
 
-        // 步骤4: 将整个输入框传来的值切割，按矩阵元素遍历解析
+        // 步骤3: 将整个输入框传来的值切割，按矩阵元素遍历解析
         // 手动解析二维数组格式
-        const matrixData = parseMatrixManually(processedInput);
+        const matrixData = parseMatrixManually(cleanedInput);
         if (!matrixData.isValid) {
             return matrixData;
         }
 
         const { rows, cols, elements: rawElements } = matrixData;
 
-        // 步骤5: 检查是否为多项式，采用多项式相关代码进行校验，并添加分数化简功能
+        // 步骤4: 将小数转为分数（在元素层面处理）
         const elements = [];
         for (let i = 0; i < rows; i++) {
             elements[i] = [];
             for (let j = 0; j < cols; j++) {
                 let element = rawElements[i][j].trim();
-                
+
                 if (element === '') {
                     elements[i][j] = '0';
                     continue;
                 }
+
+                // 新功能：识别.2格式，自动转换为0.2
+                const leadingDotPattern = /^\.\d+$/;
+                if (leadingDotPattern.test(element)) {
+                    element = '0' + element;
+                }
+
+                // 小数转分数处理
+                if (PATTERNS.DECIMAL.test(element)) {
+                    const conversionResult = convertDecimalToFraction(element);
+                    if (conversionResult.success) {
+                        element = conversionResult.formattedValue;
+                    } else {
+                        // 如果转换失败，保持原样
+                        console.warn(`小数转换失败: ${element}`, conversionResult.error);
+                    }
+                }
+
+                elements[i][j] = element;
+            }
+        }
+
+        // 步骤5: 检查是否为多项式，采用多项式相关代码进行校验，并添加分数化简功能
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                let element = elements[i][j];
 
                 // 使用现有的多项式校验逻辑
                 const validationResult = isValidMatrixElement(element);
@@ -192,54 +187,11 @@ function validateAndParseMatrix(input) {
 
                 // 新增：分数化简功能
                 // 检查是否为纯数字分数（如4/8）或包含未知数的分数（如2x/4y）
-                const fractionPattern = /^-?(\d+[a-dm-nxyzλ]*)\/(-?\d+[a-dm-nxyzλ]*)$/;
-                const fractionMatch = element.match(fractionPattern);
-                
+                const fractionMatch = element.match(PATTERNS.COMPLEX_FRACTION);
+
                 if (fractionMatch) {
-                    try {
-                        const numerator = fractionMatch[1];   // 分子
-                        const denominator = fractionMatch[2]; // 分母
-                        
-                        // 检查是否为纯数字分数（分子和分母都是数字）
-                        const numeratorIsNumber = /^-?\d+$/.test(numerator);
-                        const denominatorIsNumber = /^-?\d+$/.test(denominator);
-                        
-                        if (numeratorIsNumber && denominatorIsNumber) {
-                            // 纯数字分数：使用math.js进行化简
-                            const fraction = math.fraction(element);
-                            
-                            if (fraction.d === 1) {
-                                // 分母为1，转换为整数
-                                element = fraction.n.toString();
-                            } else {
-                                // 化简分数
-                                element = math.format(fraction, { fraction: 'ratio' });
-                            }
-                        } else {
-                            // 包含未知数的分数：进行简单的数字部分化简
-                            // 提取分子和分母中的数字部分
-                            const numNumerator = numerator.match(/-?\d+/)?.[0] || '1';
-                            const numDenominator = denominator.match(/-?\d+/)?.[0] || '1';
-                            
-                            // 计算最大公约数
-                            const gcd = math.gcd(parseInt(numNumerator), parseInt(numDenominator));
-                            
-                            if (gcd > 1) {
-                                // 化简数字部分
-                                const simplifiedNum = parseInt(numNumerator) / gcd;
-                                const simplifiedDen = parseInt(numDenominator) / gcd;
-                                
-                                // 重新构建分数
-                                const simplifiedNumerator = numerator.replace(numNumerator, simplifiedNum.toString());
-                                const simplifiedDenominator = denominator.replace(numDenominator, simplifiedDen.toString());
-                                
-                                element = `${simplifiedNumerator}/${simplifiedDenominator}`;
-                            }
-                        }
-                    } catch (error) {
-                        // 如果化简失败，保持原样
-                        console.warn(`分数化简失败: ${element}`, error);
-                    }
+                    // 使用公共函数进行复杂分数化简
+                    element = simplifyComplexFraction(element);
                 }
 
                 elements[i][j] = element;
@@ -363,172 +315,7 @@ function splitColumns(rowStr) {
     return elements;
 }
 
-/**
- * 检查字符串是否为有效矩阵元素
- * 支持：数字、分数、小数、未知数、包含未知数的多项式
- * 未知数只能是abcdmnxyz和λ中的单个字符
- * @param {string} str - 要检查的字符串
- * @returns {Object} {isValid: boolean, message: string}
- */
-function isValidMatrixElement(str) {
-    // 空字符串视为0
-    if (str === '') {
-        return { isValid: true, message: '' };
-    }
 
-    // 允许的未知数字符
-    const allowedVariables = ['a', 'b', 'c', 'd', 'm', 'n', 'x', 'y', 'z', 'λ'];
-
-    // 1. 纯数字（整数、小数）
-    if (/^-?\d+(\.\d+)?$/.test(str)) {
-        return { isValid: true, message: '' };
-    }
-
-    // 2. 分数（支持正负分数，支持未知数作为分子或分母）
-    const fractionPattern = new RegExp(`^-?([\\da-dm-nxyzλ]+)/([\\da-dm-nxyzλ]+)$`);
-    const fractionMatch = str.match(fractionPattern);
-    if (fractionMatch) {
-        const numerator = fractionMatch[1];   // 分子
-        const denominator = fractionMatch[2]; // 分母
-        
-        // 检查分母是否为0
-        if (denominator === '0') {
-            return { isValid: false, message: '分母不能为0' };
-        }
-        
-        // 检查分子和分母中的未知数是否都是允许的
-        const variablePattern = new RegExp(`[${allowedVariables.join('')}]`, 'g');
-        
-        const numeratorVariables = numerator.match(variablePattern) || [];
-        const denominatorVariables = denominator.match(variablePattern) || [];
-        
-        const allVariables = [...numeratorVariables, ...denominatorVariables];
-        const invalidVariables = allVariables.filter(v => !allowedVariables.includes(v));
-        
-        if (invalidVariables.length > 0) {
-            return {
-                isValid: false,
-                message: `未知数"${invalidVariables[0]}"不在允许范围内（允许的未知数：${allowedVariables.join(', ')}）`
-            };
-        }
-        
-        return { isValid: true, message: '' };
-    }
-
-    // 3. 单个未知数（只能是允许的字符）
-    if (allowedVariables.includes(str)) {
-        return { isValid: true, message: '' };
-    }
-
-    // 4. 带系数的未知数（如2x, -3y, 0.5λ）
-    const coefficientVariablePattern = /^(-?\d+(\.\d+)?)([a-dm-nxyzλ])$/;
-    const coefficientMatch = str.match(coefficientVariablePattern);
-    if (coefficientMatch) {
-        const variable = coefficientMatch[3];
-        if (allowedVariables.includes(variable)) {
-            return { isValid: true, message: '' };
-        }
-    }
-
-    // 5. 多项式（如2x+3y, x-y, 3a+2b-λ, 2+3x, -y+2λ, 1/z+7, x/2+3y, 2x+3/y）
-    // 先检查是否包含允许的未知数
-    const variablePattern = new RegExp(`[${allowedVariables.join('')}]`, 'g');
-    const variablesInStr = str.match(variablePattern);
-
-    if (variablesInStr) {
-        // 检查所有未知数是否都是允许的
-        const invalidVariables = variablesInStr.filter(v => !allowedVariables.includes(v));
-        if (invalidVariables.length > 0) {
-            return {
-                isValid: false,
-                message: `未知数"${invalidVariables[0]}"不在允许范围内（允许的未知数：${allowedVariables.join(', ')}）`
-            };
-        }
-
-        // 扩展的多项式格式验证：支持纯数字项、带系数未知数项、单个未知数项、分数项
-        // 格式示例：2x+3y, x-y, 3a+2b-λ, 2+3x, -y+2λ, 0.5x-1.2y+3z+4, 1/z+7, x/2+3y, 2x+3/y
-        const extendedPolynomialPattern = /^([+-]?(\d+(\.\d+)?)?([a-dm-nxyzλ])?(\/(\d+([a-dm-nxyzλ])?)?)?)([+-](\d+(\.\d+)?)?([a-dm-nxyzλ])?(\/(\d+([a-dm-nxyzλ])?)?)?)*$/;
-        
-        // 简化验证：检查是否只包含数字、允许的未知数、加减号、小数点、斜杠
-        const validCharsPattern = /^[0-9a-dm-nxyzλ+\-\.\/\s]+$/;
-        if (!validCharsPattern.test(str.replace(/\s/g, ''))) {
-            return {
-                isValid: false,
-                message: '多项式格式错误，只能包含数字、未知数、加减号、小数点和斜杠'
-            };
-        }
-
-        // 基本结构检查：不能以加减号结尾，不能有连续的加减号
-        const cleanedStr = str.replace(/\s/g, '');
-        if (/[+\-]$/.test(cleanedStr)) {
-            return { isValid: false, message: '多项式不能以加减号结尾' };
-        }
-        if (/[+\-]{2,}/.test(cleanedStr)) {
-            return { isValid: false, message: '多项式不能有连续的加减号' };
-        }
-
-        // 检查斜杠使用：不能有连续的斜杠，斜杠不能出现在开头或结尾
-        if (/\/{2,}/.test(cleanedStr)) {
-            return { isValid: false, message: '多项式不能有连续的斜杠' };
-        }
-        if (/^\/|\/$/.test(cleanedStr)) {
-            return { isValid: false, message: '多项式不能以斜杠开头或结尾' };
-        }
-
-        // 改进的验证：检查多项式结构是否合理
-        const terms = cleanedStr.split(/(?=[+-])/); // 按加减号分割，保留符号
-        let hasValidStructure = true;
-        
-        for (let term of terms) {
-            // 处理首项可能没有符号的情况
-            if (term === '') continue;
-            
-            // 检查每一项的格式（支持分数项）
-            const termPattern = /^[+-]?((\d+(\.\d+)?)?([a-dm-nxyzλ])?(\/(\d+([a-dm-nxyzλ])?)?)?)$/;
-            if (!termPattern.test(term)) {
-                hasValidStructure = false;
-                break;
-            }
-            
-            // 检查不能只有符号没有内容
-            if (term === '+' || term === '-') {
-                hasValidStructure = false;
-                break;
-            }
-            
-            // 检查分数项的分母不能为0
-            if (term.includes('/')) {
-                const parts = term.split('/');
-                if (parts.length === 2) {
-                    const denominator = parts[1];
-                    // 检查分母是否为纯数字0
-                    if (/^0$/.test(denominator)) {
-                        return { isValid: false, message: `分数项"${term}"的分母不能为0` };
-                    }
-                    // 检查分母是否包含数字0（如x0, 0y等）
-                    if (/(^0|[^1-9]0)/.test(denominator)) {
-                        return { isValid: false, message: `分数项"${term}"的分母不能包含0` };
-                    }
-                }
-            }
-        }
-        
-        if (!hasValidStructure) {
-            return {
-                isValid: false,
-                message: '多项式格式错误，请检查各项格式是否正确'
-            };
-        }
-
-        return { isValid: true, message: '' };
-    }
-
-    // 6. 如果以上都不匹配，返回错误
-    return {
-        isValid: false,
-        message: `格式错误。支持：数字、分数、未知数（${allowedVariables.join(', ')}）、多项式`
-    };
-}
 
 /**
  * 显示矩阵表格（使用与addRowColumnIndices相同的格式）

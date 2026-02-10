@@ -65,8 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// 状态机函数已移至 state.js
-
 /**
  * 处理矩阵维度选择
  */
@@ -571,7 +569,7 @@ function collectMatrixData() {
 }
 
 /**
- * 矩阵数据校验核心函数（整合版）
+ * 矩阵数据校验与预处理函数
  * 支持小数转分数、自动补零和多种数据格式验证
  * @param {boolean} useDOM - 是否从DOM元素中读取数据（否则从state.matrixData.elements读取）
  * @returns {Object} {isValid: boolean, message: string}
@@ -597,10 +595,6 @@ function validateMatrixData(useDOM = false) {
         elements = state.matrixData.elements;
     }
 
-    // 正则表达式
-    const decimalPattern = /^-?\d+\.\d+$/; // 小数
-    const fractionPattern = /^-?\d+\/\d+$/; // 分数
-
     // 遍历数据进行处理
     if (useDOM) {
         // DOM数据源处理（一维数组）
@@ -610,51 +604,18 @@ function validateMatrixData(useDOM = false) {
             const row = Math.floor(i / cols) + 1;
             const col = (i % cols) + 1;
 
-            // 自动补零
-            if (!value) {
-                input.value = '0';
-                continue;
+            // 使用增强的格式化函数处理数据
+            const formatResult = enhancedFormatMatrixValue(value, true);
+            
+            if (!formatResult.success) {
+                return {
+                    isValid: false,
+                    message: `第${row}行第${col}列${formatResult.error}`
+                };
             }
-
-            // 小数转分数处理
-            if (decimalPattern.test(value)) {
-                try {
-                    const decimalValue = parseFloat(value);
-                    const fraction = math.fraction(decimalValue);
-
-                    // 检查分母是否为1，如果是则转换为整数
-                    if (fraction.d === 1) {
-                        input.value = fraction.n.toString();
-                    } else {
-                        const fractionString = math.format(fraction, { fraction: 'ratio' });
-                        input.value = fractionString;
-                    }
-                } catch (error) {
-                    return {
-                        isValid: false,
-                        message: `第${row}行第${col}列小数转换失败：${value}`
-                    };
-                }
-            }
-            // 分数化简处理
-            else if (fractionPattern.test(value)) {
-                try {
-                    const fraction = math.fraction(value);
-
-                    // 检查分母是否为1，如果是则转换为整数
-                    if (fraction.d === 1) {
-                        input.value = fraction.n.toString();
-                    } else {
-                        const simplifiedFraction = math.format(fraction, { fraction: 'ratio' });
-                        input.value = simplifiedFraction;
-                    }
-                } catch (error) {
-                    return {
-                        isValid: false,
-                        message: `第${row}行第${col}列分数化简失败：${value}`
-                    };
-                }
-            }
+            
+            // 更新输入框的值
+            input.value = formatResult.formattedValue;
         }
     } else {
         // State数据源处理（二维数组）
@@ -662,51 +623,18 @@ function validateMatrixData(useDOM = false) {
             for (let col = 0; col < cols; col++) {
                 let value = elements[row][col]?.trim() || '';
 
-                // 自动补零
-                if (!value) {
-                    elements[row][col] = '0';
-                    continue;
+                // 使用增强的格式化函数处理数据
+                const formatResult = enhancedFormatMatrixValue(value, true);
+                
+                if (!formatResult.success) {
+                    return {
+                        isValid: false,
+                        message: `第${row + 1}行第${col + 1}列${formatResult.error}`
+                    };
                 }
-
-                // 小数转分数处理
-                if (decimalPattern.test(value)) {
-                    try {
-                        const decimalValue = parseFloat(value);
-                        const fraction = math.fraction(decimalValue);
-
-                        // 检查分母是否为1，如果是则转换为整数
-                        if (fraction.d === 1) {
-                            elements[row][col] = fraction.n.toString();
-                        } else {
-                            const fractionString = math.format(fraction, { fraction: 'ratio' });
-                            elements[row][col] = fractionString;
-                        }
-                    } catch (error) {
-                        return {
-                            isValid: false,
-                            message: `第${row + 1}行第${col + 1}列小数转换失败：${value}`
-                        };
-                    }
-                }
-                // 分数化简处理
-                else if (fractionPattern.test(value)) {
-                    try {
-                        const fraction = math.fraction(value);
-
-                        // 检查分母是否为1，如果是则转换为整数
-                        if (fraction.d === 1) {
-                            elements[row][col] = fraction.n.toString();
-                        } else {
-                            const simplifiedFraction = math.format(fraction, { fraction: 'ratio' });
-                            elements[row][col] = simplifiedFraction;
-                        }
-                    } catch (error) {
-                        return {
-                            isValid: false,
-                            message: `第${row + 1}行第${col + 1}列分数化简失败：${value}`
-                        };
-                    }
-                }
+                
+                // 更新矩阵数据
+                elements[row][col] = formatResult.formattedValue;
             }
         }
     }
