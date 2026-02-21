@@ -484,7 +484,6 @@ function convertHighlightedCellsToInputs(highlightedCells) {
         input.dataset.y = cell.dataset.y;
         input.dataset.index = cell.dataset.index;
         input.placeholder = '0';
-        input.maxLength = 5; // 增加输入长度限制
         // 替换原单元格
         cell.parentNode.replaceChild(input, cell);
 
