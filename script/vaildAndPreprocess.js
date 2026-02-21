@@ -4,7 +4,7 @@ const PATTERNS = {
     DECIMAL: /^-?\d+\.\d+$/,           // 小数格式
     DECIMAL_GLOBAL: /-?\d+\.\d+/g,     // 小数格式（全局匹配）
     FRACTION: /^-?\d+\/\d+$/,           // 分数格式
-    COMPLEX_FRACTION: /^-?(\d+[a-dm-nxyzλ]*)\/(-?\d+[a-dm-nxyzλ]*)$/, // 复杂分数（含未知数）
+    COMPLEX_FRACTION: /^-?(\d+[a-dm-nxyzλ]+)\/(-?\d+[a-dm-nxyzλ]+)$/, // 复杂分数（含未知数，支持多个未知数组合）
     PURE_NUMBER: /^-?\d+$/,             // 纯数字
     LETTERS: /[a-zA-Zλ]/g,             // 字母匹配
     NUMERIC_PART: /-?\d+/               // 数字部分
@@ -150,7 +150,7 @@ function formatMatrixValue(value) {
 
 
 /**
- * 增强的数值格式化函数 - 包含完整的校验逻辑
+ * 增强的数值格式化函数，在录入矩阵流程中使用
  * 结合formatMatrixValue和isValidMatrixElement的功能
  * @param {string} value - 输入的数值字符串
  * @param {boolean} validate - 是否进行有效性校验
@@ -248,12 +248,14 @@ function isValidMatrixElement(str) {
         return { isValid: true, message: '' };
     }
 
-    // 4. 带系数的未知数（如2x, -3y, 0.5λ）
-    const coefficientVariablePattern = /^(-?\d+(\.\d+)?)([a-dm-nxyzλ])$/;
+    // 4. 带系数的未知数（如2x, -3y, 0.5λ, 3ab, 9xy）
+    const coefficientVariablePattern = /^(-?\d+(\.\d+)?)([a-dm-nxyzλ]+)$/;
     const coefficientMatch = str.match(coefficientVariablePattern);
     if (coefficientMatch) {
-        const variable = coefficientMatch[3];
-        if (ALLOWED_VARIABLES.includes(variable)) {
+        const variables = coefficientMatch[3];
+        // 检查所有未知数是否都是允许的
+        const invalidVariables = [...variables].filter(v => !ALLOWED_VARIABLES.includes(v));
+        if (invalidVariables.length === 0) {
             return { isValid: true, message: '' };
         }
     }
@@ -273,9 +275,9 @@ function isValidMatrixElement(str) {
             };
         }
 
-        // 扩展的多项式格式验证：支持纯数字项、带系数未知数项、单个未知数项、分数项
-        // 格式示例：2x+3y, x-y, 3a+2b-λ, 2+3x, -y+2λ, 0.5x-1.2y+3z+4, 1/z+7, x/2+3y, 2x+3/y
-        const extendedPolynomialPattern = /^([+-]?(\d+(\.\d+)?)?([a-dm-nxyzλ])?(\/(\d+([a-dm-nxyzλ])?)?)?)([+-](\d+(\.\d+)?)?([a-dm-nxyzλ])?(\/(\d+([a-dm-nxyzλ])?)?)?)*$/;
+        // 扩展的多项式格式验证：支持纯数字项、带系数未知数项、单个未知数项、分数项、多个未知数组合
+        // 格式示例：2x+3y, x-y, 3a+2b-λ, 2+3x, -y+2λ, 0.5x-1.2y+3z+4, 1/z+7, x/2+3y, 2x+3/y, 3ab, 9xy, 10xy+a
+        const extendedPolynomialPattern = /^([+-]?(\d+(\.\d+)?)?([a-dm-nxyzλ]+)?(\/(\d+([a-dm-nxyzλ]+)?)?)?)([+-](\d+(\.\d+)?)?([a-dm-nxyzλ]+)?(\/(\d+([a-dm-nxyzλ]+)?)?)?)*$/;
 
         // 简化验证：检查是否只包含数字、允许的未知数、加减号、小数点、斜杠
         const validCharsPattern = /^[0-9a-dm-nxyzλ+\-\.\/\s]+$/;
@@ -311,8 +313,8 @@ function isValidMatrixElement(str) {
             // 处理首项可能没有符号的情况
             if (term === '') continue;
 
-            // 检查每一项的格式（支持分数项）
-            const termPattern = /^[+-]?((\d+(\.\d+)?)?([a-dm-nxyzλ])?(\/(\d+([a-dm-nxyzλ])?)?)?)$/;
+            // 检查每一项的格式（支持分数项、多个未知数组合）
+            const termPattern = /^[+-]?((\d+(\.\d+)?)?([a-dm-nxyzλ]+)?(\/(\d+([a-dm-nxyzλ]+)?)?)?)$/;
             if (!termPattern.test(term)) {
                 hasValidStructure = false;
                 break;
