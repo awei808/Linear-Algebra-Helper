@@ -1,7 +1,7 @@
 // ==================== 公共常量定义 ====================
 // 正则表达式常量
 const PATTERNS = {
-    DECIMAL: /^-?\d+\.\d+$/,           // 小数格式
+    DECIMAL: /^-?\d+\.\d+/,           // 小数格式（支持带未知数）
     DECIMAL_GLOBAL: /-?\d+\.\d+/g,     // 小数格式（全局匹配）
     FRACTION: /^-?\d+\/\d+$/,           // 分数格式
     COMPLEX_FRACTION: /^-?(\d+[a-dm-nxyzλ]+)\/(-?\d+[a-dm-nxyzλ]+)$/, // 复杂分数（含未知数，支持多个未知数组合）
@@ -17,11 +17,34 @@ const ALLOWED_VARIABLES =CONFIG.TRANSFORMATION_CONFIG.ALLOWED_VARIABLES;
 
 /**
  * 小数转分数处理 - 公共函数
- * @param {string} decimal - 小数字符串
+ * @param {string} decimal - 小数字符串（支持带未知数，如1.2x）
  * @returns {Object} {success: boolean, formattedValue: string, error: string}
  */
 function convertDecimalToFraction(decimal) {
     try {
+        // 检查是否包含未知数
+        const variableMatch = decimal.match(PATTERNS.LETTERS);
+        
+        if (variableMatch) {
+            // 处理带未知数的小数（如1.2x）
+            const decimalPart = decimal.match(PATTERNS.DECIMAL_GLOBAL)?.[0];
+            const variablePart = decimal.replace(decimalPart, '');
+            
+            if (decimalPart) {
+                const decimalValue = parseFloat(decimalPart);
+                const fraction = math.fraction(decimalValue);
+                
+                // 构建带未知数的分数形式
+                if (fraction.d === 1) {
+                    return { success: true, formattedValue: fraction.n.toString() + variablePart, error: '' };
+                } else {
+                    const fractionString = math.format(fraction, { fraction: 'ratio' });
+                    return { success: true, formattedValue: fractionString + variablePart, error: '' };
+                }
+            }
+        }
+        
+        // 处理纯小数
         const decimalValue = parseFloat(decimal);
         const fraction = math.fraction(decimalValue);
 

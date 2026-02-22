@@ -99,8 +99,8 @@ function initTransformationButtons() {
         elements.transformParam.style.opacity = '1';
         elements.transformParam.style.pointerEvents = 'auto';
         // 设置运算符值
-        if (transformOperator) {
-            transformOperator.value = '−';
+        if (elements.transformOperator) {
+            elements.transformOperator.value = '−';
         }
     });
 
@@ -390,7 +390,7 @@ function validatePolynomialVariables(expression) {
 
     // 检查每个变量是否在允许列表中
     for (const variable of variables) {
-        if (!allowedVariables.includes(variable)) {
+        if (!ALLOWED_VARIABLES.includes(variable)) {
             return false;
         }
     }
