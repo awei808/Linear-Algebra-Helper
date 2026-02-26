@@ -14,9 +14,12 @@ table:hover {
 
 td {
     border: 1px solid var(--border-color);
-    padding: 10px 12px;
+    padding: 8px 12px;
     text-align: center;
-    width: 50px;
+    background-color: #f9f9f9;
+    white-space: nowrap;
+    min-width: 60px;
+    width: auto;
     transition: var(--transition);
 }
 

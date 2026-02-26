@@ -947,14 +947,6 @@ function addRowColumnIndices() {
             // 直接显示矩阵值，不再使用输入框
             const cellValue = matrixElements[row][col] || '0'; // 默认值为0
             td.textContent = cellValue;
-
-            // 添加样式类，保持与原输入框相似的外观
-            td.className = 'grid-cell-value';
-            td.style.border = '1px solid #ccc';
-            td.style.padding = '8px 12px';
-            td.style.textAlign = 'center';
-            td.style.backgroundColor = '#f9f9f9';
-
             tr.appendChild(td);
         }
 
