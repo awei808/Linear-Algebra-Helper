@@ -11,7 +11,7 @@ const PATTERNS = {
 };
 
 // 允许的未知数常量
-const ALLOWED_VARIABLES =CONFIG.TRANSFORMATION_CONFIG.ALLOWED_VARIABLES;
+const ALLOWED_VARIABLES = CONFIG.TRANSFORMATION_CONFIG.ALLOWED_VARIABLES;
 
 // ==================== 公共函数定义 ====================
 
@@ -24,16 +24,16 @@ function convertDecimalToFraction(decimal) {
     try {
         // 检查是否包含未知数
         const variableMatch = decimal.match(PATTERNS.LETTERS);
-        
+
         if (variableMatch) {
             // 处理带未知数的小数（如1.2x）
             const decimalPart = decimal.match(PATTERNS.DECIMAL_GLOBAL)?.[0];
             const variablePart = decimal.replace(decimalPart, '');
-            
+
             if (decimalPart) {
                 const decimalValue = parseFloat(decimalPart);
                 const fraction = math.fraction(decimalValue);
-                
+
                 // 构建带未知数的分数形式
                 if (fraction.d === 1) {
                     return { success: true, formattedValue: fraction.n.toString() + variablePart, error: '' };
@@ -43,7 +43,7 @@ function convertDecimalToFraction(decimal) {
                 }
             }
         }
-        
+
         // 处理纯小数
         const decimalValue = parseFloat(decimal);
         const fraction = math.fraction(decimalValue);
@@ -182,10 +182,10 @@ function formatMatrixValue(value) {
 function enhancedFormatMatrixValue(value, validate = true) {
     // 先进行基本的格式预处理（包括.2格式转换）
     let processedValue = value;
-    
+
     if (value && value.trim) {
         processedValue = value.trim();
-        
+
         // 新功能：识别.2格式，自动转换为0.2
         const leadingDotPattern = /^\.\d+$/;
         if (leadingDotPattern.test(processedValue)) {
@@ -302,12 +302,12 @@ function isValidMatrixElement(str) {
         // 格式示例：2x+3y, x-y, 3a+2b-λ, 2+3x, -y+2λ, 0.5x-1.2y+3z+4, 1/z+7, x/2+3y, 2x+3/y, 3ab, 9xy, 10xy+a
         const extendedPolynomialPattern = /^([+-]?(\d+(\.\d+)?)?([a-dm-nxyzλ]+)?(\/(\d+([a-dm-nxyzλ]+)?)?)?)([+-](\d+(\.\d+)?)?([a-dm-nxyzλ]+)?(\/(\d+([a-dm-nxyzλ]+)?)?)?)*$/;
 
-        // 简化验证：检查是否只包含数字、允许的未知数、加减号、小数点、斜杠
-        const validCharsPattern = /^[0-9a-dm-nxyzλ+\-\.\/\s]+$/;
+        // 简化验证：检查是否只包含数字、允许的未知数、加减号、乘号、小数点、斜杠、括号
+        const validCharsPattern = /^[0-9a-dm-nxyzλ+\-\*\.\/\(\)\s]+$/;
         if (!validCharsPattern.test(str.replace(/\s/g, ''))) {
             return {
                 isValid: false,
-                message: '多项式格式错误，只能包含数字、未知数、加减号、小数点和斜杠'
+                message: '多项式格式错误，只能包含数字、未知数、加减号、乘号、小数点、斜杠和括号'
             };
         }
 
@@ -328,52 +328,37 @@ function isValidMatrixElement(str) {
             return { isValid: false, message: '多项式不能以斜杠开头或结尾' };
         }
 
-        // 改进的验证：检查多项式结构是否合理
-        const terms = cleanedStr.split(/(?=[+-])/); // 按加减号分割，保留符号
-        let hasValidStructure = true;
-
-        for (let term of terms) {
-            // 处理首项可能没有符号的情况
-            if (term === '') continue;
-
-            // 检查每一项的格式（支持分数项、多个未知数组合）
-            const termPattern = /^[+-]?((\d+(\.\d+)?)?([a-dm-nxyzλ]+)?(\/(\d+([a-dm-nxyzλ]+)?)?)?)$/;
-            if (!termPattern.test(term)) {
-                hasValidStructure = false;
-                break;
-            }
-
-            // 检查不能只有符号没有内容
-            if (term === '+' || term === '-') {
-                hasValidStructure = false;
-                break;
-            }
-
-            // 检查分数项的分母不能为0
-            if (term.includes('/')) {
-                const parts = term.split('/');
-                if (parts.length === 2) {
-                    const denominator = parts[1];
-                    // 检查分母是否为纯数字0
-                    if (/^0$/.test(denominator)) {
-                        return { isValid: false, message: `分数项"${term}"的分母不能为0` };
-                    }
-                    // 检查分母是否包含数字0（如x0, 0y等）
-                    if (/(^0|[^1-9]0)/.test(denominator)) {
-                        return { isValid: false, message: `分数项"${term}"的分母不能包含0` };
-                    }
-                }
+        // 检查括号匹配
+        let bracketCount = 0;
+        for (let char of cleanedStr) {
+            if (char === '(') bracketCount++;
+            if (char === ')') bracketCount--;
+            if (bracketCount < 0) {
+                return { isValid: false, message: '括号不匹配，有未闭合的右括号' };
             }
         }
+        if (bracketCount > 0) {
+            return { isValid: false, message: '括号不匹配，有未闭合的左括号' };
+        }
 
-        if (!hasValidStructure) {
-            return {
-                isValid: false,
-                message: '多项式格式错误，请检查各项格式是否正确'
+        // 检查括号使用规则：不能有空的括号，不能有连续的括号如 ()(), 括号内必须有内容
+        if (/\(\)/.test(cleanedStr)) {
+            return { isValid: false, message: '括号内不能为空' };
+        }
+        if (/\)\(/.test(cleanedStr)) {
+            return { isValid: false, message: '不能有连续的括号' };
+        }
+
+        // 统一使用math.js解析来判定表达式格式合法性
+        try {
+            math.parse(cleanedStr);
+            return { isValid: true, message: '' };
+        } catch (error) {
+            return { 
+                isValid: false, 
+                message: `表达式格式错误：${error.message}` 
             };
         }
-
-        return { isValid: true, message: '' };
     }
 
     // 6. 如果以上都不匹配，返回错误
