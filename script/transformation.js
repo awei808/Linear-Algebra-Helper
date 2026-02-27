@@ -5,7 +5,12 @@ let symbolStatus = {
     activeButton: null
 };
 
-// 设置活动符号和按钮样式
+/**
+ * 设置活动符号和按钮样式
+ * 更新符号状态并设置对应按钮的样式
+ * @param {string} symbol - 操作符号
+ * @param {HTMLElement} activeButton - 活动按钮元素
+ */
 function setActiveSymbol(symbol, activeButton) {
     // 更新状态
     symbolStatus.currentSymbol = symbol;
@@ -28,7 +33,10 @@ function setActiveSymbol(symbol, activeButton) {
     });
 }
 
-// 重置所有按钮样式
+/**
+ * 重置所有按钮样式
+ * 将所有算术符号按钮重置为默认样式
+ */
 function resetButtonStyles() {
     const allButtons = document.querySelectorAll('#arithmetic-symbols button');
     allButtons.forEach(button => {
@@ -38,7 +46,10 @@ function resetButtonStyles() {
     });
 }
 
-// 获取当前符号状态
+/**
+ * 获取当前符号状态
+ * @returns {string} 当前选择的操作符号
+ */
 function getCurrentSymbol() {
     return symbolStatus.currentSymbol;
 }
@@ -50,10 +61,13 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(initTransformationButtons, 100);
 });
 
-// 更新初始化函数，添加执行按钮的初始化
+/**
+ * 初始化变换按钮
+ * 为所有算术符号按钮和执行按钮绑定事件
+ */
 function initTransformationButtons() {
 
-        // 交换按钮
+    // 交换按钮
     elements.buttonChange.addEventListener('click', function () {
         setActiveSymbol('↔', elements.buttonChange);
         // 使用空白占位方式隐藏系数输入框和参数框
@@ -128,7 +142,11 @@ function initTransformationButtons() {
     // 初始化状态
     resetButtonStyles();
 }
-// 为执行按钮绑定点击事件
+
+/**
+ * 为执行按钮绑定点击事件
+ * 初始化执行初等变换的按钮事件
+ */
 function initTranslateButton() {
     if (elements && elements.buttonTranslate) {
         elements.buttonTranslate.addEventListener('click', executeElementaryTransformation);
@@ -136,7 +154,11 @@ function initTranslateButton() {
 }
 
 // ==================== 相关计算函数 ====================
-// 执行初等变换功能
+/**
+ * 执行初等变换功能
+ * 处理用户输入的初等变换操作，并执行相应的矩阵变换
+ * @returns {boolean} 操作是否成功
+ */
 function executeElementaryTransformation() {
     try {
         // 1. 获取三个输入框的值
@@ -147,7 +169,7 @@ function executeElementaryTransformation() {
         // 2. 获取当前符号
         const currentSymbol = getCurrentSymbol();
 
-        // 校验输入
+        // 校验、预处理输入
         const validationResult = validateTransformationInputs(targetInput, coefficientInput, paramInput, currentSymbol);
         if (!validationResult.isValid) {
             showError(validationResult.message);
@@ -193,7 +215,15 @@ function executeElementaryTransformation() {
     }
 }
 
-// 校验和解析输入数据
+/**
+ * 校验和解析输入数据
+ * 验证用户输入的初等变换参数是否合法，并解析为可执行的格式
+ * @param {string} targetInput - 目标行/列输入
+ * @param {string} coefficientInput - 系数输入
+ * @param {string} paramInput - 参数行/列输入
+ * @param {string} currentSymbol - 当前选择的操作符号
+ * @returns {Object} 包含验证结果和解析数据的对象
+ */
 function validateTransformationInputs(targetInput, coefficientInput, paramInput, currentSymbol) {
     // 校验目标输入
     if (!targetInput) {
@@ -298,6 +328,11 @@ function validateTransformationInputs(targetInput, coefficientInput, paramInput,
             if (targetType !== paramType) {
                 return { isValid: false, message: '加减操作只能在同行或同列之间进行' };
             }
+            
+            // 检验目标行列和参数行列不能相同
+            if (targetIndex === paramIndex) {
+                return { isValid: false, message: '目标行列和参数行列不能相同' };
+            }
             break;
 
         case '×':
@@ -342,7 +377,12 @@ function validateTransformationInputs(targetInput, coefficientInput, paramInput,
     };
 }
 
-// 解析并化简系数（处理小数和分数）
+/**
+ * 解析并化简系数（处理小数和分数）
+ * 将系数转换为最简分数形式
+ * @param {string|number} mathInput - 输入的系数
+ * @returns {string} 化简后的系数
+ */
 function parseAndSimplifyCoefficient(mathInput) {
     try {
         // 核心：math.fraction()自动识别整数/小数/分数字符串/数字，自动化简
@@ -355,7 +395,12 @@ function parseAndSimplifyCoefficient(mathInput) {
     }
 }
 
-// 解析并简化多项式表达式
+/**
+ * 解析并简化多项式表达式
+ * 使用math.js解析和简化数学表达式
+ * @param {string} expression - 数学表达式
+ * @returns {string} 简化后的表达式
+ */
 function parseAndSimplifyPolynomial(expression) {
     try {
         // 使用math.js解析表达式
@@ -383,7 +428,12 @@ function parseAndSimplifyPolynomial(expression) {
     }
 }
 
-// 验证表达式中的变量是否都在允许的列表中
+/**
+ * 验证表达式中的变量是否都在允许的列表中
+ * 检查表达式中的变量是否为允许的未知数
+ * @param {string} expression - 数学表达式
+ * @returns {boolean} 变量是否都在允许列表中
+ */
 function validatePolynomialVariables(expression) {
     // 提取所有变量
     const variables = expression.match(/[a-zA-Zλ]/g) || [];
@@ -398,7 +448,15 @@ function validatePolynomialVariables(expression) {
     return true;
 }
 
-// 执行行/列交换
+/**
+ * 执行行/列交换
+ * 交换矩阵中的两行或两列
+ * @param {string} targetType - 目标类型（'r' 表示行，'c' 表示列）
+ * @param {number} targetIndex - 目标索引
+ * @param {string} paramType - 参数类型（'r' 表示行，'c' 表示列）
+ * @param {number} paramIndex - 参数索引
+ * @returns {Object} 操作结果
+ */
 function executeRowColumnSwap(targetType, targetIndex, paramType, paramIndex) {
     const matrix = state.matrixData.elements;
 
@@ -427,7 +485,17 @@ function executeRowColumnSwap(targetType, targetIndex, paramType, paramIndex) {
     }
 }
 
-// 执行行/列加减
+/**
+ * 执行行/列加减
+ * 执行矩阵的行或列加减操作
+ * @param {string} targetType - 目标类型（'r' 表示行，'c' 表示列）
+ * @param {number} targetIndex - 目标索引
+ * @param {string} paramType - 参数类型（'r' 表示行，'c' 表示列）
+ * @param {number} paramIndex - 参数索引
+ * @param {string|number} coefficient - 系数
+ * @param {string} operation - 操作类型（'+' 或 '−'）
+ * @returns {Object} 操作结果
+ */
 function executeRowColumnAddSubtract(targetType, targetIndex, paramType, paramIndex, coefficient, operation) {
     // 如果系数为空或未定义，默认使用1
     if (!coefficient || coefficient === '') {
@@ -516,7 +584,14 @@ function executeRowColumnAddSubtract(targetType, targetIndex, paramType, paramIn
     }
 }
 
-// 执行行/列倍乘
+/**
+ * 执行行/列倍乘
+ * 执行矩阵的行或列倍乘操作
+ * @param {string} targetType - 目标类型（'r' 表示行，'c' 表示列）
+ * @param {number} targetIndex - 目标索引
+ * @param {string|number} coefficient - 系数
+ * @returns {Object} 操作结果
+ */
 function executeRowColumnMultiply(targetType, targetIndex, coefficient) {
     const matrix = state.matrixData.elements;
 
@@ -524,20 +599,20 @@ function executeRowColumnMultiply(targetType, targetIndex, coefficient) {
         // 行倍乘
         for (let j = 0; j < state.matrixData.cols; j++) {
             const currentValue = matrix[targetIndex][j];
-            
+
             // 使用math.js执行倍乘运算
             try {
                 // 构建数学表达式
                 const mathExpression = `(${coefficient})*(${currentValue})`;
-                
+
                 // 简化表达式
                 const result = parseAndSimplifyPolynomial(mathExpression);
-                
+
                 // 验证结果中的变量
                 if (!validatePolynomialVariables(result)) {
                     throw new Error('表达式包含不允许的变量');
                 }
-                
+
                 matrix[targetIndex][j] = result;
             } catch (error) {
                 // 如果计算失败，使用原始拼接方式
@@ -554,20 +629,20 @@ function executeRowColumnMultiply(targetType, targetIndex, coefficient) {
         // 列倍乘
         for (let i = 0; i < state.matrixData.rows; i++) {
             const currentValue = matrix[i][targetIndex];
-            
+
             // 使用math.js执行倍乘运算
             try {
                 // 构建数学表达式
                 const mathExpression = `(${coefficient})*(${currentValue})`;
-                
+
                 // 简化表达式
                 const result = parseAndSimplifyPolynomial(mathExpression);
-                
+
                 // 验证结果中的变量
                 if (!validatePolynomialVariables(result)) {
                     throw new Error('表达式包含不允许的变量');
                 }
-                
+
                 matrix[i][targetIndex] = result;
             } catch (error) {
                 // 如果计算失败，使用原始拼接方式
