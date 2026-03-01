@@ -1,4 +1,4 @@
-/* 弹窗容器样式 - 固定在右下角 */
+/* 弹窗容器样式 - 固定在右下角或中心 */
 .popup-box-container {
     position: fixed;
     bottom: 20px;
@@ -170,5 +170,130 @@
     
     .popup-message {
         font-size: 12px;
+    }
+}
+
+/* 中心弹窗样式 */
+.popup-centre-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.popup-centre-container.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.popup-centre {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 400px;
+    transform: scale(0.9);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.popup-centre.show {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.popup-centre-content {
+    padding: 24px;
+}
+
+.popup-centre-message {
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 24px;
+    color: #333;
+    text-align: center;
+}
+
+.popup-centre-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.popup-centre-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.popup-centre-btn.cancel {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.popup-centre-btn.cancel:hover {
+    background-color: #e0e0e0;
+}
+
+.popup-centre-btn.confirm {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.popup-centre-btn.confirm:hover {
+    background-color: #45a049;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .popup-centre {
+        width: 95%;
+        max-width: 350px;
+    }
+    
+    .popup-centre-content {
+        padding: 20px;
+    }
+    
+    .popup-centre-message {
+        font-size: 15px;
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .popup-centre {
+        width: 98%;
+        max-width: 300px;
+    }
+    
+    .popup-centre-content {
+        padding: 16px;
+    }
+    
+    .popup-centre-message {
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+    
+    .popup-centre-buttons {
+        gap: 8px;
+    }
+    
+    .popup-centre-btn {
+        padding: 6px 12px;
+        font-size: 13px;
     }
 }

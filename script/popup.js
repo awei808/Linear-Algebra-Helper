@@ -32,34 +32,6 @@ class PopupManager {
         document.body.appendChild(this.popupBox);
     }
     
-    /**
-     * 绑定测试按钮事件
-     */
-    /*bindTestButtons() {
-        // 绑定error测试按钮
-        const debugErrorBtn = elements ? elements.debugError : null;
-        if (debugErrorBtn) {
-            debugErrorBtn.addEventListener('click', () => {
-                this.showPopup('这是一个错误测试信息，用于调试弹窗功能。', 'error');
-            });
-        }
-        
-        // 绑定success测试按钮
-        const debugSuccessBtn = elements ? elements.debugSuccess : null;
-        if (debugSuccessBtn) {
-            debugSuccessBtn.addEventListener('click', () => {
-                this.showPopup('操作成功完成！数据已保存。', 'success');
-            });
-        }
-        
-        // 绑定warning测试按钮
-        const debugWarningBtn = elements ? elements.debugWarning : null;
-        if (debugWarningBtn) {
-            debugWarningBtn.addEventListener('click', () => {
-                this.showPopup('警告：内存使用率较高，建议优化。', 'warning');
-            });
-        }
-    }*/
     
     /**
      * 显示弹窗
@@ -259,6 +231,124 @@ window.showSuccess = showSuccess;
 window.showWarning = showWarning;
 window.clearAllPopups = clearAllPopups;
 window.clearAllErrors = clearAllErrors;
+
+/**
+ * 中心弹窗管理器 - 用于在屏幕中心显示确认弹窗
+ */
+class PopupCentreManager {
+    constructor() {
+        // 使用elements对象中的popupCentreContainer引用
+        this.container = elements ? elements.popupCentreContainer : null;
+        // 存储当前显示的弹窗
+        this.currentPopup = null;
+    }
+    
+    /**
+     * 显示中心确认弹窗
+     * @param {string} message - 信息文本
+     * @param {Function} confirmCallback - 确认按钮触发的回调函数
+     * @param {Function} cancelCallback - 取消按钮触发的回调函数（默认为空）
+     */
+    showConfirmPopup(message, confirmCallback, cancelCallback = null) {
+        // 确保容器存在（参考PopupManager的设计）
+        if (!this.container) {
+            this.container = document.getElementById('popupCentreContainer');
+            if (!this.container) {
+                this.container = document.createElement('div');
+                this.container.id = 'popupCentreContainer';
+                this.container.className = 'popup-centre-container';
+                document.body.appendChild(this.container);
+            }
+        }
+        
+        // 关闭之前的弹窗
+        this.closePopup();
+        
+        // 创建弹窗元素
+        const popup = this.createConfirmPopup(message, confirmCallback, cancelCallback);
+        
+        // 添加到容器
+        this.container.appendChild(popup);
+        this.currentPopup = popup;
+        
+        // 显示容器和弹窗
+        this.container.classList.add('show');
+        setTimeout(() => {
+            popup.classList.add('show');
+        }, 10);
+    }
+    
+    /**
+     * 创建确认弹窗元素
+     */
+    createConfirmPopup(message, confirmCallback, cancelCallback) {
+        const popup = document.createElement('div');
+        popup.className = 'popup-centre';
+        
+        popup.innerHTML = `
+            <div class="popup-centre-content">
+                <div class="popup-centre-message">${this.escapeHtml(message)}</div>
+                <div class="popup-centre-buttons">
+                    <button class="popup-centre-btn cancel">取消</button>
+                    <button class="popup-centre-btn confirm">确认</button>
+                </div>
+            </div>
+        `;
+        
+        // 绑定按钮事件
+        const cancelBtn = popup.querySelector('.cancel');
+        const confirmBtn = popup.querySelector('.confirm');
+        
+        cancelBtn.addEventListener('click', () => {
+            if (cancelCallback) {
+                cancelCallback();
+            }
+            this.closePopup();
+        });
+        
+        confirmBtn.addEventListener('click', () => {
+            if (confirmCallback) {
+                confirmCallback();
+            }
+            this.closePopup();
+        });
+        
+        return popup;
+    }
+    
+    /**
+     * 关闭弹窗
+     */
+    closePopup() {
+        if (this.currentPopup) {
+            this.currentPopup.classList.remove('show');
+            
+            setTimeout(() => {
+                if (this.currentPopup && this.currentPopup.parentNode) {
+                    this.currentPopup.parentNode.removeChild(this.currentPopup);
+                }
+                this.currentPopup = null;
+                // 隐藏容器
+                this.container.classList.remove('show');
+            }, 300);
+        }
+    }
+    
+    /**
+     * HTML转义
+     */
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+}
+
+// 全局中心弹窗管理器实例
+const popupCentreManager = new PopupCentreManager();
+
+// 导出到全局作用域
+window.popupCentreManager = popupCentreManager;
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {

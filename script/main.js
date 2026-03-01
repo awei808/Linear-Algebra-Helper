@@ -38,6 +38,10 @@ const elements = {
     //导入矩阵
     buttonQuickInput:document.getElementById('ButtonQuickInput'),
 
+    // 弹窗相关
+    popupBox: document.getElementById('popupBox'),
+    popupCentreContainer: document.getElementById('popupCentreContainer'),
+
     //杂项
 
 };
