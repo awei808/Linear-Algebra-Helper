@@ -173,66 +173,22 @@ function formatMatrixValue(value) {
 
 
 /**
- * 增强的数值格式化函数，在录入矩阵流程中使用
- * 结合formatMatrixValue和isValidMatrixElement的功能
- * @param {string} value - 输入的数值字符串
- * @param {boolean} validate - 是否进行有效性校验
- * @returns {Object} {success: boolean, formattedValue: string, error: string}
- */
-function enhancedFormatMatrixValue(value, validate = true) {
-    // 先进行基本的格式预处理（包括.2格式转换）
-    let processedValue = value;
-
-    if (value && value.trim) {
-        processedValue = value.trim();
-
-        // 新功能：识别.2格式，自动转换为0.2
-        const leadingDotPattern = /^\.\d+$/;
-        if (leadingDotPattern.test(processedValue)) {
-            processedValue = '0' + processedValue;
-        }
-    }
-
-    // 如果需要校验，进行有效性检查
-    if (validate) {
-        const validationResult = isValidMatrixElement(processedValue);
-        if (!validationResult.isValid) {
-            return {
-                success: false,
-                formattedValue: value,
-                error: validationResult.message
-            };
-        }
-    }
-
-    // 然后进行完整的格式化处理
-    const formatResult = formatMatrixValue(processedValue);
-
-    if (!formatResult.success) {
-        return formatResult;
-    }
-
-    return formatResult;
-}
-
-
-
-/**
- * 检查字符串是否为有效矩阵元素
+ * 检查字符串是否为有效矩阵元素 - 公共函数
  * 支持：数字、分数、小数、未知数、包含未知数的多项式
  * 未知数只能是abcdmnxyz和λ中的单个字符
  * @param {string} str - 要检查的字符串
- * @returns {Object} {isValid: boolean, message: string}
+ * @returns {Object} {isValid: boolean, message: string, type: string}
+ * 类型说明：'number' - 纯数字, 'unknown' - 纯未知数, 'polynomial' - 包含未知数的多项式, 'none' - 未知类型
  */
 function isValidMatrixElement(str) {
     // 空字符串视为0
     if (str === '') {
-        return { isValid: true, message: '' };
+        return { isValid: true, message: '', type: 'none' };
     }
 
     // 1. 纯数字（整数、小数）
     if (/^-?\d+(\.\d+)?$/.test(str)) {
-        return { isValid: true, message: '' };
+        return { isValid: true, message: '', type: 'number' };
     }
 
     // 2. 分数（支持正负分数，支持未知数作为分子或分母）
@@ -244,7 +200,7 @@ function isValidMatrixElement(str) {
 
         // 检查分母是否为0
         if (denominator === '0') {
-            return { isValid: false, message: '分母不能为0' };
+            return { isValid: false, message: '分母不能为0', type: 'none' };
         }
 
         // 检查分子和分母中的未知数是否都是允许的
@@ -259,16 +215,17 @@ function isValidMatrixElement(str) {
         if (invalidVariables.length > 0) {
             return {
                 isValid: false,
-                message: `未知数"${invalidVariables[0]}"不在允许范围内（允许的未知数：${ALLOWED_VARIABLES.join(', ')}）`
+                message: `未知数"${invalidVariables[0]}"不在允许范围内（允许的未知数：${ALLOWED_VARIABLES.join(', ')}）`,
+                type: 'none'
             };
         }
 
-        return { isValid: true, message: '' };
+        return { isValid: true, message: '', type: 'number' };
     }
 
     // 3. 单个未知数（只能是允许的字符）
     if (ALLOWED_VARIABLES.includes(str)) {
-        return { isValid: true, message: '' };
+        return { isValid: true, message: '', type: 'unknown' };
     }
 
     // 4. 带系数的未知数（如2x, -3y, 0.5λ, 3ab, 9xy）
@@ -279,7 +236,7 @@ function isValidMatrixElement(str) {
         // 检查所有未知数是否都是允许的
         const invalidVariables = [...variables].filter(v => !ALLOWED_VARIABLES.includes(v));
         if (invalidVariables.length === 0) {
-            return { isValid: true, message: '' };
+            return { isValid: true, message: '', type: 'unknown' };
         }
     }
 
@@ -294,7 +251,8 @@ function isValidMatrixElement(str) {
         if (invalidVariables.length > 0) {
             return {
                 isValid: false,
-                message: `未知数"${invalidVariables[0]}"不在允许范围内（允许的未知数：${ALLOWED_VARIABLES.join(', ')}）`
+                message: `未知数"${invalidVariables[0]}"不在允许范围内（允许的未知数：${ALLOWED_VARIABLES.join(', ')}）`,
+                type: 'none'
             };
         }
 
@@ -352,11 +310,12 @@ function isValidMatrixElement(str) {
         // 统一使用math.js解析来判定表达式格式合法性
         try {
             math.parse(cleanedStr);
-            return { isValid: true, message: '' };
+            return { isValid: true, message: '', type: 'polynomial' };
         } catch (error) {
             return { 
                 isValid: false, 
-                message: `表达式格式错误：${error.message}` 
+                message: `表达式格式错误：${error.message}`,
+                type: 'none'
             };
         }
     }
@@ -364,6 +323,55 @@ function isValidMatrixElement(str) {
     // 6. 如果以上都不匹配，返回错误
     return {
         isValid: false,
-        message: `格式错误。支持：数字、分数、未知数（${ALLOWED_VARIABLES.join(', ')}）、多项式`
+        message: `格式错误。支持：数字、分数、未知数（${ALLOWED_VARIABLES.join(', ')}）、多项式`,
+        type: 'none'
     };
+}
+
+
+
+
+
+
+/**
+ * 增强的数值格式化函数，在录入矩阵流程中使用 - 私用函数
+ * 结合formatMatrixValue和isValidMatrixElement的功能
+ * @param {string} value - 输入的数值字符串
+ * @param {boolean} validate - 是否进行有效性校验
+ * @returns {Object} {success: boolean, formattedValue: string, error: string}
+ */
+function enhancedFormatMatrixValue(value, validate = true) {
+    // 先进行基本的格式预处理（包括.2格式转换）
+    let processedValue = value;
+
+    if (value && value.trim) {
+        processedValue = value.trim();
+
+        // 新功能：识别.2格式，自动转换为0.2
+        const leadingDotPattern = /^\.\d+$/;
+        if (leadingDotPattern.test(processedValue)) {
+            processedValue = '0' + processedValue;
+        }
+    }
+
+    // 如果需要校验，进行有效性检查
+    if (validate) {
+        const validationResult = isValidMatrixElement(processedValue);
+        if (!validationResult.isValid) {
+            return {
+                success: false,
+                formattedValue: value,
+                error: validationResult.message
+            };
+        }
+    }
+
+    // 然后进行完整的格式化处理
+    const formatResult = formatMatrixValue(processedValue);
+
+    if (!formatResult.success) {
+        return formatResult;
+    }
+
+    return formatResult;
 }

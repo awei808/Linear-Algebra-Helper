@@ -17,9 +17,6 @@ class PopupManager {
         if (!this.popupBox) {
             this.createPopupBox();
         }
-        
-        // 绑定测试按钮事件
-        //this.bindTestButtons();
     }
     
     /**
@@ -223,14 +220,6 @@ function clearAllErrors() {
     clearAllPopups();
 }
 
-// 导出到全局作用域
-window.popupManager = popupManager;
-window.showPopup = showPopup;
-window.showError = showError;
-window.showSuccess = showSuccess;
-window.showWarning = showWarning;
-window.clearAllPopups = clearAllPopups;
-window.clearAllErrors = clearAllErrors;
 
 /**
  * 中心弹窗管理器 - 用于在屏幕中心显示确认弹窗
@@ -347,10 +336,20 @@ class PopupCentreManager {
 // 全局中心弹窗管理器实例
 const popupCentreManager = new PopupCentreManager();
 
-// 导出到全局作用域
-window.popupCentreManager = popupCentreManager;
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
     console.log('弹窗系统已初始化');
 });
+
+/* 这段代码应该是没用的，删除后还能正常运行，但ai总在提示不能删，先注释掉
+// 导出到全局作用域
+window.popupManager = popupManager;
+window.showPopup = showPopup;
+window.showError = showError;
+window.showSuccess = showSuccess;
+window.showWarning = showWarning;
+window.clearAllPopups = clearAllPopups;
+window.clearAllErrors = clearAllErrors;
+window.popupCentreManager = popupCentreManager;
+*/
