@@ -36,7 +36,7 @@ const elements = {
     buttonTest: document.getElementById('ButtonTest'),
 
     //导入矩阵
-    buttonQuickInput:document.getElementById('ButtonQuickInput'),
+    buttonQuickInput: document.getElementById('ButtonQuickInput'),
 
     // 弹窗相关
     popupBox: document.getElementById('popupBox'),
@@ -292,6 +292,7 @@ function exportMatrixToArray() {
         }
     });
 }
+
 /**
  * 处理鼠标按下事件
  */
@@ -464,11 +465,11 @@ function restoreGridForInputElements() {
         state.gridInputs.forEach(input => {
             input.removeEventListener('input', handleInputChange); // 避免重复添加
             input.addEventListener('input', handleInputChange);
-            
+
             // 初始化时也调整宽度
             adjustInputWidth(input);
         });
-        
+
         // 7. 更新坐标显示
         updateCoordinatesDisplay(`${rows}×${cols}`);
     } else {
@@ -528,11 +529,11 @@ function getTextWidth(text, font) {
     span.style.font = font;
     span.style.whiteSpace = 'pre';
     span.textContent = text;
-    
+
     document.body.appendChild(span);
     const width = span.offsetWidth;
     document.body.removeChild(span);
-    
+
     return width;
 }
 
@@ -541,36 +542,36 @@ function getTextWidth(text, font) {
  */
 function adjustInputWidth(input) {
     const value = input.value.toString();
-    
+
     // 获取输入框的字体样式
     const computedStyle = window.getComputedStyle(input);
     const font = `${computedStyle.fontSize} ${computedStyle.fontFamily}`;
-    
+
     // 计算基础宽度（原始CSS设定的宽度）
     const baseWidth = 60; // CSS中设定的默认宽度
-    
+
     // 计算padding和border的总宽度
     const paddingWidth = parseFloat(computedStyle.paddingLeft) + parseFloat(computedStyle.paddingRight);
     const borderWidth = parseFloat(computedStyle.borderLeftWidth) + parseFloat(computedStyle.borderRightWidth);
-    
+
     // 每5个字符扩大50像素（约等于5个字符的宽度）
     const charBasedWidth = baseWidth + Math.floor(value.length / 5) * 50;
-    
+
     // 设置最小和最大宽度
     const minWidth = baseWidth;
     const maxWidth = 300; // 最大宽度限制
-    
+
     // 计算最终宽度
     let newWidth = Math.max(minWidth, Math.min(maxWidth, charBasedWidth));
-    
+
     // 设置新宽度
     input.style.width = newWidth + 'px';
-    
+
     // 同步调整同列的所有输入框宽度
     const inputCol = parseInt(input.dataset.x);
     const allInputs = Array.from(elements.windowDiv.querySelectorAll('.grid-cell-input'));
     const columnInputs = allInputs.filter(inp => parseInt(inp.dataset.x) === inputCol);
-    
+
     // 找到同列中最宽的输入框宽度
     let maxWidthInColumn = newWidth;
     columnInputs.forEach(colInput => {
@@ -578,14 +579,14 @@ function adjustInputWidth(input) {
         const colCharBasedWidth = baseWidth + Math.floor(colValue.length / 5) * 50;
         maxWidthInColumn = Math.max(maxWidthInColumn, colCharBasedWidth);
     });
-    
+
     // 将同列所有输入框设置为最大宽度
     columnInputs.forEach(colInput => {
         const colCharBasedWidth = baseWidth + Math.floor(colInput.value.toString().length / 5) * 50;
         const colFinalWidth = Math.max(minWidth, Math.min(maxWidth, maxWidthInColumn));
         colInput.style.width = colFinalWidth + 'px';
     });
-    
+
     // 重新调整整个网格的列宽
     if (state.matrixData) {
         const { cols } = state.matrixData;
@@ -601,7 +602,7 @@ function adjustInputWidth(input) {
             }
         }
         elements.windowDiv.style.gridTemplateColumns = gridColumnSizes.join(' ');
-        
+
         // 重新计算整个窗口的宽度
         const totalWidth = gridColumnSizes.reduce((sum, size) => sum + parseFloat(size), 0);
         elements.windowDiv.style.width = totalWidth + 'px';
@@ -618,11 +619,11 @@ function enableInputInteraction() {
         input.disabled = false;
         input.style.backgroundColor = 'white';
         input.style.cursor = 'text';
-        
+
         // 为每个输入框添加输入事件监听器
         input.removeEventListener('input', handleInputChange); // 避免重复添加
         input.addEventListener('input', handleInputChange);
-        
+
         // 初始化时也调整宽度
         adjustInputWidth(input);
     });
@@ -716,14 +717,14 @@ function validateMatrixData(useDOM = false) {
 
             // 使用增强的格式化函数处理数据
             const formatResult = enhancedFormatMatrixValue(value, true);
-            
+
             if (!formatResult.success) {
                 return {
                     isValid: false,
                     message: `第${row}行第${col}列${formatResult.error}`
                 };
             }
-            
+
             // 更新输入框的值
             input.value = formatResult.formattedValue;
         }
@@ -735,14 +736,14 @@ function validateMatrixData(useDOM = false) {
 
                 // 使用增强的格式化函数处理数据
                 const formatResult = enhancedFormatMatrixValue(value, true);
-                
+
                 if (!formatResult.success) {
                     return {
                         isValid: false,
                         message: `第${row + 1}行第${col + 1}列${formatResult.error}`
                     };
                 }
-                
+
                 // 更新矩阵数据
                 elements[row][col] = formatResult.formattedValue;
             }

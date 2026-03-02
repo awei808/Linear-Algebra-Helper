@@ -177,18 +177,17 @@ function formatMatrixValue(value) {
  * 支持：数字、分数、小数、未知数、包含未知数的多项式
  * 未知数只能是abcdmnxyz和λ中的单个字符
  * @param {string} str - 要检查的字符串
- * @returns {Object} {isValid: boolean, message: string, type: string}
- * 类型说明：'number' - 纯数字, 'unknown' - 纯未知数, 'polynomial' - 包含未知数的多项式, 'none' - 未知类型
+ * @returns {Object} {isValid: boolean, message: string}
  */
 function isValidMatrixElement(str) {
     // 空字符串视为0
     if (str === '') {
-        return { isValid: true, message: '', type: 'none' };
+        return { isValid: true, message: '' };
     }
 
     // 1. 纯数字（整数、小数）
     if (/^-?\d+(\.\d+)?$/.test(str)) {
-        return { isValid: true, message: '', type: 'number' };
+        return { isValid: true, message: '' };
     }
 
     // 2. 分数（支持正负分数，支持未知数作为分子或分母）
@@ -200,7 +199,7 @@ function isValidMatrixElement(str) {
 
         // 检查分母是否为0
         if (denominator === '0') {
-            return { isValid: false, message: '分母不能为0', type: 'none' };
+            return { isValid: false, message: '分母不能为0' };
         }
 
         // 检查分子和分母中的未知数是否都是允许的
@@ -215,17 +214,16 @@ function isValidMatrixElement(str) {
         if (invalidVariables.length > 0) {
             return {
                 isValid: false,
-                message: `未知数"${invalidVariables[0]}"不在允许范围内（允许的未知数：${ALLOWED_VARIABLES.join(', ')}）`,
-                type: 'none'
+                message: `未知数"${invalidVariables[0]}"不在允许范围内（允许的未知数：${ALLOWED_VARIABLES.join(', ')}）`
             };
         }
 
-        return { isValid: true, message: '', type: 'number' };
+        return { isValid: true, message: '' };
     }
 
     // 3. 单个未知数（只能是允许的字符）
     if (ALLOWED_VARIABLES.includes(str)) {
-        return { isValid: true, message: '', type: 'unknown' };
+        return { isValid: true, message: '' };
     }
 
     // 4. 带系数的未知数（如2x, -3y, 0.5λ, 3ab, 9xy）
@@ -236,7 +234,7 @@ function isValidMatrixElement(str) {
         // 检查所有未知数是否都是允许的
         const invalidVariables = [...variables].filter(v => !ALLOWED_VARIABLES.includes(v));
         if (invalidVariables.length === 0) {
-            return { isValid: true, message: '', type: 'unknown' };
+            return { isValid: true, message: '' };
         }
     }
 
@@ -251,8 +249,7 @@ function isValidMatrixElement(str) {
         if (invalidVariables.length > 0) {
             return {
                 isValid: false,
-                message: `未知数"${invalidVariables[0]}"不在允许范围内（允许的未知数：${ALLOWED_VARIABLES.join(', ')}）`,
-                type: 'none'
+                message: `未知数"${invalidVariables[0]}"不在允许范围内（允许的未知数：${ALLOWED_VARIABLES.join(', ')}）`
             };
         }
 
@@ -310,12 +307,11 @@ function isValidMatrixElement(str) {
         // 统一使用math.js解析来判定表达式格式合法性
         try {
             math.parse(cleanedStr);
-            return { isValid: true, message: '', type: 'polynomial' };
+            return { isValid: true, message: '' };
         } catch (error) {
             return { 
                 isValid: false, 
-                message: `表达式格式错误：${error.message}`,
-                type: 'none'
+                message: `表达式格式错误：${error.message}`
             };
         }
     }
@@ -323,8 +319,7 @@ function isValidMatrixElement(str) {
     // 6. 如果以上都不匹配，返回错误
     return {
         isValid: false,
-        message: `格式错误。支持：数字、分数、未知数（${ALLOWED_VARIABLES.join(', ')}）、多项式`,
-        type: 'none'
+        message: `格式错误。支持：数字、分数、未知数（${ALLOWED_VARIABLES.join(', ')}）、多项式`
     };
 }
 

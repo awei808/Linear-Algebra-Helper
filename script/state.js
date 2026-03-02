@@ -8,10 +8,10 @@ const state = {
     gridInputs: [], // 缓存输入框元素引用
     currentState: CONFIG.STATES.INIT, // 默认状态为INIT
     matrixData: null, // 存储矩阵数据，预期格式{rows，cols，elements}
-    matrixElementTypes: [], // 存储矩阵元素类型，与elements对应
     previousStates: [],// 状态历史，用于撤销
     rowColumnIndexEventListener: null, // 存储行列索引事件监听器引用
-    isRowColumnIndexEventsBound: false // 新增：标记行列索引事件是否已绑定
+    isRowColumnIndexEventsBound: false ,// 新增：标记行列索引事件是否已绑定
+    selectedMatrixElements: [], // 存储用户选中的矩阵元素索引
 };
 
 // ==================== 状态机核心函数 ====================
