@@ -16,7 +16,7 @@ function initQuickInput() {
  * 处理快速录入按钮点击事件
  */
 function handleQuickInputClick() {
-    
+
 
     // 如果输入框已经存在，则不再添加
     if (quickInputAdded) {
@@ -38,7 +38,7 @@ function handleQuickInputClick() {
     // 添加到header中
     elements.header.appendChild(input);
     quickInputAdded = true;
-    
+
     // 必须更新elements对象中的引用，确保所有DOM访问都通过elements
     if (typeof elements !== 'undefined') {
         elements.quickInput = input;
@@ -138,63 +138,23 @@ function validateAndParseMatrix(input) {
 
         const { rows, cols, elements: rawElements } = matrixData;
 
-        // 步骤4: 将小数转为分数（在元素层面处理）
+        // 步骤4: 使用增强的格式化函数统一处理所有元素（包含格式化和校验）
         const elements = [];
         for (let i = 0; i < rows; i++) {
             elements[i] = [];
             for (let j = 0; j < cols; j++) {
                 let element = rawElements[i][j].trim();
 
-                if (element === '') {
-                    elements[i][j] = '0';
-                    continue;
-                }
-
-                // 新功能：识别.2格式，自动转换为0.2
-                const leadingDotPattern = /^\.\d+$/;
-                if (leadingDotPattern.test(element)) {
-                    element = '0' + element;
-                }
-
-                // 小数转分数处理
-                if (PATTERNS.DECIMAL.test(element)) {
-                    const conversionResult = convertDecimalToFraction(element);
-                    if (conversionResult.success) {
-                        element = conversionResult.formattedValue;
-                    } else {
-                        // 如果转换失败，保持原样
-                        console.warn(`小数转换失败: ${element}`, conversionResult.error);
-                    }
-                }
-
-                elements[i][j] = element;
-            }
-        }
-
-        // 步骤5: 检查是否为多项式，采用多项式相关代码进行校验，并添加分数化简功能
-        for (let i = 0; i < rows; i++) {
-            for (let j = 0; j < cols; j++) {
-                let element = elements[i][j];
-
-                // 使用现有的多项式校验逻辑
-                const validationResult = isValidMatrixElement(element);
-                if (!validationResult.isValid) {
+                // 使用增强的格式化函数一次性完成格式化和校验
+                const formatResult = enhancedFormatMatrixValue(element, true);
+                if (!formatResult.success) {
                     return {
                         isValid: false,
-                        message: `第${i + 1}行第${j + 1}列的值"${element}"不是有效矩阵元素。${validationResult.message}`
+                        message: `第${i + 1}行第${j + 1}列的值"${element}"不是有效矩阵元素。${formatResult.error}`
                     };
                 }
 
-                // 新增：分数化简功能
-                // 检查是否为纯数字分数（如4/8）或包含未知数的分数（如2x/4y）
-                const fractionMatch = element.match(PATTERNS.COMPLEX_FRACTION);
-
-                if (fractionMatch) {
-                    // 使用公共函数进行复杂分数化简
-                    element = simplifyComplexFraction(element);
-                }
-
-                elements[i][j] = element;
+                elements[i][j] = formatResult.formattedValue;
             }
         }
 
@@ -230,7 +190,7 @@ function parseMatrixManually(matrixStr) {
 
         // 分割行（按], [分割）
         const rowStrings = innerStr.split(/\s*\]\s*,\s*\[\s*/);
-        
+
         // 处理第一行和最后一行
         if (rowStrings.length > 0) {
             rowStrings[0] = rowStrings[0].replace(/^\[\s*/, '');
@@ -249,13 +209,13 @@ function parseMatrixManually(matrixStr) {
 
             // 分割列（按逗号分割，但要注意保护字符串内的逗号）
             const columnElements = splitColumns(rowStr);
-            
+
             if (i === 0) {
                 cols = columnElements.length;
             } else if (columnElements.length !== cols) {
-                return { 
-                    isValid: false, 
-                    message: `第${i + 1}行列数(${columnElements.length})与第一行(${cols})不一致` 
+                return {
+                    isValid: false,
+                    message: `第${i + 1}行列数(${columnElements.length})与第一行(${cols})不一致`
                 };
             }
 
@@ -290,7 +250,7 @@ function splitColumns(rowStr) {
 
     for (let i = 0; i < rowStr.length; i++) {
         const char = rowStr[i];
-        
+
         if ((char === '"' || char === "'") && !inQuotes) {
             inQuotes = true;
             quoteChar = char;
@@ -340,6 +300,12 @@ function displayMatrixTable() {
             // 直接显示矩阵值
             const cellValue = matrixElements[row][col] || '0';
             td.textContent = cellValue;
+
+            // 添加数据属性，用于事件委托
+            td.dataset.row = row;
+            td.dataset.col = col;
+            td.dataset.type = 'matrix-cell';
+
             tr.appendChild(td);
         }
 
@@ -374,9 +340,28 @@ function displayMatrixTable() {
 
     table.appendChild(colTr);
 
+    // 为表格添加事件委托（事件冒泡）
+    table.addEventListener('click', function (event) {
+        const target = event.target;
+
+        // 检查是否点击了矩阵单元格
+        if (target.dataset.type === 'matrix-cell') {
+            const row = parseInt(target.dataset.row);
+            const col = parseInt(target.dataset.col);
+
+            // 调用已存在的矩阵元素点击处理函数
+            if (typeof handleMatrixElementClick === 'function') {
+                handleMatrixElementClick(row, col, target);
+            }
+        }
+    })
+
     // 替换原来的输入框布局
     elements.windowDiv.innerHTML = '';
     elements.windowDiv.appendChild(table);
+
+    // 清除之前的选中状态
+    state.selectedMatrixElements = [];
 
     // 计算并调整windowDiv大小以适应表格
     setTimeout(() => {

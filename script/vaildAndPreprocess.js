@@ -329,7 +329,7 @@ function isValidMatrixElement(str) {
 
 
 /**
- * 增强的数值格式化函数，在录入矩阵流程中使用 - 私用函数
+ * 增强的数值格式化函数 - 公共函数
  * 结合formatMatrixValue和isValidMatrixElement的功能
  * @param {string} value - 输入的数值字符串
  * @param {boolean} validate - 是否进行有效性校验
