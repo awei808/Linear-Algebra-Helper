@@ -206,6 +206,20 @@ button#button-reset:hover {
     display: none;
 }
 
+/* 选中的矩阵元素样式 */
+.selected-matrix-element {
+    background-color: #e3f2fd !important;
+    border: 2px solid #2196f3 !important;
+    box-shadow: 0 0 5px rgba(33, 150, 243, 0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.selected-matrix-element:hover {
+    background-color: #bbdefb !important;
+    box-shadow: 0 0 8px rgba(33, 150, 243, 0.7);
+}
+
 #arithmetic-symbols {
     display: flex;
     flex-direction: column;

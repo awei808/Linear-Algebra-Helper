@@ -45,6 +45,11 @@ function updateUIForCurrentState() {
             updateButtonState(elements.undoButton, true);
             enableInputInteraction();
             disableGridInteraction();
+            
+            // 清除选中的矩阵元素
+            if (typeof clearSelectedMatrixElements === 'function') {
+                clearSelectedMatrixElements();
+            }
             break;
 
         case CONFIG.STATES.ELEMENTARY_TRANSFORMATION:  // 初等变换状态

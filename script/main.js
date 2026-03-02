@@ -17,6 +17,8 @@ const elements = {
     moreButton: document.getElementById('moreButton'),
     moreDropdown: document.getElementById('moreDropdown'),
     exportMatrixButton: document.getElementById('exportMatrixButton'),
+    ButtonForceSimplify: document.getElementById('ButtonForceSimplify'),
+    ButtonForceFactorize: document.getElementById('ButtonForceFactorize'),
 
     // 矩阵数据显示
     matrixDataDisplay: document.getElementById('matrixDataDisplay'),
@@ -952,6 +954,12 @@ function addRowColumnIndices() {
             // 直接显示矩阵值，不再使用输入框
             const cellValue = matrixElements[row][col] || '0'; // 默认值为0
             td.textContent = cellValue;
+            
+            // 添加点击事件处理
+            td.addEventListener('click', function() {
+                handleMatrixElementClick(row, col, td);
+            });
+            
             tr.appendChild(td);
         }
 
@@ -989,6 +997,9 @@ function addRowColumnIndices() {
     // 替换原来的输入框布局
     elements.windowDiv.innerHTML = '';
     elements.windowDiv.appendChild(table);
+    
+    // 清除之前的选中状态
+        state.selectedMatrixElements = [];
 
     // 计算并调整windowDiv大小以适应表格
     // 使用setTimeout确保表格已添加到DOM中并完成渲染
@@ -1007,6 +1018,54 @@ function addRowColumnIndices() {
         elements.windowDiv.style.overflow = 'visible';
         elements.windowDiv.style.display = 'block';
     }, 0);
+}
+
+/**
+ * 处理矩阵元素点击事件
+ * @param {number} row - 行索引
+ * @param {number} col - 列索引
+ * @param {HTMLElement} element - 被点击的元素
+ */
+function handleMatrixElementClick(row, col, element) {
+    // 检查是否在初等变换状态下
+    if (state.currentState !== CONFIG.STATES.ELEMENTARY_TRANSFORMATION) {
+        return;
+    }
+    
+    const elementIndex = { row, col };
+    
+    // 检查是否已经选中
+    const isAlreadySelected = state.selectedMatrixElements.some(item => 
+        item.row === row && item.col === col
+    );
+    
+    if (isAlreadySelected) {
+        // 取消选中
+        state.selectedMatrixElements = state.selectedMatrixElements.filter(item => 
+            !(item.row === row && item.col === col)
+        );
+        element.classList.remove('selected-matrix-element');
+    } else {
+        // 添加选中
+        state.selectedMatrixElements.push(elementIndex);
+        element.classList.add('selected-matrix-element');
+    }
+    
+    console.log(state.selectedMatrixElements);
+}
+
+/**
+ * 清除所有选中的矩阵元素
+ */
+function clearSelectedMatrixElements() {
+    // 清除样式
+    const selectedElements = elements.windowDiv.querySelectorAll('.selected-matrix-element');
+    selectedElements.forEach(element => {
+        element.classList.remove('selected-matrix-element');
+    });
+    
+    // 清空选中数组
+    state.selectedMatrixElements = [];
 }
 
 /**
