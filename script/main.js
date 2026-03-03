@@ -289,6 +289,7 @@ function updateGrid(cell) {
  * 设置事件监听器
  */
 function setupEventListeners() {
+
     // 使用事件委托，减少事件监听器数量
     elements.windowDiv.addEventListener('mousedown', handleMouseDown);
     elements.windowDiv.addEventListener('mouseleave', handleMouseLeave);
@@ -319,13 +320,9 @@ function setupEventListeners() {
     }
 
     // 添加多项式处理功能事件绑定
-    if (elements.ButtonForceSimplify && typeof handleForceSimplify === 'function') {
-        elements.ButtonForceSimplify.addEventListener('click', handleForceSimplify);
-    }
-    
-    if (elements.ButtonForceFactorize && typeof handleForceFactorize === 'function') {
-        elements.ButtonForceFactorize.addEventListener('click', handleForceFactorize);
-    }
+    elements.ButtonForceSimplify.addEventListener('click', handleForceSimplify);
+    elements.ButtonForceFactorize.addEventListener('click', handleForceFactorize);
+
 }
 
 // ==================== 网格操作函数 ====================
