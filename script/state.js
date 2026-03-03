@@ -10,7 +10,7 @@ const state = {
     matrixData: null, // 存储矩阵数据，预期格式{rows，cols，elements}
     previousStates: [],// 状态历史，用于撤销
     rowColumnIndexEventListener: null, // 存储行列索引事件监听器引用
-    isRowColumnIndexEventsBound: false ,// 新增：标记行列索引事件是否已绑定
+    isRowColumnIndexEventsBound: false,// 新增：标记行列索引事件是否已绑定
     selectedMatrixElements: [], // 存储用户选中的矩阵元素索引
 };
 
@@ -45,7 +45,7 @@ function updateUIForCurrentState() {
             updateButtonState(elements.undoButton, true);
             enableInputInteraction();
             disableGridInteraction();
-            
+
             // 清除选中的矩阵元素
             if (typeof clearSelectedMatrixElements === 'function') {
                 clearSelectedMatrixElements();
@@ -112,7 +112,7 @@ function Next() {
 
     let success = true;
     let nextState = null;
-    
+
     switch (state.currentState) {
         case CONFIG.STATES.SELECT_DIMENSION:
             console.log('维度选择下, next');
@@ -152,9 +152,9 @@ function Next() {
  */
 function Undo() {
     // 检查必要的依赖函数是否存在
-    const requiredFunctions = ['hideElementaryTransformationUI', 'restoreOriginalGrid', 
-                              'restoreGridForInputElements', 'updateCoordinatesDisplay', 
-                              'updateUIForCurrentState', 'showWarning'];
+    const requiredFunctions = ['hideElementaryTransformationUI', 'restoreOriginalGrid',
+        'restoreGridForInputElements', 'updateCoordinatesDisplay',
+        'updateUIForCurrentState', 'showWarning'];
     for (const funcName of requiredFunctions) {
         if (typeof window[funcName] !== 'function') {
             console.error(`${funcName} 函数未定义，请检查文件加载顺序`);
@@ -212,7 +212,7 @@ function Undo() {
         updateCoordinatesDisplay(dim);
     }
     state.lastSelectedDimension = dim;
-    
+
     if (typeof updateUIForCurrentState === 'function') {
         updateUIForCurrentState();
     }
@@ -227,7 +227,7 @@ function saveCurrentState() {
         matrixData: state.matrixData ? JSON.parse(JSON.stringify(state.matrixData)) : null,
         timestamp: Date.now()
     });
-    
+
     // 限制历史记录数量，防止内存泄漏
     if (state.previousStates.length > 10) {
         state.previousStates.shift();
@@ -247,7 +247,7 @@ function resetState() {
     state.previousStates = [];
     state.rowColumnIndexEventListener = null;
     state.isRowColumnIndexEventsBound = false;
-    
+
     updateUIForCurrentState();
 }
 
@@ -279,7 +279,7 @@ function isValidStateTransition(fromState, toState) {
         [CONFIG.STATES.INPUT_ELEMENTS]: [CONFIG.STATES.ELEMENTARY_TRANSFORMATION, CONFIG.STATES.SELECT_DIMENSION],
         [CONFIG.STATES.ELEMENTARY_TRANSFORMATION]: [CONFIG.STATES.INPUT_ELEMENTS]
     };
-    
+
     return validTransitions[fromState] && validTransitions[fromState].includes(toState);
 }
 

@@ -106,27 +106,6 @@ function handleDimensionSelection() {
 
 
 /**
- * 处理矩阵元素输入，函数未被使用
- */
-/*function handleElementInput() {
-    // 验证所有输入框是否已填写
-    const allFilled = fillEmptyInputsAndValidate();
-
-    if (!allFilled) {
-    showWarning('请填写所有矩阵元素');
-    state.previousStates.pop();
-return;
-    }
-
-    // 收集矩阵数据
-    collectMatrixData();
-    // 切换到数据校验状态
-    state.currentState = CONFIG.STATES.DATA_VALIDATION;
-    // 执行数据校验
-    validateMatrixData();
-}*/
-
-/**
  * 处理数据校验
  */
 function handleDataValidation() {
@@ -212,8 +191,6 @@ function startMatrixInput() {
     elements.inputMatrixDiv.classList.toggle('visible');
 }
 
-
-
 /**
  * 切换更多下拉菜单的显示/隐藏
  */
@@ -292,6 +269,7 @@ function handleMouseDown(e) {
 function handleMouseLeave() {
     elements.coordinatesDiv.textContent = `矩阵维度: ${state.lastSelectedDimension}`;
 }
+
 /**
  * 更新网格状态
  */
@@ -338,6 +316,15 @@ function setupEventListeners() {
             event.preventDefault();
             exportMatrixToArray();
         });
+    }
+
+    // 添加多项式处理功能事件绑定
+    if (elements.ButtonForceSimplify && typeof handleForceSimplify === 'function') {
+        elements.ButtonForceSimplify.addEventListener('click', handleForceSimplify);
+    }
+    
+    if (elements.ButtonForceFactorize && typeof handleForceFactorize === 'function') {
+        elements.ButtonForceFactorize.addEventListener('click', handleForceFactorize);
     }
 }
 
@@ -941,12 +928,12 @@ function createMatrixDisplayTable() {
             // 直接显示矩阵值，不再使用输入框
             const cellValue = matrixElements[row][col] || '0'; // 默认值为0
             td.textContent = cellValue;
-            
+
             // 添加数据属性，用于事件委托
             td.dataset.row = row;
             td.dataset.col = col;
             td.dataset.type = 'matrix-cell';
-            
+
             tr.appendChild(td);
         }
 
@@ -1000,7 +987,7 @@ function createMatrixDisplayTable() {
     // 替换原来的输入框布局
     elements.windowDiv.innerHTML = '';
     elements.windowDiv.appendChild(table);
-    
+
     // 清除之前的选中状态
     state.selectedMatrixElements = [];
 
@@ -1034,19 +1021,19 @@ function handleMatrixElementClick(row, col, element) {
     if (state.currentState !== CONFIG.STATES.ELEMENTARY_TRANSFORMATION) {
         return;
     }
-    
+
     // 计算元素索引：index = (row) * cols + col+1
     // 注意：row和col都是0-based索引
     // 元素索引手动+1，符合直觉
     const cols = state.matrixData.cols;
-    const elementIndex = row * cols + col+1;
-    
+    const elementIndex = row * cols + col + 1;
+
     // 检查是否已经选中
     const isAlreadySelected = state.selectedMatrixElements.includes(elementIndex);
-    
+
     if (isAlreadySelected) {
         // 取消选中
-        state.selectedMatrixElements = state.selectedMatrixElements.filter(index => 
+        state.selectedMatrixElements = state.selectedMatrixElements.filter(index =>
             index !== elementIndex
         );
         element.classList.remove('selected-matrix-element');
@@ -1055,7 +1042,7 @@ function handleMatrixElementClick(row, col, element) {
         state.selectedMatrixElements.push(elementIndex);
         element.classList.add('selected-matrix-element');
     }
-    
+
     console.log('选中元素索引:', state.selectedMatrixElements);
 }
 
@@ -1068,7 +1055,7 @@ function clearSelectedMatrixElements() {
     selectedElements.forEach(element => {
         element.classList.remove('selected-matrix-element');
     });
-    
+
     // 清空选中数组
     state.selectedMatrixElements = [];
 }

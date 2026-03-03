@@ -328,7 +328,7 @@ function validateTransformationInputs(targetInput, coefficientInput, paramInput,
             if (targetType !== paramType) {
                 return { isValid: false, message: '加减操作只能在同行或同列之间进行' };
             }
-            
+
             // 检验目标行列和参数行列不能相同
             if (targetIndex === paramIndex) {
                 return { isValid: false, message: '目标行列和参数行列不能相同' };

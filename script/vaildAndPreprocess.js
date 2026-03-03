@@ -309,8 +309,8 @@ function isValidMatrixElement(str) {
             math.parse(cleanedStr);
             return { isValid: true, message: '' };
         } catch (error) {
-            return { 
-                isValid: false, 
+            return {
+                isValid: false,
                 message: `表达式格式错误：${error.message}`
             };
         }

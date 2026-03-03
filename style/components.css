@@ -229,13 +229,17 @@ button#button-reset:hover {
 #arithmetic-symbols button {
     padding: 4px 12px;
     font-size: 16px;
-    background-color: #cccccc; /* 默认灰色背景 */
-    color: #666666; /* 默认灰色文字 */
-    border: 1px solid #999999; /* 默认灰色边框 */
+    background-color: #cccccc;
+    /* 默认灰色背景 */
+    color: #666666;
+    /* 默认灰色文字 */
+    border: 1px solid #999999;
+    /* 默认灰色边框 */
 }
 
 #arithmetic-symbols button:hover {
-    background-color: #bbbbbb; /* 悬停时稍深的灰色 */
+    background-color: #bbbbbb;
+    /* 悬停时稍深的灰色 */
     color: #555555;
     border-color: #888888;
 }
