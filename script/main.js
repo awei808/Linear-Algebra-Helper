@@ -212,25 +212,7 @@ function startMatrixInput() {
     elements.inputMatrixDiv.classList.toggle('visible');
 }
 
-/**
- * 处理快速录入矩阵功能（调用quickinput.js中的函数）
- */
-function handleQuickInputMatrix() {
-    // 修复：检查quickinput.js中的函数，而不是自身
-    if (typeof window.handleQuickInputMatrix === 'function' &&
-        window.handleQuickInputMatrix !== handleQuickInputMatrix) {
-        const success = window.handleQuickInputMatrix();
-        if (success) {
-            // 快速录入成功后隐藏输入矩阵区域
-            elements.inputMatrixDiv.classList.remove('visible');
-        }
-        return success;
-    } else {
-        // 如果quickinput.js未加载，显示错误提示
-        showError('快速录入功能未加载，请检查quickinput.js文件');
-        return false;
-    }
-}
+
 
 /**
  * 切换更多下拉菜单的显示/隐藏
@@ -825,7 +807,7 @@ function showElementaryTransformationUI() {
     }
 
     // 为输入框添加行列索引按钮
-    addRowColumnIndices();
+    createMatrixDisplayTable();
 
     // 为行列索引按钮添加事件冒泡绑定（现在有双重保护）
     bindRowColumnIndexEvents();
@@ -932,10 +914,15 @@ function reorganizeLayoutForElementaryTransformation() {
 }
 
 /**
- * 添加行列索引按钮
- * 修改后：调整windowDiv大小以适应表格，避免重叠
+ * 创建完整的矩阵显示表格
+ * 功能包括：
+ * 1. 创建表格结构显示矩阵数据
+ * 2. 添加行列索引按钮（r1, r2, c1, c2,...）
+ * 3. 实现事件委托处理矩阵单元格点击
+ * 4. 调整窗口大小以适应表格布局
+ * 5. 替换原有的输入框布局为表格显示
  */
-function addRowColumnIndices() {
+function createMatrixDisplayTable() {
     // 修改：将解构的elements重命名为matrixElements，避免与全局elements对象冲突
     const { rows, cols, elements: matrixElements } = state.matrixData;
 
@@ -955,10 +942,10 @@ function addRowColumnIndices() {
             const cellValue = matrixElements[row][col] || '0'; // 默认值为0
             td.textContent = cellValue;
             
-            // 添加点击事件处理
-            td.addEventListener('click', function() {
-                handleMatrixElementClick(row, col, td);
-            });
+            // 添加数据属性，用于事件委托
+            td.dataset.row = row;
+            td.dataset.col = col;
+            td.dataset.type = 'matrix-cell';
             
             tr.appendChild(td);
         }
@@ -994,12 +981,28 @@ function addRowColumnIndices() {
 
     table.appendChild(colTr);
 
+    // 为表格添加事件委托（事件冒泡）
+    table.addEventListener('click', function (event) {
+        const target = event.target;
+
+        // 检查是否点击了矩阵单元格
+        if (target.dataset.type === 'matrix-cell') {
+            const row = parseInt(target.dataset.row);
+            const col = parseInt(target.dataset.col);
+
+            // 调用已存在的矩阵元素点击处理函数
+            if (typeof handleMatrixElementClick === 'function') {
+                handleMatrixElementClick(row, col, target);
+            }
+        }
+    });
+
     // 替换原来的输入框布局
     elements.windowDiv.innerHTML = '';
     elements.windowDiv.appendChild(table);
     
     // 清除之前的选中状态
-        state.selectedMatrixElements = [];
+    state.selectedMatrixElements = [];
 
     // 计算并调整windowDiv大小以适应表格
     // 使用setTimeout确保表格已添加到DOM中并完成渲染
@@ -1032,17 +1035,19 @@ function handleMatrixElementClick(row, col, element) {
         return;
     }
     
-    const elementIndex = { row, col };
+    // 计算元素索引：index = (row) * cols + col+1
+    // 注意：row和col都是0-based索引
+    // 元素索引手动+1，符合直觉
+    const cols = state.matrixData.cols;
+    const elementIndex = row * cols + col+1;
     
     // 检查是否已经选中
-    const isAlreadySelected = state.selectedMatrixElements.some(item => 
-        item.row === row && item.col === col
-    );
+    const isAlreadySelected = state.selectedMatrixElements.includes(elementIndex);
     
     if (isAlreadySelected) {
         // 取消选中
-        state.selectedMatrixElements = state.selectedMatrixElements.filter(item => 
-            !(item.row === row && item.col === col)
+        state.selectedMatrixElements = state.selectedMatrixElements.filter(index => 
+            index !== elementIndex
         );
         element.classList.remove('selected-matrix-element');
     } else {
@@ -1051,7 +1056,7 @@ function handleMatrixElementClick(row, col, element) {
         element.classList.add('selected-matrix-element');
     }
     
-    console.log(state.selectedMatrixElements);
+    console.log('选中元素索引:', state.selectedMatrixElements);
 }
 
 /**

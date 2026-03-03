@@ -87,7 +87,7 @@ function handleQuickInputMatrix() {
     // 设置状态为初等变换
     state.currentState = CONFIG.STATES.ELEMENTARY_TRANSFORMATION;
 
-    // 显示表格（使用与addRowColumnIndices相同的格式）
+    // 显示表格（使用与createMatrixDisplayTable相同的格式）
     displayMatrixTable();
 
     // 更新UI状态
@@ -278,7 +278,7 @@ function splitColumns(rowStr) {
 
 
 /**
- * 显示矩阵表格（使用与addRowColumnIndices相同的格式）
+ * 显示矩阵表格（使用与createMatrixDisplayTable相同的格式）
  */
 function displayMatrixTable() {
     if (!state.matrixData) return;

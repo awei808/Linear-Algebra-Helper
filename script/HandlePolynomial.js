@@ -19,7 +19,14 @@ function handleForceSimplify() {
     
     let hasChanges = false;
     
-    state.selectedMatrixElements.forEach(({row, col}) => {
+    const cols = state.matrixData.cols;
+    
+    state.selectedMatrixElements.forEach(index => {
+        // 从索引计算行列坐标：index = row * cols + col + 1
+        // 所以：row = Math.floor((index - 1) / cols), col = (index - 1) % cols
+        const row = Math.floor((index - 1) / cols);
+        const col = (index - 1) % cols;
+        
         const originalValue = state.matrixData.elements[row][col];
         
         try {
@@ -31,13 +38,13 @@ function handleForceSimplify() {
                 hasChanges = true;
             }
         } catch (error) {
-            console.error(`化简失败 (${row},${col}):`, error);
+            console.warn(`化简失败: ${originalValue}`, error);
         }
     });
     
     if (hasChanges) {
         showSuccess('强制化简完成');
-        addRowColumnIndices();
+        createMatrixDisplayTable();
     } else {
         showInfo('所选元素无需化简或化简后无变化');
     }
@@ -54,7 +61,14 @@ function handleForceFactorize() {
     
     let hasChanges = false;
     
-    state.selectedMatrixElements.forEach(({row, col}) => {
+    const cols = state.matrixData.cols;
+    
+    state.selectedMatrixElements.forEach(index => {
+        // 从索引计算行列坐标：index = row * cols + col + 1
+        // 所以：row = Math.floor((index - 1) / cols), col = (index - 1) % cols
+        const row = Math.floor((index - 1) / cols);
+        const col = (index - 1) % cols;
+        
         const originalValue = state.matrixData.elements[row][col];
         
         try {
@@ -69,13 +83,13 @@ function handleForceFactorize() {
                 hasChanges = true;
             }
         } catch (error) {
-            console.error(`因式分解失败 (${row},${col}):`, error);
+            console.warn(`因式分解失败: ${originalValue}`, error);
         }
     });
     
     if (hasChanges) {
         showSuccess('强制因式分解完成');
-        addRowColumnIndices();
+        createMatrixDisplayTable();
     } else {
         showInfo('所选元素无法因式分解或分解后无变化');
     }
