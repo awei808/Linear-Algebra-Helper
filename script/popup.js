@@ -1,4 +1,4 @@
-// 弹窗管理器
+// 右下角弹窗管理器
 class PopupManager {
     constructor() {
         // 使用elements对象中的popupBox引用
@@ -186,6 +186,7 @@ function showError(message) {
         alert(message);
     }
 }
+
 /**
  * 显示成功消息
  * @param {string} message - 成功消息

@@ -47,7 +47,6 @@ const elements = {
     //杂项
 
 };
-
 // ==================== 初始化函数 ====================
 /**
  * 初始化应用
@@ -320,8 +319,8 @@ function setupEventListeners() {
     }
 
     // 添加多项式处理功能事件绑定
-    elements.ButtonForceSimplify.addEventListener('click', handleForceSimplify);
-    elements.ButtonForceFactorize.addEventListener('click', handleForceFactorize);
+    elements.ButtonForceSimplify.addEventListener('click', confirmForceExpand);
+    elements.ButtonForceFactorize.addEventListener('click', confirmForceFactorize);
 
 }
 
