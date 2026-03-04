@@ -49,6 +49,7 @@
 - 点击"导入二维数组"按钮
 - 输入标准的二维数组格式，如：`[[1,2,3],[4,5,6]]`
 - 系统自动解析并显示矩阵
+- 支持复杂表达式及低等级的智能识别：`[[.2,2,3,4,2*(15xy+4a)+a],[6,7,8,9abc,10a+16abc+xyz]]`
 
 ### 导出矩阵
 - 通过"更多"菜单中的"导出矩阵为二维数组"功能
@@ -67,9 +68,14 @@
 - 支持分数、小数、未知数['a', 'b', 'c', 'd', 'm', 'n', 'x', 'y', 'z', 'λ']等复杂矩阵元素
 - 自动分数化简功能
 - 多项式表达式验证
+- **智能格式转换**：自动识别 `.2` 格式并转换为 `0.2`
 
 ## 浏览器兼容性
 - 现代浏览器
+
+## 新增功能
+-  确认弹窗机制
+-  依赖管理
 
 ## 项目结构
 ```
@@ -77,13 +83,22 @@
 ├── index.html          # 主页面
 ├── script/             # JavaScript脚本
 │   ├── main.js         # 主逻辑
-│   ├── quickinput.js   # 快速录入功能
+│   ├── config.js       # 配置管理
+│   ├── state.js        # 状态管理
+│   ├── VaildAndPreprocess.js # 数据验证和预处理
+│   ├── HandlePolynomial.js  # 多项式处理功能
 │   ├── transformation.js # 变换操作
-│   └── popup.js        # 弹窗功能
+│   ├── popup.js        # 弹窗功能
+│   ├── quickinput.js   # 快速录入功能
+│   └── test.js         # 测试功能
 ├── style/              # 样式文件
 │   ├── base.css        # 基础样式
 │   ├── components.css  # 组件样式
-│   └── responsive.css # 响应式样式
+│   ├── popup.css       # 弹窗样式
+│   ├── responsive.css  # 响应式样式
+│   ├── transformation.css # 变换操作样式
+│   └── window-and-grid.css # 窗口和网格样式
+├── dependencies.md     # 依赖关系说明
 └── readme.md          # 项目说明
 ```
 
