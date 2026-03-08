@@ -9,8 +9,8 @@ function confirmForceExpand() {
         return;
     }
     
-    const elementCount = state.selectedMatrixElements.length;
-    const confirmText = `确定对${elementCount}个元素进行强制展开多项式吗？`;
+    const elementCount = state.selectedMatrixElements;
+    const confirmText = `确定对${elementCount}号矩阵元素进行强制展开多项式吗？`;
 
     popupCentreManager.showConfirmPopup(
         confirmText,
@@ -57,9 +57,11 @@ function handleForceExpand() {
         const originalValue = state.matrixData.elements[row][col];
 
         try {
-            // 使用math.expand展开多项式
-            const expanded = math.expand(originalValue);
+            // 使用math.rationalize展开多项式
+            const expanded = math.rationalize(originalValue);
             const expandedStr = math.format(expanded, { fraction: 'ratio' });
+
+            console.log(`多项式展开: ${originalValue} -> ${expandedStr}`);
 
             if (expandedStr !== originalValue) {
                 state.matrixData.elements[row][col] = expandedStr;
@@ -74,7 +76,7 @@ function handleForceExpand() {
         showSuccess('强制展开完成');
         createMatrixDisplayTable();
     } else {
-        showWarning('所选元素无需展开或展开后无变化');
+        showWarning(`${elementCount}号元素无需展开或展开后无变化`);
     }
 }
 
@@ -119,6 +121,6 @@ function handleForceFactorize() {
         showSuccess('强制因式分解完成');
         createMatrixDisplayTable();
     } else {
-        showWarning('所选元素无法因式分解或分解后无变化');
+        showWarning(`${elementCount}号元素无法因式分解或分解后无变化`);
     }
 }

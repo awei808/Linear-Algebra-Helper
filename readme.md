@@ -79,7 +79,7 @@
 
 ## 项目结构
 ```
-线性代数试错区/
+线代辅助/
 ├── index.html          # 主页面
 ├── script/             # JavaScript脚本
 │   ├── main.js         # 主逻辑
