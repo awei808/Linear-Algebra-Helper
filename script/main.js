@@ -43,9 +43,73 @@ const elements = {
     popupBox: document.getElementById('popupBox'),
     popupCentreContainer: document.getElementById('popupCentreContainer'),
 
-    //杂项
+    //特殊element元素，无法直接在此处获取，在其他函数创建后才会进入elements对象
+    /*
+    buttonInputMatrix   在quickinput.js中创建
+     */
 
 };
+
+/**
+ * 设置事件监听器
+ */
+function setupEventListeners() {
+
+    // 使用事件委托，减少事件监听器数量
+    elements.windowDiv.addEventListener('mousedown', handleMouseDown);
+    elements.windowDiv.addEventListener('mouseleave', handleMouseLeave);
+    // 添加按钮事件监听器
+    elements.undoButton.addEventListener('click', Undo);
+    elements.nextButton.addEventListener('click', Next);
+    // 添加录入矩阵按钮点击事件
+    elements.buttonInputMatrix.addEventListener('click', startMatrixInput);
+
+    // 添加更多按钮点击事件
+    if (elements.moreButton && elements.moreDropdown) {
+        elements.moreButton.addEventListener('click', toggleMoreDropdown);
+
+        // 点击页面其他区域时关闭下拉菜单
+        document.addEventListener('click', function (event) {
+            if (!elements.moreButton.contains(event.target) && !elements.moreDropdown.contains(event.target)) {
+                elements.moreDropdown.classList.remove('show');
+            }
+        });
+    }
+
+    // 添加导出矩阵按钮点击事件
+    elements.exportMatrixButton.addEventListener('click', function (event) {
+        event.preventDefault();
+        exportMatrixToArray();
+    });
+    // 为导入二维数组为矩阵按钮绑定点击事件
+    elements.ButtonQuickInput.addEventListener('click', handleQuickInputClick);
+
+    // 添加多项式处理功能事件绑定
+    elements.ButtonForceSimplify.addEventListener('click', confirmForceExpand);
+    elements.ButtonForceFactorize.addEventListener('click', confirmForceFactorize);
+
+}
+
+// ==================== 网格操作函数 ====================
+/**
+ * 创建网格
+ */
+function createGrid() {
+    state.gridCells = [];
+    const fragment = document.createDocumentFragment();
+    for (let y = 0; y < CONFIG.GRID_SIZE; y++) {
+        for (let x = 0; x < CONFIG.GRID_SIZE; x++) {
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell';
+            cell.dataset.x = x;
+            cell.dataset.y = y;
+            fragment.appendChild(cell);
+            state.gridCells.push(cell);
+        }
+    }
+
+    elements.windowDiv.appendChild(fragment);
+}
 // ==================== 初始化函数 ====================
 /**
  * 初始化应用
@@ -283,70 +347,7 @@ function updateGrid(cell) {
     updateHighlightedCells(x, y);
 }
 
-/**
- * 设置事件监听器
- */
-function setupEventListeners() {
 
-    // 使用事件委托，减少事件监听器数量
-    elements.windowDiv.addEventListener('mousedown', handleMouseDown);
-    elements.windowDiv.addEventListener('mouseleave', handleMouseLeave);
-    // 添加按钮事件监听器
-    elements.undoButton.addEventListener('click', Undo);
-    elements.nextButton.addEventListener('click', Next);
-    // 添加录入矩阵按钮点击事件
-    elements.buttonInputMatrix.addEventListener('click', startMatrixInput);
-
-    // 添加更多按钮点击事件
-    if (elements.moreButton && elements.moreDropdown) {
-        elements.moreButton.addEventListener('click', toggleMoreDropdown);
-
-        // 点击页面其他区域时关闭下拉菜单
-        document.addEventListener('click', function (event) {
-            if (!elements.moreButton.contains(event.target) && !elements.moreDropdown.contains(event.target)) {
-                elements.moreDropdown.classList.remove('show');
-            }
-        });
-    }
-
-    // 添加导出矩阵按钮点击事件
-    elements.exportMatrixButton.addEventListener('click', function (event) {
-        event.preventDefault();
-        exportMatrixToArray();
-    });
-    // 为导入二维数组为矩阵按钮绑定点击事件
-    elements.ButtonQuickInput.addEventListener('click', handleQuickInputClick);
-
-    // 添加多项式处理功能事件绑定
-    elements.ButtonForceSimplify.addEventListener('click', confirmForceExpand);
-    elements.ButtonForceFactorize.addEventListener('click', confirmForceFactorize);
-
-    //特殊element元素，无法直接在此处获取，在其他函数创建后才会进入elements对象
-    /*
-    buttonInputMatrix   在quickinput.js中创建
-     */
-}
-
-// ==================== 网格操作函数 ====================
-/**
- * 创建网格
- */
-function createGrid() {
-    state.gridCells = [];
-    const fragment = document.createDocumentFragment();
-    for (let y = 0; y < CONFIG.GRID_SIZE; y++) {
-        for (let x = 0; x < CONFIG.GRID_SIZE; x++) {
-            const cell = document.createElement('div');
-            cell.className = 'grid-cell';
-            cell.dataset.x = x;
-            cell.dataset.y = y;
-            fragment.appendChild(cell);
-            state.gridCells.push(cell);
-        }
-    }
-
-    elements.windowDiv.appendChild(fragment);
-}
 
 /**
  * 恢复原始网格
