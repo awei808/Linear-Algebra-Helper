@@ -19,6 +19,7 @@ const elements = {
     exportMatrixButton: document.getElementById('exportMatrixButton'),
     ButtonForceSimplify: document.getElementById('ButtonForceSimplify'),
     ButtonForceFactorize: document.getElementById('ButtonForceFactorize'),
+    ButtonQuickInput: document.getElementById('ButtonQuickInput'),
 
     // 矩阵数据显示
     matrixDataDisplay: document.getElementById('matrixDataDisplay'),
@@ -37,8 +38,6 @@ const elements = {
     // 调试相关
     buttonTest: document.getElementById('ButtonTest'),
 
-    //导入矩阵
-    buttonQuickInput: document.getElementById('ButtonQuickInput'),
 
     // 弹窗相关
     popupBox: document.getElementById('popupBox'),
@@ -311,17 +310,21 @@ function setupEventListeners() {
     }
 
     // 添加导出矩阵按钮点击事件
-    if (elements.exportMatrixButton) {
-        elements.exportMatrixButton.addEventListener('click', function (event) {
-            event.preventDefault();
-            exportMatrixToArray();
-        });
-    }
+    elements.exportMatrixButton.addEventListener('click', function (event) {
+        event.preventDefault();
+        exportMatrixToArray();
+    });
+    // 为导入二维数组为矩阵按钮绑定点击事件
+    elements.ButtonQuickInput.addEventListener('click', handleQuickInputClick);
 
     // 添加多项式处理功能事件绑定
     elements.ButtonForceSimplify.addEventListener('click', confirmForceExpand);
     elements.ButtonForceFactorize.addEventListener('click', confirmForceFactorize);
 
+    //特殊element元素，无法直接在此处获取，在其他函数创建后才会进入elements对象
+    /*
+    buttonInputMatrix   在quickinput.js中创建
+     */
 }
 
 // ==================== 网格操作函数 ====================
@@ -879,8 +882,6 @@ function unbindRowColumnIndexEvents() {
  * 重新组织布局以适应初等变换状态
  */
 function reorganizeLayoutForElementaryTransformation() {
-    // 不再清空inputMatrixDiv，保持现有结构
-
     // 获取所有需要操作的元素
     const operatorButtons = document.querySelectorAll('.operator-buttons');
 
@@ -999,10 +1000,11 @@ function createMatrixDisplayTable() {
         // 重置grid布局，因为我们不再使用它
         elements.windowDiv.style.gridTemplateColumns = 'none';
         elements.windowDiv.style.gridTemplateRows = 'none';
-
         // 确保windowDiv能正确显示表格
         elements.windowDiv.style.overflow = 'visible';
         elements.windowDiv.style.display = 'block';
+        elements.inputMatrixDiv.style.display = 'block';
+        console.log('表格显示成功');
     }, 0);
 }
 
