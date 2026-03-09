@@ -682,8 +682,8 @@ function validateMatrixData(useDOM = false) {
             const row = Math.floor(i / cols) + 1;
             const col = (i % cols) + 1;
 
-            // 使用增强的格式化函数处理数据
-            const formatResult = enhancedFormatMatrixValue(value, true);
+            // 验证并格式化函数处理数据
+            const formatResult = validateAndFormatMatrixValue(value, true);
 
             if (!formatResult.success) {
                 return {
@@ -702,7 +702,7 @@ function validateMatrixData(useDOM = false) {
                 let value = elements[row][col]?.trim() || '';
 
                 // 使用增强的格式化函数处理数据
-                const formatResult = enhancedFormatMatrixValue(value, true);
+                const formatResult = validateAndFormatMatrixValue(value, true);
 
                 if (!formatResult.success) {
                     return {

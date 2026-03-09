@@ -13,7 +13,7 @@ function initQuickInput() {
 }
 
 /**
- * 处理快速录入按钮点击事件
+ * 处理“导入二维数组为矩阵”按钮点击事件
  */
 function handleQuickInputClick() {
 
@@ -55,7 +55,7 @@ function handleQuickInputClick() {
 }
 
 /**
- * 处理快速录入矩阵功能（由main.js调用）
+ * 处理“导入二维数组为矩阵”矩阵功能（由main.js调用）
  */
 function handleQuickInputMatrix() {
     // 严格通过elements对象访问，不直接获取DOM元素
@@ -146,7 +146,7 @@ function validateAndParseMatrix(input) {
                 let element = rawElements[i][j].trim();
 
                 // 使用增强的格式化函数一次性完成格式化和校验
-                const formatResult = enhancedFormatMatrixValue(element, true);
+                const formatResult = validateAndFormatMatrixValue(element, true);
                 if (!formatResult.success) {
                     return {
                         isValid: false,
