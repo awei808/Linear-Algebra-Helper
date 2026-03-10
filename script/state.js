@@ -12,6 +12,7 @@ const state = {
     rowColumnIndexEventListener: null, // 存储行列索引事件监听器引用
     isRowColumnIndexEventsBound: false,// 新增：标记行列索引事件是否已绑定
     selectedMatrixElements: [], // 存储用户选中的矩阵元素索引
+    quickInputAdded : false,
 };
 
 // ==================== 状态机核心函数 ====================
