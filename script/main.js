@@ -1124,9 +1124,15 @@ function createMatrixDisplayTable() {
         // 添加数据单元格（先添加数据，再添加行索引）
         for (let col = 0; col < cols; col++) {
             const td = document.createElement('td');
-            // 直接显示矩阵值，不再使用输入框
-            const cellValue = matrixElements[row][col] || '0'; // 默认值为0
-            td.textContent = cellValue;
+            //使用mathjs解析，输出latex格式，使用katex渲染
+            const parsedExpr = math.parse(matrixElements[row][col] || '0');
+            const latexStr = math.format(parsedExpr, { format: 'latex' });
+            katex.render(latexStr,td,{
+                    displayMode: true, // 块级渲染（公式居中，更美观）
+                    throwOnError: false, // 容错处理
+                    errorColor: '#d32f2f'
+                }
+            );
 
             // 添加数据属性，用于事件委托
             td.dataset.row = row;

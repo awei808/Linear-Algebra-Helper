@@ -201,7 +201,7 @@ function executeElementaryTransformation() {
             showSuccess(`初等变换执行成功: ${transformationResult.description}`);
             // 更新矩阵显示
             if (state.matrixData) {
-                displayMatrixTable();
+                createMatrixDisplayTable(state.matrixData);
             }
             return true;
         } else {
