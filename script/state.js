@@ -283,20 +283,3 @@ function isValidStateTransition(fromState, toState) {
 
     return validTransitions[fromState] && validTransitions[fromState].includes(toState);
 }
-
-/**
- * 检查当前状态是否可以进行下一步操作
- * @returns {boolean} 是否可以继续
- */
-function canProceedToNextState() {
-    switch (state.currentState) {
-        case CONFIG.STATES.SELECT_DIMENSION:
-            return state.gridCells.some(cell => cell.classList.contains('highlighted'));
-        case CONFIG.STATES.INPUT_ELEMENTS:
-            return state.gridInputs.length > 0;
-        case CONFIG.STATES.ELEMENTARY_TRANSFORMATION:
-            return !!state.matrixData;
-        default:
-            return false;
-    }
-}

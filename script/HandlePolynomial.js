@@ -105,8 +105,7 @@ function handleFactorize() {
 
         try {
             //使用第三方库nerdamer进行因式分解，然后使用math.simplify进行格式化
-            const factoredStr = math.simplify(nerdamer('factor(' + originalValue + ')').toString());
-
+            const factoredStr = math.simplify(nerdamer('factor(' + originalValue + ')').toString()).toString();
             if (factoredStr !== originalValue) {
                 state.matrixData.elements[row][col] = factoredStr;
                 hasChanges = true;

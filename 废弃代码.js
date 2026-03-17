@@ -154,3 +154,20 @@ const factorRules = [
     // 8. 四次方平方差: n1^4 - n2^4 = (n1^2 - n2^2)(n1^2 + n2^2)
     { l: 'n1^4 - n2^4', r: '(n1^2 - n2^2) * (n1^2 + n2^2)' },
 ];
+
+/**
+ * 检查当前状态是否可以进行下一步操作
+ * @returns {boolean} 是否可以继续
+ */
+function canProceedToNextState() {
+    switch (state.currentState) {
+        case CONFIG.STATES.SELECT_DIMENSION:
+            return state.gridCells.some(cell => cell.classList.contains('highlighted'));
+        case CONFIG.STATES.INPUT_ELEMENTS:
+            return state.gridInputs.length > 0;
+        case CONFIG.STATES.ELEMENTARY_TRANSFORMATION:
+            return !!state.matrixData;
+        default:
+            return false;
+    }
+}
