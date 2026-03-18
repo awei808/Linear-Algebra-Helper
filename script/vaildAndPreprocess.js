@@ -1,7 +1,8 @@
 /* 数据校验和预处理 
 在输入元素状态到初等变换状态的跳转过程中，或在“导入二维数组为矩阵”功能（初始状态跳转到初等变换状态）中使用
 */
-// ==================== 公共常量定义 ====================
+
+// ==================== 常量定义 ====================
 // 正则表达式常量
 const PATTERNS = {
     DECIMAL: /^-?\d+\.\d+/,           // 小数格式（支持带未知数）
@@ -16,7 +17,7 @@ const PATTERNS = {
 // 允许的未知数常量
 const ALLOWED_VARIABLES = CONFIG.TRANSFORMATION_CONFIG.ALLOWED_VARIABLES;
 
-// ==================== 公共函数定义 ====================
+// ==================== 数据处理函数 ====================
 
 /**
  * 小数转分数处理 - 公共函数
@@ -83,6 +84,7 @@ function simplifyFraction(fractionStr) {
         return { success: false, formattedValue: fractionStr, error: `分数化简失败：${fractionStr}` };
     }
 }
+
 /**
  * 复杂分数化简处理（包含未知数）- 公共函数
  * @param {string} complexFraction - 包含未知数的分数字符串
@@ -269,10 +271,6 @@ function isValidMatrixElement(str) {
     }
 }
 
-
-
-
-
 /**
  * 验证并格式化矩阵元素 - 公共函数
  * 结合formatMatrixValue和isValidMatrixElement的功能
@@ -305,28 +303,105 @@ function validateAndFormatMatrixValue(value, validate = true) {
     return formatResult;
 }
 
+// ==================== 逻辑处理函数 ====================
 /**
- * 处理数据校验的总入口函数
+ * 分割列元素，支持保护字符串内的逗号
+ * @param {string} rowStr - 行字符串
+ * @returns {Array} 列元素数组
  */
-function handleDataValidation() {
+function splitColumns(rowStr) {
+    const elements = [];
+    let currentElement = '';
+    let inQuotes = false;
+    let quoteChar = '';
 
-    if (state.currentState !== CONFIG.STATES.INPUT_ELEMENTS) {
-        return false;
+    for (let i = 0; i < rowStr.length; i++) {
+        const char = rowStr[i];
+
+        if ((char === '"' || char === "'") && !inQuotes) {
+            inQuotes = true;
+            quoteChar = char;
+            currentElement += char;
+        } else if (char === quoteChar && inQuotes) {
+            inQuotes = false;
+            currentElement += char;
+        } else if (char === ',' && !inQuotes) {
+            // 遇到逗号且不在引号内，完成当前元素
+            elements.push(currentElement.trim());
+            currentElement = '';
+        } else {
+            currentElement += char;
+        }
     }
 
-    // 1. 收集矩阵数据（确保数据已收集）
-    collectMatrixData();
-
-    // 2. 执行数据校验（去除空数据校验，改为自动补零）
-    const validationResult = validateMatrixData();
-    if (!validationResult.isValid) {
-        // 校验失败：提示错误并终止流程
-        showError(validationResult.message);
-        return false; // 返回处理失败
+    // 添加最后一个元素
+    if (currentElement.trim() !== '') {
+        elements.push(currentElement.trim());
     }
-    // 4. 更新坐标显示和全局UI
-    updateCoordinatesDisplay(`${state.matrixData.rows}×${state.matrixData.cols}`);
-    return true; // 返回处理成功
+
+    return elements;
+}
+
+/**
+ * 手动解析矩阵字符串（不使用JSON.parse）
+ * @param {string} matrixStr - 矩阵字符串
+ * @returns {Object} 解析结果
+ */
+function parseMatrixManually(matrixStr) {
+    try {
+        // 去除最外层的中括号
+        const innerStr = matrixStr.slice(1, -1).trim();
+        if (innerStr === '') {
+            return { isValid: false, message: '矩阵不能为空' };
+        }
+
+        // 分割行（按], [分割）
+        const rowStrings = innerStr.split(/\s*\]\s*,\s*\[\s*/);
+
+        // 处理第一行和最后一行
+        if (rowStrings.length > 0) {
+            rowStrings[0] = rowStrings[0].replace(/^\[\s*/, '');
+            rowStrings[rowStrings.length - 1] = rowStrings[rowStrings.length - 1].replace(/\s*\]$/, '');
+        }
+
+        const rows = rowStrings.length;
+        const elements = [];
+        let cols = 0;
+
+        for (let i = 0; i < rows; i++) {
+            const rowStr = rowStrings[i].trim();
+            if (rowStr === '') {
+                return { isValid: false, message: `第${i + 1}行为空` };
+            }
+
+            // 分割列（按逗号分割，但要注意保护字符串内的逗号）
+            const columnElements = splitColumns(rowStr);
+
+            if (i === 0) {
+                cols = columnElements.length;
+            } else if (columnElements.length !== cols) {
+                return {
+                    isValid: false,
+                    message: `第${i + 1}行列数(${columnElements.length})与第一行(${cols})不一致`
+                };
+            }
+
+            elements.push(columnElements);
+        }
+
+        return {
+            isValid: true,
+            rows: rows,
+            cols: cols,
+            elements: elements
+        };
+
+    } catch (error) {
+        return {
+            isValid: false,
+            message: `矩阵格式解析错误: ${error.message}`
+        };
+    }
 }
 
 /**
@@ -340,6 +415,83 @@ function collectMatrixData() {
         const y = parseInt(input.dataset.y);
         state.matrixData.elements[y][x] = input.value.trim();
     });
+}
+
+/**
+ * 检验并解析二维数组字符串
+ * @param {string} input - 输入的二维数组字符串
+ * @returns {Object} {isValid: boolean, message: string, rows: number, cols: number, elements: Array}
+ */
+function validateAndParseMatrix(input) {
+    try {
+        // 步骤1: 以字符串形式解析整个输入框传来的值
+        const cleanedInput = input.replace(/\s+/g, ' ').trim();
+
+        // 检查是否为有效的二维数组格式
+        if (!cleanedInput.startsWith('[') || !cleanedInput.endsWith(']')) {
+            return {
+                isValid: false,
+                message: '请输入有效的二维数组格式，如：[[1,2,3],[4,5,6]]'
+            };
+        }
+
+        // 步骤2: 对字母进行校验，检验是否是未知数
+        const allLetters = cleanedInput.match(PATTERNS.LETTERS) || [];
+        const invalidLetters = [...new Set(allLetters)].filter(letter =>
+            !ALLOWED_VARIABLES.includes(letter.toLowerCase())
+        );
+
+        if (invalidLetters.length > 0) {
+            return {
+                isValid: false,
+                message: `发现不允许的未知数: ${invalidLetters.join(', ')}。允许的未知数: ${ALLOWED_VARIABLES.join(', ')}`
+            };
+        }
+
+        // 步骤3: 将整个输入框传来的值切割，按矩阵元素遍历解析
+        // 手动解析二维数组格式
+        const matrixData = parseMatrixManually(cleanedInput);
+        if (!matrixData.isValid) {
+            return matrixData;
+        }
+
+        const { rows, cols, elements: rawElements } = matrixData;
+
+        // 步骤4: 使用增强的格式化函数统一处理所有元素（包含格式化和校验）
+        const elements = [];
+        for (let i = 0; i < rows; i++) {
+            elements[i] = [];
+            for (let j = 0; j < cols; j++) {
+                let element = rawElements[i][j].trim();
+
+                // 使用增强的格式化函数一次性完成格式化和校验
+                const formatResult = validateAndFormatMatrixValue(element, true);
+                if (!formatResult.success) {
+                    return {
+                        isValid: false,
+                        message: `第${i + 1}行第${j + 1}列的值"${element}"不是有效矩阵元素。${formatResult.error}`
+                    };
+                }
+
+                elements[i][j] = formatResult.formattedValue;
+            }
+        }
+
+        // 步骤6: 返回解析结果供显示矩阵使用
+        return {
+            isValid: true,
+            message: '解析成功',
+            rows: rows,
+            cols: cols,
+            elements: elements
+        };
+
+    } catch (error) {
+        return {
+            isValid: false,
+            message: `解析过程中发生错误: ${error.message}`
+        };
+    }
 }
 
 /**
@@ -421,178 +573,25 @@ function validateMatrixData(useDOM = false) {
 }
 
 /**
- * 检验并解析二维数组字符串
- * @param {string} input - 输入的二维数组字符串
- * @returns {Object} {isValid: boolean, message: string, rows: number, cols: number, elements: Array}
+ * 处理数据校验的总入口函数
  */
-function validateAndParseMatrix(input) {
-    try {
-        // 步骤1: 以字符串形式解析整个输入框传来的值
-        const cleanedInput = input.replace(/\s+/g, ' ').trim();
+function handleDataValidation() {
 
-        // 检查是否为有效的二维数组格式
-        if (!cleanedInput.startsWith('[') || !cleanedInput.endsWith(']')) {
-            return {
-                isValid: false,
-                message: '请输入有效的二维数组格式，如：[[1,2,3],[4,5,6]]'
-            };
-        }
-
-        // 步骤2: 对字母进行校验，检验是否是未知数
-        const allLetters = cleanedInput.match(PATTERNS.LETTERS) || [];
-        const invalidLetters = [...new Set(allLetters)].filter(letter =>
-            !ALLOWED_VARIABLES.includes(letter.toLowerCase())
-        );
-
-        if (invalidLetters.length > 0) {
-            return {
-                isValid: false,
-                message: `发现不允许的未知数: ${invalidLetters.join(', ')}。允许的未知数: ${ALLOWED_VARIABLES.join(', ')}`
-            };
-        }
-
-        // 步骤3: 将整个输入框传来的值切割，按矩阵元素遍历解析
-        // 手动解析二维数组格式
-        const matrixData = parseMatrixManually(cleanedInput);
-        if (!matrixData.isValid) {
-            return matrixData;
-        }
-
-        const { rows, cols, elements: rawElements } = matrixData;
-
-        // 步骤4: 使用增强的格式化函数统一处理所有元素（包含格式化和校验）
-        const elements = [];
-        for (let i = 0; i < rows; i++) {
-            elements[i] = [];
-            for (let j = 0; j < cols; j++) {
-                let element = rawElements[i][j].trim();
-
-                // 使用增强的格式化函数一次性完成格式化和校验
-                const formatResult = validateAndFormatMatrixValue(element, true);
-                if (!formatResult.success) {
-                    return {
-                        isValid: false,
-                        message: `第${i + 1}行第${j + 1}列的值"${element}"不是有效矩阵元素。${formatResult.error}`
-                    };
-                }
-
-                elements[i][j] = formatResult.formattedValue;
-            }
-        }
-
-        // 步骤6: 返回解析结果供显示矩阵使用
-        return {
-            isValid: true,
-            message: '解析成功',
-            rows: rows,
-            cols: cols,
-            elements: elements
-        };
-
-    } catch (error) {
-        return {
-            isValid: false,
-            message: `解析过程中发生错误: ${error.message}`
-        };
-    }
-}
-
-/**
- * 手动解析矩阵字符串（不使用JSON.parse）
- * @param {string} matrixStr - 矩阵字符串
- * @returns {Object} 解析结果
- */
-function parseMatrixManually(matrixStr) {
-    try {
-        // 去除最外层的中括号
-        const innerStr = matrixStr.slice(1, -1).trim();
-        if (innerStr === '') {
-            return { isValid: false, message: '矩阵不能为空' };
-        }
-
-        // 分割行（按], [分割）
-        const rowStrings = innerStr.split(/\s*\]\s*,\s*\[\s*/);
-
-        // 处理第一行和最后一行
-        if (rowStrings.length > 0) {
-            rowStrings[0] = rowStrings[0].replace(/^\[\s*/, '');
-            rowStrings[rowStrings.length - 1] = rowStrings[rowStrings.length - 1].replace(/\s*\]$/, '');
-        }
-
-        const rows = rowStrings.length;
-        const elements = [];
-        let cols = 0;
-
-        for (let i = 0; i < rows; i++) {
-            const rowStr = rowStrings[i].trim();
-            if (rowStr === '') {
-                return { isValid: false, message: `第${i + 1}行为空` };
-            }
-
-            // 分割列（按逗号分割，但要注意保护字符串内的逗号）
-            const columnElements = splitColumns(rowStr);
-
-            if (i === 0) {
-                cols = columnElements.length;
-            } else if (columnElements.length !== cols) {
-                return {
-                    isValid: false,
-                    message: `第${i + 1}行列数(${columnElements.length})与第一行(${cols})不一致`
-                };
-            }
-
-            elements.push(columnElements);
-        }
-
-        return {
-            isValid: true,
-            rows: rows,
-            cols: cols,
-            elements: elements
-        };
-
-    } catch (error) {
-        return {
-            isValid: false,
-            message: `矩阵格式解析错误: ${error.message}`
-        };
-    }
-}
-
-/**
- * 分割列元素，支持保护字符串内的逗号
- * @param {string} rowStr - 行字符串
- * @returns {Array} 列元素数组
- */
-function splitColumns(rowStr) {
-    const elements = [];
-    let currentElement = '';
-    let inQuotes = false;
-    let quoteChar = '';
-
-    for (let i = 0; i < rowStr.length; i++) {
-        const char = rowStr[i];
-
-        if ((char === '"' || char === "'") && !inQuotes) {
-            inQuotes = true;
-            quoteChar = char;
-            currentElement += char;
-        } else if (char === quoteChar && inQuotes) {
-            inQuotes = false;
-            currentElement += char;
-        } else if (char === ',' && !inQuotes) {
-            // 遇到逗号且不在引号内，完成当前元素
-            elements.push(currentElement.trim());
-            currentElement = '';
-        } else {
-            currentElement += char;
-        }
+    if (state.currentState !== CONFIG.STATES.INPUT_ELEMENTS) {
+        return false;
     }
 
-    // 添加最后一个元素
-    if (currentElement.trim() !== '') {
-        elements.push(currentElement.trim());
-    }
+    // 1. 收集矩阵数据（确保数据已收集）
+    collectMatrixData();
 
-    return elements;
+    // 2. 执行数据校验（去除空数据校验，改为自动补零）
+    const validationResult = validateMatrixData();
+    if (!validationResult.isValid) {
+        // 校验失败：提示错误并终止流程
+        showError(validationResult.message);
+        return false; // 返回处理失败
+    }
+    // 4. 更新坐标显示和全局UI
+    updateCoordinatesDisplay(`${state.matrixData.rows}×${state.matrixData.cols}`);
+    return true; // 返回处理成功
 }
