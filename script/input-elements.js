@@ -1,6 +1,8 @@
-/*本文件存储输入元素状态的相关函数，包括函数执行完成后进入输入元素状态的函数
+/*
+本文件存储输入元素状态的相关函数，包括函数执行完成后进入输入元素状态的函数
 */
 
+// ==================== 底层工具函数 ====================
 /**
  * 计算文本在特定字体下的像素宽度
  */
@@ -93,6 +95,21 @@ function adjustInputWidth(input) {
 }
 
 /**
+ * 删除非高亮的单元格
+ */
+function removeNonHighlightedCells() {
+    const allCells = Array.from(elements.windowDiv.querySelectorAll('.grid-cell'));
+    const nonHighlightedCells = allCells.filter(cell => !cell.classList.contains('highlighted'));
+
+    nonHighlightedCells.forEach(cell => {
+        cell.remove();
+    });
+
+    // 更新网格单元格数组
+    state.gridCells = Array.from(elements.windowDiv.querySelectorAll('.grid-cell'));
+}
+// ==================== 中层操作函数 ====================
+/**
  * 将高亮单元格转换为输入框
  */
 function convertHighlightedCellsToInputs(highlightedCells) {
@@ -114,6 +131,29 @@ function convertHighlightedCellsToInputs(highlightedCells) {
 }
 
 /**
+ * 清除所有选中的矩阵元素
+ */
+function clearSelectedMatrixElements() {
+    // 清除样式
+    const selectedElements = elements.windowDiv.querySelectorAll('.selected-matrix-element');
+    selectedElements.forEach(element => {
+        element.classList.remove('selected-matrix-element');
+    });
+
+    // 清空选中数组
+    state.selectedMatrixElements = [];
+}
+
+// ==================== 事件处理函数 ====================
+/**
+ * 处理输入框内容变化
+ */
+function handleInputChange(event) {
+    adjustInputWidth(event.target);
+}
+
+// ==================== 高级流程函数 ====================
+/**
  * 启用输入框交互
 */
 function enableInputInteraction() {
@@ -134,10 +174,13 @@ function enableInputInteraction() {
 }
 
 /**
- * 处理输入框内容变化
+ * 禁用网格交互
+ * 注：本函数既用于跳转输入元素状态，也用于跳转初等变换状态
  */
-function handleInputChange(event) {
-    adjustInputWidth(event.target);
+function disableGridInteraction() {
+    // 移除鼠标事件监听器
+    elements.windowDiv.removeEventListener('mousedown', handleMouseDown);
+    elements.windowDiv.removeEventListener('mouseleave', handleMouseLeave);
 }
 
 /**
@@ -147,21 +190,6 @@ function hideElementaryTransformationUI() {
     // 移除初等变换相关的DOM元素（根据实际DOM结构调整选择器）
     const transformUI = document.querySelector('.operator-buttons');
     transformUI.classList.add('hidden');
-
     // 移除行列索引事件监听器
     unbindRowColumnIndexEvents();
-}
-
-/**
- * 清除所有选中的矩阵元素
- */
-function clearSelectedMatrixElements() {
-    // 清除样式
-    const selectedElements = elements.windowDiv.querySelectorAll('.selected-matrix-element');
-    selectedElements.forEach(element => {
-        element.classList.remove('selected-matrix-element');
-    });
-
-    // 清空选中数组
-    state.selectedMatrixElements = [];
 }

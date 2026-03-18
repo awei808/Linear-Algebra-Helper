@@ -1,95 +1,20 @@
-/*本文件存储初等变换状态的相关函数，包括函数执行完成后进入初等变换状态的函数
+/*
+本文件存储初等变换状态的相关函数，包括函数执行完成后进入初等变换状态的函数
 */
 
-
+// ==================== 底层工具函数 ====================
 /**
- * 显示初等变换UI
+ * 禁用输入框交互
  */
-function showElementaryTransformationUI() {
-    // 移除hidden类，显示初等变换界面
-    const elementaryTransformationDiv = document.querySelector('.operator-buttons');
-    if (elementaryTransformationDiv) {
-        elementaryTransformationDiv.classList.remove('hidden');
-
-        // 确保初等变换界面也继承body的居中样式
-        elementaryTransformationDiv.style.alignItems = 'center';
-        elementaryTransformationDiv.style.width = '100%';
-        elementaryTransformationDiv.style.maxWidth = '1000px';
-        elementaryTransformationDiv.style.margin = '0 auto';
-    }
-
-    // 为输入框添加行列索引按钮
-    createMatrixDisplayTable();
-
-    // 为行列索引按钮添加事件冒泡绑定（现在有双重保护）
-    bindRowColumnIndexEvents();
-
-    // 重新组织布局，避免元素重叠
-    reorganizeLayoutForElementaryTransformation();
-}
-
-/**
- * 为行列索引按钮绑定事件（事件冒泡方式）
- */
-function bindRowColumnIndexEvents() {
-    // 在最外层添加条件判断：若事件监听器已绑定，则直接返回
-    if (state.isRowColumnIndexEventsBound && state.rowColumnIndexEventListener) {
-        console.log('行列索引事件监听器已绑定，跳过重复绑定');
-        return;
-    }
-
-    // 先移除已存在的事件监听器（安全措施）
-    if (state.rowColumnIndexEventListener) {
-        elements.windowDiv.removeEventListener('click', state.rowColumnIndexEventListener);
-        state.rowColumnIndexEventListener = null;
-    }
-
-    // 为windowDiv添加点击事件监听器，处理行列索引按钮点击
-    const eventListener = function (e) {
-        const target = e.target;
-        // 判断是否点击了行/列标识按钮（ID以button_add_r或button_add_c开头）
-        if (target.id.startsWith('button_add_r') || target.id.startsWith('button_add_c')) {
-            const type = target.id.includes('r') ? 'r' : 'c';
-            const num = target.textContent.replace(type, ''); // 提取数字（如"r1"→"1"）
-
-            // 获取目标输入框和参数输入框
-            const transformTarget = document.getElementById('transform-target');
-            const transformParam = document.getElementById('transform-param');
-
-            if (transformTarget && transformParam) {
-                if (transformTarget.value.trim() === '') {
-                    // 如果目标框为空，将点击的行列索引添加到目标框
-                    transformTarget.value += type + num;
-                } else {
-                    // 如果目标框不为空，将点击的行列索引添加到参数框
-                    const currentParam = transformParam.value.trim();
-                    const rowColRegex = /[rc]\d+/g;
-                    const hasRowCol = rowColRegex.test(currentParam);
-
-                    if (hasRowCol) {
-                        // 如果已经包含行列索引，则替换最后一个行列索引
-                        const lastRowColMatch = currentParam.match(rowColRegex);
-                        if (lastRowColMatch && lastRowColMatch.length > 0) {
-                            const lastRowCol = lastRowColMatch[lastRowColMatch.length - 1];
-                            const lastIndex = currentParam.lastIndexOf(lastRowCol);
-                            transformParam.value = currentParam.substring(0, lastIndex) + type + num + currentParam.substring(lastIndex + lastRowCol.length);
-                        } else {
-                            transformParam.value += type + num;
-                        }
-                    } else {
-                        // 如果没有行列索引，直接添加
-                        transformParam.value += type + num;
-                    }
-                }
-            }
-        }
-    };
-
-    // 绑定事件监听器并保存引用
-    elements.windowDiv.addEventListener('click', eventListener);
-    state.rowColumnIndexEventListener = eventListener;
-    state.isRowColumnIndexEventsBound = true; // 标记为已绑定
-    console.log('行列索引事件监听器已绑定');
+function disableInputInteraction() {
+    // 禁用所有输入框
+    const inputs = Array.from(elements.windowDiv.querySelectorAll('.grid-cell-input'));
+    inputs.forEach(input => {
+        input.disabled = true;
+        input.style.backgroundColor = '#f0f0f0';
+        input.style.cursor = 'not-allowed';
+        console.log('禁用成功');
+    });
 }
 
 /**
@@ -104,9 +29,10 @@ function unbindRowColumnIndexEvents() {
     }
 }
 
+// ==================== 中层操作函数 ====================
 /**
- * 重新组织布局以适应初等变换状态
- */
+* 重新组织布局以适应初等变换状态
+*/
 function reorganizeLayoutForElementaryTransformation() {
     // 获取所有需要操作的元素
     const operatorButtons = document.querySelectorAll('.operator-buttons');
@@ -241,15 +167,91 @@ function createMatrixDisplayTable() {
 }
 
 /**
- * 禁用输入框交互
+ * 为行列索引按钮绑定事件（事件冒泡方式）
  */
-function disableInputInteraction() {
-    // 禁用所有输入框
-    const inputs = Array.from(elements.windowDiv.querySelectorAll('.grid-cell-input'));
-    inputs.forEach(input => {
-        input.disabled = true;
-        input.style.backgroundColor = '#f0f0f0';
-        input.style.cursor = 'not-allowed';
-        console.log('禁用成功');
-    });
+function bindRowColumnIndexEvents() {
+    // 在最外层添加条件判断：若事件监听器已绑定，则直接返回
+    if (state.isRowColumnIndexEventsBound && state.rowColumnIndexEventListener) {
+        console.log('行列索引事件监听器已绑定，跳过重复绑定');
+        return;
+    }
+
+    // 先移除已存在的事件监听器（安全措施）
+    if (state.rowColumnIndexEventListener) {
+        elements.windowDiv.removeEventListener('click', state.rowColumnIndexEventListener);
+        state.rowColumnIndexEventListener = null;
+    }
+
+    // 为windowDiv添加点击事件监听器，处理行列索引按钮点击
+    const eventListener = function (e) {
+        const target = e.target;
+        // 判断是否点击了行/列标识按钮（ID以button_add_r或button_add_c开头）
+        if (target.id.startsWith('button_add_r') || target.id.startsWith('button_add_c')) {
+            const type = target.id.includes('r') ? 'r' : 'c';
+            const num = target.textContent.replace(type, ''); // 提取数字（如"r1"→"1"）
+
+            // 获取目标输入框和参数输入框
+            const transformTarget = document.getElementById('transform-target');
+            const transformParam = document.getElementById('transform-param');
+
+            if (transformTarget && transformParam) {
+                if (transformTarget.value.trim() === '') {
+                    // 如果目标框为空，将点击的行列索引添加到目标框
+                    transformTarget.value += type + num;
+                } else {
+                    // 如果目标框不为空，将点击的行列索引添加到参数框
+                    const currentParam = transformParam.value.trim();
+                    const rowColRegex = /[rc]\d+/g;
+                    const hasRowCol = rowColRegex.test(currentParam);
+
+                    if (hasRowCol) {
+                        // 如果已经包含行列索引，则替换最后一个行列索引
+                        const lastRowColMatch = currentParam.match(rowColRegex);
+                        if (lastRowColMatch && lastRowColMatch.length > 0) {
+                            const lastRowCol = lastRowColMatch[lastRowColMatch.length - 1];
+                            const lastIndex = currentParam.lastIndexOf(lastRowCol);
+                            transformParam.value = currentParam.substring(0, lastIndex) + type + num + currentParam.substring(lastIndex + lastRowCol.length);
+                        } else {
+                            transformParam.value += type + num;
+                        }
+                    } else {
+                        // 如果没有行列索引，直接添加
+                        transformParam.value += type + num;
+                    }
+                }
+            }
+        }
+    };
+
+    // 绑定事件监听器并保存引用
+    elements.windowDiv.addEventListener('click', eventListener);
+    state.rowColumnIndexEventListener = eventListener;
+    state.isRowColumnIndexEventsBound = true; // 标记为已绑定
+}
+
+// ==================== 高级流程函数 ====================
+/**
+ * 显示初等变换UI
+ */
+function showElementaryTransformationUI() {
+    // 移除hidden类，显示初等变换界面
+    const elementaryTransformationDiv = document.querySelector('.operator-buttons');
+    if (elementaryTransformationDiv) {
+        elementaryTransformationDiv.classList.remove('hidden');
+
+        // 确保初等变换界面也继承body的居中样式
+        elementaryTransformationDiv.style.alignItems = 'center';
+        elementaryTransformationDiv.style.width = '100%';
+        elementaryTransformationDiv.style.maxWidth = '1000px';
+        elementaryTransformationDiv.style.margin = '0 auto';
+    }
+
+    // 为输入框添加行列索引按钮
+    createMatrixDisplayTable();
+
+    // 为行列索引按钮添加事件冒泡绑定（现在有双重保护）
+    bindRowColumnIndexEvents();
+
+    // 重新组织布局，避免元素重叠
+    reorganizeLayoutForElementaryTransformation();
 }

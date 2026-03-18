@@ -1,144 +1,25 @@
-/*本文件存储维度选择状态相关的函数，包括函数执行完成后进入维度选择状态的函数
+/*
+本文件存储维度选择状态相关的函数，包括函数执行完成后进入维度选择状态的函数
 */
+
+// ==================== 底层工具函数 ====================
 /**
- * 处理矩阵维度选择
+ * 清除所有高亮
  */
-function handleDimensionSelection() {
-    // 获取所有高亮的单元格
-    const highlightedCells = Array.from(elements.windowDiv.querySelectorAll('.grid-cell.highlighted'));
-    if (highlightedCells.length === 0) {
-        // 使用新版弹窗函数
-        showWarning('请先选择矩阵维度（点击并拖动网格）');
-        state.previousStates.pop(); // 移除无效的状态保存
-        return false; // 返回处理失败
-    }
-    // 计算矩阵的实际维度
-    const matrixDimensions = calculateMatrixDimensions(highlightedCells);
-    // 删除非高亮的网格
-    removeNonHighlightedCells();
-    // 将高亮单元格转换为输入框
-    convertHighlightedCellsToInputs(highlightedCells);
-    // 调整窗口大小以适应新的矩阵
-    resizeWindow(matrixDimensions);
-    // 更新坐标显示为实际矩阵维度
-    updateCoordinatesDisplay(`${matrixDimensions.rows}×${matrixDimensions.cols}`);
-    // 初始化矩阵数据
-    state.matrixData = {
-        rows: matrixDimensions.rows,
-        cols: matrixDimensions.cols,
-        elements: Array.from({ length: matrixDimensions.rows }, () =>
-            Array.from({ length: matrixDimensions.cols }, () => '')
-        )
-    };
-    return true; // 返回处理成功
-}
-
-/**
- * 处理鼠标按下事件
- */
-function handleMouseDown(e) {
-    if (e.target.classList.contains('grid-cell')) {
-        updateGrid(e.target);
-    }
-}
-
-/**
- * 处理鼠标离开网格区域
- */
-function handleMouseLeave() {
-    elements.coordinatesDiv.textContent = `矩阵维度: ${state.lastSelectedDimension}`;
-}
-
-/**
- * 更新网格状态
- */
-function updateGrid(cell) {
-    const { x, y } = getCellCoordinates(cell);
-    const dimensionText = `${y + 1}×${x + 1}`;
-
-    // 更新显示
-    updateCoordinatesDisplay(dimensionText);
-    state.lastSelectedDimension = dimensionText;
-
-    // 更新高亮状态
-    updateHighlightedCells(x, y);
-}
-
-/**
- * 恢复原始网格
- */
-function restoreOriginalGrid() {
-    // 清空窗口内容
-    elements.windowDiv.innerHTML = '';
-
-    // 重置窗口样式
-    elements.windowDiv.classList.remove('dynamic');
-    elements.windowDiv.style.width = '400px';
-    elements.windowDiv.style.height = '400px';
-    elements.windowDiv.style.gridTemplateColumns = 'repeat(10, 40px)';
-    elements.windowDiv.style.gridTemplateRows = 'repeat(10, 40px)';
-    elements.windowDiv.style.display = 'grid'; // 恢复网格布局
-
-    // 重新创建网格
-    createGrid();
-
-    // 清空输入框状态
-    state.gridInputs = [];
-
-    // 重置坐标显示
-    updateCoordinatesDisplay('0×0');
-    state.lastSelectedDimension = '0×0';
-}
-
-/**
- * 启用网格交互（用于撤销功能）
- */
-function enableGridInteraction() {
-    // 重新添加事件监听器
-    elements.windowDiv.addEventListener('mousedown', handleMouseDown);
-    elements.windowDiv.addEventListener('mouseleave', handleMouseLeave);
-}
-
-/**
- * 禁用网格交互
- */
-function disableGridInteraction() {
-    // 移除鼠标事件监听器
-    elements.windowDiv.removeEventListener('mousedown', handleMouseDown);
-    elements.windowDiv.removeEventListener('mouseleave', handleMouseLeave);
-}
-
-/**
- * 删除非高亮的单元格
- */
-function removeNonHighlightedCells() {
-    const allCells = Array.from(elements.windowDiv.querySelectorAll('.grid-cell'));
-    const nonHighlightedCells = allCells.filter(cell => !cell.classList.contains('highlighted'));
-
-    nonHighlightedCells.forEach(cell => {
-        cell.remove();
+function clearAllHighlights() {
+    state.gridCells.forEach(cell => {
+        cell.classList.remove('highlighted');
     });
-
-    // 更新网格单元格数组
-    state.gridCells = Array.from(elements.windowDiv.querySelectorAll('.grid-cell'));
 }
 
 /**
- * 更新高亮单元格
+ * 获取单元格坐标
  */
-function updateHighlightedCells(targetX, targetY) {
-    // 清除所有高亮
-    clearAllHighlights();
-
-    // 高亮从(0,0)到当前网格的所有格子
-    highlightCellsInRange(targetX, targetY);
-}
-
-/**
- * 更新坐标显示
- */
-function updateCoordinatesDisplay(dimensionText) {
-    elements.coordinatesDiv.textContent = `矩阵维度: ${dimensionText}`;
+function getCellCoordinates(cell) {
+    return {
+        x: parseInt(cell.dataset.x),
+        y: parseInt(cell.dataset.y)
+    };
 }
 
 /**
@@ -177,6 +58,18 @@ function highlightCellsInRange(targetX, targetY) {
     }
 }
 
+// ==================== 中层操作函数 ====================
+/**
+ * 更新高亮单元格
+ */
+function updateHighlightedCells(targetX, targetY) {
+    // 清除所有高亮
+    clearAllHighlights();
+
+    // 高亮从(0,0)到当前网格的所有格子
+    highlightCellsInRange(targetX, targetY);
+}
+
 /**
  * 创建网格
  */
@@ -197,25 +90,11 @@ function createGrid() {
     elements.windowDiv.appendChild(fragment);
 }
 
-
-
 /**
- * 清除所有高亮
+ * 更新坐标显示
  */
-function clearAllHighlights() {
-    state.gridCells.forEach(cell => {
-        cell.classList.remove('highlighted');
-    });
-}
-
-/**
- * 获取单元格坐标
- */
-function getCellCoordinates(cell) {
-    return {
-        x: parseInt(cell.dataset.x),
-        y: parseInt(cell.dataset.y)
-    };
+function updateCoordinatesDisplay(dimensionText) {
+    elements.coordinatesDiv.textContent = `矩阵维度: ${dimensionText}`;
 }
 
 /**
@@ -262,4 +141,106 @@ function resizeWindow(dimensions) {
     // 更新网格布局
     elements.windowDiv.style.gridTemplateColumns = `repeat(${dimensions.cols}, ${inputWidth}px)`;
     elements.windowDiv.style.gridTemplateRows = `repeat(${dimensions.rows}, ${inputHeight}px)`;
+}
+
+// ==================== 事件处理函数 ====================
+/**
+ * 处理鼠标按下事件
+ */
+function handleMouseDown(e) {
+    if (e.target.classList.contains('grid-cell')) {
+        updateGrid(e.target);
+    }
+}
+
+/**
+ * 处理鼠标离开网格区域
+ */
+function handleMouseLeave() {
+    elements.coordinatesDiv.textContent = `矩阵维度: ${state.lastSelectedDimension}`;
+}
+
+/**
+ * 更新网格状态
+ */
+function updateGrid(cell) {
+    const { x, y } = getCellCoordinates(cell);
+    const dimensionText = `${y + 1}×${x + 1}`;
+
+    // 更新显示
+    updateCoordinatesDisplay(dimensionText);
+    state.lastSelectedDimension = dimensionText;
+
+    // 更新高亮状态
+    updateHighlightedCells(x, y);
+}
+
+
+// ==================== 高级流程函数 ====================
+/**
+ * 启用网格交互（用于撤销功能）
+ */
+function enableGridInteraction() {
+    // 重新添加事件监听器
+    elements.windowDiv.addEventListener('mousedown', handleMouseDown);
+    elements.windowDiv.addEventListener('mouseleave', handleMouseLeave);
+}
+
+/**
+ * 恢复原始网格
+ */
+function restoreOriginalGrid() {
+    // 清空窗口内容
+    elements.windowDiv.innerHTML = '';
+
+    // 重置窗口样式
+    elements.windowDiv.classList.remove('dynamic');
+    elements.windowDiv.style.width = '400px';
+    elements.windowDiv.style.height = '400px';
+    elements.windowDiv.style.gridTemplateColumns = 'repeat(10, 40px)';
+    elements.windowDiv.style.gridTemplateRows = 'repeat(10, 40px)';
+    elements.windowDiv.style.display = 'grid'; // 恢复网格布局
+
+    // 重新创建网格
+    createGrid();
+
+    // 清空输入框状态
+    state.gridInputs = [];
+
+    // 重置坐标显示
+    updateCoordinatesDisplay('0×0');
+    state.lastSelectedDimension = '0×0';
+}
+
+/**
+ * 处理矩阵维度选择
+ */
+function handleDimensionSelection() {
+    // 获取所有高亮的单元格
+    const highlightedCells = Array.from(elements.windowDiv.querySelectorAll('.grid-cell.highlighted'));
+    if (highlightedCells.length === 0) {
+        // 使用新版弹窗函数
+        showWarning('请先选择矩阵维度（点击并拖动网格）');
+        state.previousStates.pop(); // 移除无效的状态保存
+        return false; // 返回处理失败
+    }
+    // 计算矩阵的实际维度
+    const matrixDimensions = calculateMatrixDimensions(highlightedCells);
+    // 删除非高亮的网格
+    removeNonHighlightedCells();
+    // 将高亮单元格转换为输入框
+    convertHighlightedCellsToInputs(highlightedCells);
+    // 调整窗口大小以适应新的矩阵
+    resizeWindow(matrixDimensions);
+    // 更新坐标显示为实际矩阵维度
+    updateCoordinatesDisplay(`${matrixDimensions.rows}×${matrixDimensions.cols}`);
+    // 初始化矩阵数据
+    state.matrixData = {
+        rows: matrixDimensions.rows,
+        cols: matrixDimensions.cols,
+        elements: Array.from({ length: matrixDimensions.rows }, () =>
+            Array.from({ length: matrixDimensions.cols }, () => '')
+        )
+    };
+    return true; // 返回处理成功
 }
