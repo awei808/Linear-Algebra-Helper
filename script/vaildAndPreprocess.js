@@ -3,23 +3,30 @@
 */
 // ==================== 公共常量定义 ====================
 // 正则表达式常量
-const PATTERNS = {
-    DECIMAL: /^-?\d+\.\d+/,           // 小数格式（支持带未知数）
-    DECIMAL_GLOBAL: /-?\d+\.\d+/g,     // 小数格式（全局匹配）
-    FRACTION: /^-?\d+\/\d+$/,           // 分数格式
-    COMPLEX_FRACTION: /^-?(\d+[a-dm-nxyzλ]+)\/(-?\d+[a-dm-nxyzλ]+)$/, // 复杂分数（含未知数，支持多个未知数组合）
-    PURE_NUMBER: /^-?\d+$/,             // 纯数字
-    LETTERS: /[a-zA-Zλ]/g,             // 字母匹配
-    NUMERIC_PART: /-?\d+/               // 数字部分
-};
-
 // 允许的未知数常量
-const ALLOWED_VARIABLES = CONFIG.TRANSFORMATION_CONFIG.ALLOWED_VARIABLES;
+const ALLOWED_VARIABLES = CONFIG.TRANSFORMATION_CONFIG.VALUE_PROCESSING.ALLOWED_VARIABLES;
+const ALL_LETTERS = `[${ALLOWED_VARIABLES.join('')}]`;
+const PATTERNS = {
+    DECIMAL: /-?\d+\.\d+/,                     // 小数格式（支持未知数）
+    FRACTION: /^-?\d+\/\d+$/,               // 分数格式
+    ALL_LETTERS: new RegExp(`[${ALLOWED_VARIABLES.join('')}]`),
+    COMPLEX_FRACTION: new RegExp(`^-?(\\d+${ALL_LETTERS}+)\\/(-?\\d+${ALL_LETTERS}+)$`), // 复杂分数（含未知数，支持多个未知数组合）
+    PURE_NUMBER: /^-?\d+$/,                 // 纯数字
+    PURE_NUMBER_OR_DECIMAL: /^-?\d+(\.\d+)?$/, // 纯数字或小数
+    LETTERS: new RegExp(`[${ALLOWED_VARIABLES.join('')}]`, 'g'), // 字母匹配
+    NUMERIC_PART: /-?\d+/,                  // 数字部分
+    // 新增：表达式验证相关模式
+    VALID_CHARS: new RegExp(`^[0-9${ALL_LETTERS}+\-\*\.\/\(\)\^]+$`), // 有效字符集
+    ENDS_WITH_OPERATOR: /[+\-]$/,           // 以运算符结尾
+    CONSECUTIVE_OPERATORS: /[+\-]{2,}/,     // 连续运算符
+    CONSECUTIVE_SLASHES: /\/{2,}/,          // 连续斜杠
+    STARTS_OR_ENDS_WITH_SLASH: /^\/|\/$/,   // 以斜杠开头或结尾
+};
 
 // ==================== 公共函数定义 ====================
 
 /**
- * 小数转分数处理 - 公共函数
+ * 小数转分数处理 
  * @param {string} decimal - 小数字符串（支持带未知数，如1.2x）
  * @returns {Object} {success: boolean, formattedValue: string, error: string}
  */
@@ -30,7 +37,7 @@ function convertDecimalToFraction(decimal) {
 
         if (variableMatch) {
             // 处理带未知数的小数（如1.2x）
-            const decimalPart = decimal.match(PATTERNS.DECIMAL_GLOBAL)?.[0];
+            const decimalPart = decimal.match(PATTERNS.DECIMAL)?.[0];
             const variablePart = decimal.replace(decimalPart, '');
 
             if (decimalPart) {
@@ -64,7 +71,7 @@ function convertDecimalToFraction(decimal) {
 }
 
 /**
- * 分数化简处理 - 公共函数
+ * 分数化简处理 
  * @param {string} fractionStr - 分数字符串
  * @returns {Object} {success: boolean, formattedValue: string, error: string}
  */
@@ -83,12 +90,14 @@ function simplifyFraction(fractionStr) {
         return { success: false, formattedValue: fractionStr, error: `分数化简失败：${fractionStr}` };
     }
 }
+
+//未使用，功能与simplifyFraction相似
 /**
- * 复杂分数化简处理（包含未知数）- 公共函数
+ * 复杂分数化简处理（包含未知数）
  * @param {string} complexFraction - 包含未知数的分数字符串
  * @returns {string} 化简后的分数字符串
  */
-function simplifyComplexFraction(complexFraction) {
+/*function simplifyComplexFraction(complexFraction) {
     try {
         const fractionMatch = complexFraction.match(PATTERNS.COMPLEX_FRACTION);
         if (!fractionMatch) return complexFraction;
@@ -139,10 +148,10 @@ function simplifyComplexFraction(complexFraction) {
     }
 
     return complexFraction;
-}
+}*/
 
 /**
- * 数值格式化函数 - 公共函数
+ * 只负责格式化
  * 处理小数转分数、分数化简、空值补零、小数补零、**到^转换等预处理操作
  * @param {string} value - 输入的数值字符串
  * @returns {Object} {success: boolean, formattedValue: string, error: string}
@@ -155,7 +164,7 @@ function formatMatrixValue(value) {
     value = value.trim();
     // 小数补零
     const leadingDotPattern = /^\.\d+$/;
-    if (leadingDotPattern.test(value)) {
+    if (CONFIG.TRANSFORMATION_CONFIG.VALUE_PROCESSING.LEADING_ZERO_FOR_DECIMAL && leadingDotPattern.test(value)) {
         value = '0' + value;
     }
     // 将**替换为^
@@ -173,16 +182,15 @@ function formatMatrixValue(value) {
     return { success: true, formattedValue: value, error: '' };
 }
 
-
 /**
- * 检查字符串是否为有效矩阵元素 - 公共函数
- * 重构版本：按照清晰步骤进行验证
+ * 只负责校验
+ * 检查字符串是否为有效矩阵元素
  * 支持：数字、分数、小数、未知数、包含未知数的多项式
  * 未知数只能是abcdmnxyz和λ中的单个字符
  * @param {string} str - 要检查的字符串
  * @returns {Object} {isValid: boolean, message: string}
  */
-function isValidMatrixElement(str) {
+function ValidMatrixElement(str) {
     // 步骤1：空字符串视为0
     if (str === '') {
         return { isValid: true, message: '' };
@@ -195,14 +203,13 @@ function isValidMatrixElement(str) {
 
     // 步骤3：字符串形式检测未知数是否都是允许的
     // 匹配所有可能的字母字符（包括非法未知数）
-    const allLettersPattern = /[a-zA-Zλ]/g;
-    const lettersInStr = str.match(allLettersPattern);
+    const lettersInStr = str.match(PATTERNS.ALL_LETTERS);
     if (lettersInStr) {
         const invalidLetters = lettersInStr.filter(v => !ALLOWED_VARIABLES.includes(v));
         if (invalidLetters.length > 0) {
             return {
                 isValid: false,
-                message: `未知数"${invalidVariables.join(', ')}"不在允许范围内（允许的未知数：${ALLOWED_VARIABLES.join(', ')}）`
+                message: `未知数"${invalidLetters.join(', ')}"不在允许范围内（允许的未知数：${ALLOWED_VARIABLES.join(', ')}）`
             };
         }
     }
@@ -269,13 +276,9 @@ function isValidMatrixElement(str) {
     }
 }
 
-
-
-
-
 /**
- * 验证并格式化矩阵元素 - 公共函数
- * 结合formatMatrixValue和isValidMatrixElement的功能
+ * 验证并格式化矩阵元素 
+ * 结合formatMatrixValue和ValidMatrixElement的功能
  * @param {string} value - 输入的数值字符串
  * @param {boolean} validate - 是否进行有效性校验
  * @returns {Object} {success: boolean, formattedValue: string, error: string}
@@ -292,7 +295,7 @@ function validateAndFormatMatrixValue(value, validate = true) {
 
     // 如果需要校验，对格式化后的值进行有效性检查
     if (validate) {
-        const validationResult = isValidMatrixElement(formatResult.formattedValue);
+        const validationResult = ValidMatrixElement(formatResult.formattedValue);
         if (!validationResult.isValid) {
             return {
                 success: false,
@@ -305,6 +308,8 @@ function validateAndFormatMatrixValue(value, validate = true) {
     return formatResult;
 }
 
+
+// ==================== 逻辑处理 =================
 /**
  * 处理数据校验的总入口函数
  */
@@ -460,14 +465,14 @@ function validateAndParseMatrix(input) {
 
         const { rows, cols, elements: rawElements } = matrixData;
 
-        // 步骤4: 使用增强的格式化函数统一处理所有元素（包含格式化和校验）
+        // 步骤4: 统一处理所有元素（包含格式化和校验）
         const elements = [];
         for (let i = 0; i < rows; i++) {
             elements[i] = [];
             for (let j = 0; j < cols; j++) {
                 let element = rawElements[i][j].trim();
 
-                // 使用增强的格式化函数一次性完成格式化和校验
+                // 一次性完成格式化和校验
                 const formatResult = validateAndFormatMatrixValue(element, true);
                 if (!formatResult.success) {
                     return {

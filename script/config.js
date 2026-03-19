@@ -47,7 +47,11 @@ const CONFIG = {
 
     // 初等变换配置
     TRANSFORMATION_CONFIG: {
-        ALLOWED_VARIABLES: ['a', 'b', 'c', 'd', 'm', 'n', 'x', 'y', 'z', 'λ'],
+        VALUE_PROCESSING:{
+            ALLOWED_VARIABLES: ['a', 'b', 'c', 'd', 'm', 'n', 'x', 'y', 'z', 'λ'],
+            LEADING_ZERO_FOR_DECIMAL: true,
+        },
+        
         SYMBOLS: ['↔', '+', '−', '×'],
         OPERATORS: {
             SWAP: '↔',
