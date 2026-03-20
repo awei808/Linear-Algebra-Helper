@@ -11,7 +11,6 @@ function confirmForceExpand() {
 
     const elementCount = state.selectedMatrixElements;
     const confirmText = `确定对${elementCount}号矩阵元素进行展开多项式吗？`;
-
     popupCentreManager.showConfirmPopup(
         confirmText,
         handleExpand,
@@ -24,9 +23,12 @@ function confirmForceExpand() {
  * 显示确认弹窗，确认后执行因式分解
  */
 function confirmForceFactorize() {
+    if (state.selectedMatrixElements.length === 0) {
+        showWarning('请先选择要因式分解的矩阵元素');
+        return;
+    }
     const elementCount = state.selectedMatrixElements;
     const confirmText = `确定对${elementCount}号矩阵元素进行因式分解吗？`;
-
     popupCentreManager.showConfirmPopup(
         confirmText,
         handleFactorize,
@@ -34,18 +36,48 @@ function confirmForceFactorize() {
     );
 }
 
-
-
 /**
- * 展开多项式
- * 将多项式表达式展开为最简形式
+ * 确认替换矩阵元素
+ * 显示确认弹窗，确认后执行替换
  */
-function handleExpand() {
+function confirmReplaceElement() {
     if (state.selectedMatrixElements.length === 0) {
-        showWarning('请先选择要展开的矩阵元素');
+        showWarning('请先选择要替换的矩阵元素');
+        return;
+    }
+    if (state.selectedMatrixElements.length !== 1) {
+        showWarning('只能替换一个矩阵元素');
         return;
     }
 
+    const elementCount = state.selectedMatrixElements;
+    const confirmText = `将${elementCount}号矩阵元素替换为：`;
+    popupCentreManager.showConfirmPopup(
+        confirmText,
+        handleReplaceElement,
+        null,
+        'input'
+    );
+}
+
+/**
+ * 当替换值与原值展开后不同，调用该函数进行确认
+ */
+function confirmReplaceElementDifferent() {
+    const elementCount = state.selectedMatrixElements;
+    const confirmText = `替换值与原值展开后的结果不同，确定要替换${elementCount}号矩阵元素吗？`;
+    popupCentreManager.showConfirmPopup(
+        confirmText,
+        replaceElement,
+        null,
+    );
+}
+
+
+/**
+ * 将多项式表达式展开为最简形式
+ */
+function handleExpand() {
     let hasChanges = false;
 
     const cols = state.matrixData.cols;
@@ -86,15 +118,8 @@ function handleExpand() {
  * 一元多项式因式分解
  */
 function handleFactorize() {
-    if (state.selectedMatrixElements.length === 0) {
-        showWarning('请先选择要因式分解的矩阵元素');
-        return;
-    }
-
     let hasChanges = false;
-
     const cols = state.matrixData.cols;
-
     state.selectedMatrixElements.forEach(index => {
         // 从索引计算行列坐标：index = row * cols + col + 1
         // 所以：row = Math.floor((index - 1) / cols), col = (index - 1) % cols
@@ -122,4 +147,58 @@ function handleFactorize() {
     } else {
         showWarning(`无法因式分解或分解后无变化`);
     }
+}
+
+/**
+ * 处理替换矩阵元素的入口函数
+ */
+function handleReplaceElement() {
+    const inputValue = document.getElementById('popup-input').value;
+    if (!inputValue) {
+        showWarning('请输入替换值');
+        return;
+    }
+
+    // 预处理和验证输入值是否有效
+    const validationResult = validateAndFormatMatrixValue(inputValue);
+    console.log(validationResult);
+    if (!validationResult.success) {
+        showError(`输入值无效: ${validationResult.error}`);
+        return;
+    }
+
+    // state.selectedMatrixElements只会含有一个索引
+    const index = state.selectedMatrixElements[0];
+    const cols = state.matrixData.cols;
+    const row = Math.floor((index - 1) / cols);
+    const col = (index - 1) % cols;
+
+    const originalValue = state.matrixData.elements[row][col];
+
+    try {
+        // 如果新值与旧值展开后相同，进行替换
+        if (math.rationalize(validationResult.formattedValue).toString() === math.rationalize(originalValue).toString()) {
+            replaceElement(validationResult.formattedValue, row, col, originalValue);
+            showSuccess(`替换成功`);
+        } else {
+            console.log(`尝试替换: ${originalValue} -> ${validationResult.formattedValue}`);
+            confirmReplaceElementDifferent();
+        }
+
+    } catch (error) {
+        console.error(`替换失败: ${originalValue} -> ${validationResult.formattedValue}`, error);
+        showError('替换失败，请检查输入值格式');
+    }
+}
+/**
+ * 替换矩阵元素
+ */
+function replaceElement(inputValue, row, col, originalValue) {
+    // 直接替换为输入的值
+    state.matrixData.elements[row][col] = inputValue;
+    console.log(`矩阵元素替换: [${row},${col}] ${originalValue} -> ${inputValue}`);
+    createMatrixDisplayTable();
+
+    // 清除选中状态
+    clearSelectedMatrixElements();
 }

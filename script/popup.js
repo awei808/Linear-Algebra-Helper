@@ -5,7 +5,6 @@ class PopupManager {
     constructor() {
         // 使用elements对象中的popupBox引用
         this.popupBox = elements ? elements.popupBox : null;
-        // 从配置中读取弹窗配置
         this.maxPopups = CONFIG.POPUP_CONFIG.MAX_POPUPS;
         this.popupTimeout = CONFIG.POPUP_CONFIG.TIMEOUT;
         this.animationDuration = CONFIG.POPUP_CONFIG.ANIMATION.DURATION;
@@ -218,10 +217,6 @@ function clearAllPopups() {
     popupManager.clearAllPopups();
 }
 
-// 兼容旧版本的clearAllErrors函数
-function clearAllErrors() {
-    clearAllPopups();
-}
 
 
 /**
@@ -240,8 +235,9 @@ class PopupCentreManager {
      * @param {string} message - 信息文本
      * @param {Function} confirmCallback - 确认按钮触发的回调函数
      * @param {Function} cancelCallback - 取消按钮触发的回调函数（默认为空）
+     * @param {string} attachment - 附加内容（如输入框）
      */
-    showConfirmPopup(message, confirmCallback, cancelCallback = null) {
+    showConfirmPopup(message, confirmCallback, cancelCallback = null, attachment = null) {
         // 确保容器存在（参考PopupManager的设计）
         if (!this.container) {
             this.container = document.getElementById('popupCentreContainer');
@@ -257,7 +253,7 @@ class PopupCentreManager {
         this.closePopup();
 
         // 创建弹窗元素
-        const popup = this.createConfirmPopup(message, confirmCallback, cancelCallback);
+        const popup = this.createConfirmPopup(message, confirmCallback, cancelCallback, attachment);
 
         // 添加到容器
         this.container.appendChild(popup);
@@ -273,13 +269,25 @@ class PopupCentreManager {
     /**
      * 创建确认弹窗元素
      */
-    createConfirmPopup(message, confirmCallback, cancelCallback) {
+    createConfirmPopup(message, confirmCallback, cancelCallback, attachment = null) {
         const popup = document.createElement('div');
         popup.className = 'popup-centre';
-
+        
+        // 根据attachment参数决定是否添加输入框
+        let inputHtml = '';
+        if (attachment === 'input') {
+            inputHtml = `
+                <div class="popup-centre-input">
+                    <input type="text" id="popup-input" placeholder="输入更改后的元素" 
+                           style="margin-left: 10px; margin-right: 10px; padding: 8px 12px; border: 1px solid rgb(204, 204, 204); border-radius: 4px; width: 200px;">
+                </div>
+            `;
+        }
+        
         popup.innerHTML = `
             <div class="popup-centre-content">
                 <div class="popup-centre-message">${this.escapeHtml(message)}</div>
+                ${inputHtml}
                 <div class="popup-centre-buttons">
                     <button class="popup-centre-btn cancel">取消</button>
                     <button class="popup-centre-btn confirm">确认</button>
@@ -300,13 +308,21 @@ class PopupCentreManager {
 
         confirmBtn.addEventListener('click', () => {
             if (confirmCallback) {
-                confirmCallback();
+                // 如果attachment为input，将输入框的值作为参数传递给回调函数
+                if (attachment === 'input') {
+                    const inputElement = popup.querySelector('#popup-input');
+                    const inputValue = inputElement ? inputElement.value : '';
+                    confirmCallback(inputValue);
+                } else {
+                    confirmCallback();
+                }
             }
             this.closePopup();
         });
 
         return popup;
     }
+
 
     /**
      * 关闭弹窗

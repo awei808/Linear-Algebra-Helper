@@ -24,6 +24,7 @@ const elements = {
     ButtonForceSimplify: document.getElementById('ButtonForceSimplify'),
     ButtonForceFactorize: document.getElementById('ButtonForceFactorize'),
     ButtonQuickInput: document.getElementById('ButtonQuickInput'),
+    ButtonReplaceElement: document.getElementById('ButtonReplaceElement'),
 
     // 矩阵数据显示
     matrixDataDisplay: document.getElementById('matrixDataDisplay'),
@@ -91,6 +92,7 @@ function setupEventListeners() {
     // 添加多项式处理功能事件绑定
     elements.ButtonForceSimplify.addEventListener('click', confirmForceExpand);
     elements.ButtonForceFactorize.addEventListener('click', confirmForceFactorize);
+    elements.ButtonReplaceElement.addEventListener('click', confirmReplaceElement);
 
 }
 

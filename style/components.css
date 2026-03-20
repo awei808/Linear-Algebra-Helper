@@ -261,3 +261,21 @@ button#button-reset:hover {
     margin: 0 0 10px 0;
     /* 只设置底部边距 */
 }
+
+/* KaTeX事件穿透- 确保矩阵单元格点击事件正常工作 */
+.katex-display,
+.katex,
+.katex-mathml,
+.katex-html,
+.katex-display *,
+.katex *,
+.katex-mathml *,
+.katex-html * {
+    pointer-events: none;
+}
+
+/* 确保矩阵单元格本身可以响应事件 */
+[data-type="matrix-cell"] {
+    pointer-events: auto;
+    cursor: pointer;
+}

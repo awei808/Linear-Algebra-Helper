@@ -151,7 +151,7 @@ function simplifyFraction(fractionStr) {
 }*/
 
 /**
- * 只负责格式化
+ * 只负责格式化（预处理）
  * 处理小数转分数、分数化简、空值补零、小数补零、**到^转换等预处理操作
  * @param {string} value - 输入的数值字符串
  * @returns {Object} {success: boolean, formattedValue: string, error: string}
@@ -188,17 +188,17 @@ function formatMatrixValue(value) {
  * 支持：数字、分数、小数、未知数、包含未知数的多项式
  * 未知数只能是abcdmnxyz和λ中的单个字符
  * @param {string} str - 要检查的字符串
- * @returns {Object} {isValid: boolean, message: string}
+ * @returns {Object} {success: boolean, formattedValue: string, error: string}
  */
 function ValidMatrixElement(str) {
     // 步骤1：空字符串视为0
     if (str === '') {
-        return { isValid: true, message: '' };
+        return { success: true, formattedValue: str, error: '' };
     }
 
     // 步骤2：纯数字（整数、小数）
     if (/^-?\d+(\.\d+)?$/.test(str)) {
-        return { isValid: true, message: '' };
+        return { success: true, formattedValue: str, error: '' };
     }
 
     // 步骤3：字符串形式检测未知数是否都是允许的
@@ -208,8 +208,9 @@ function ValidMatrixElement(str) {
         const invalidLetters = lettersInStr.filter(v => !ALLOWED_VARIABLES.includes(v));
         if (invalidLetters.length > 0) {
             return {
-                isValid: false,
-                message: `未知数"${invalidLetters.join(', ')}"不在允许范围内（允许的未知数：${ALLOWED_VARIABLES.join(', ')}）`
+                success: false,
+                formattedValue: str,
+                error: `未知数"${invalidLetters.join(', ')}"不在允许范围内（允许的未知数：${ALLOWED_VARIABLES.join(', ')}）`
             };
         }
     }
@@ -220,9 +221,9 @@ function ValidMatrixElement(str) {
     if (fractionMatch) {
         const denominator = fractionMatch[2]; // 分母
         if (denominator === '0') {
-            return { isValid: false, message: '分母不能为0' };
+            return { success: false, formattedValue: str, error: '分母不能为0' };
         }
-        return { isValid: true, message: '' };
+        return { success: true, formattedValue: str, error: '' };
     }
 
     // 步骤5：剩余无法识别的矩阵元素先进行基本格式检查，再交给math.parse处理
@@ -232,22 +233,23 @@ function ValidMatrixElement(str) {
     const validCharsPattern = /^[0-9a-dm-nxyzλ+\-\*\.\/\(\)\^]+$/;
     if (!validCharsPattern.test(cleanedStr)) {
         return {
-            isValid: false,
-            message: '格式错误，只能包含数字、未知数、加减号、乘号、乘方符号(^或**)、小数点、斜杠和括号'
-        };
+                success: false,
+                formattedValue: str,
+                error: '格式错误，只能包含数字、未知数、加减号、乘号、乘方符号(^或**)、小数点、斜杠和括号'
+            };
     }
     // 基本结构检查
     if (/[+\-]$/.test(cleanedStr)) {
-        return { isValid: false, message: '不能以加减号结尾' };
+        return { success: false, formattedValue: str, error: '不能以加减号结尾' };
     }
     if (/[+\-]{2,}/.test(cleanedStr)) {
-        return { isValid: false, message: '不能有连续的加减号' };
+        return { success: false, formattedValue: str, error: '不能有连续的加减号' };
     }
     if (/\/{2,}/.test(cleanedStr)) {
-        return { isValid: false, message: '不能有连续的斜杠' };
+        return { success: false, formattedValue: str, error: '不能有连续的斜杠' };
     }
     if (/^\/|\/$/.test(cleanedStr)) {
-        return { isValid: false, message: '不能以斜杠开头或结尾' };
+        return { success: false, formattedValue: str, error: '不能以斜杠开头或结尾' };
     }
     // 括号匹配检查
     let bracketCount = 0;
@@ -255,23 +257,24 @@ function ValidMatrixElement(str) {
         if (char === '(') bracketCount++;
         if (char === ')') bracketCount--;
         if (bracketCount < 0) {
-            return { isValid: false, message: '括号不匹配，有未闭合的右括号' };
+            return { success: false, formattedValue: str, error: '括号不匹配，有未闭合的右括号' };
         }
     }
     if (bracketCount > 0) {
-        return { isValid: false, message: '括号不匹配，有未闭合的左括号' };
+        return { success: false, formattedValue: str, error: '括号不匹配，有未闭合的左括号' };
     }
     if (/\(\)/.test(cleanedStr)) {
-        return { isValid: false, message: '括号内不能为空' };
+        return { success: false, formattedValue: str, error: '括号内不能为空' };
     }
     // 使用math.js进行最终验证
     try {
         math.parse(cleanedStr);
-        return { isValid: true, message: '' };
+        return { success: true, formattedValue: str, error: '' };
     } catch (error) {
         return {
-            isValid: false,
-            message: `表达式格式错误：${error.message}`
+            success: false,
+            formattedValue: str,
+            error: `表达式格式错误：${error.message}`
         };
     }
 }
@@ -296,11 +299,11 @@ function validateAndFormatMatrixValue(value, validate = true) {
     // 如果需要校验，对格式化后的值进行有效性检查
     if (validate) {
         const validationResult = ValidMatrixElement(formatResult.formattedValue);
-        if (!validationResult.isValid) {
+        if (!validationResult.success) {
             return {
                 success: false,
                 formattedValue: formatResult.formattedValue,
-                error: validationResult.message
+                error: validationResult.error
             };
         }
     }
