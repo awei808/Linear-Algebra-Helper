@@ -175,7 +175,6 @@ function showPopup(message, type = 'error') {
     popupManager.showPopup(message, type);
 }
 
-
 /**
  * 显示错误消息
  * @param {string} message - 错误消息
@@ -186,6 +185,7 @@ function showError(message) {
     } else {
         alert(message);
     }
+    console.error(message);
 }
 
 /**
@@ -198,6 +198,7 @@ function showSuccess(message) {
     } else {
         alert(message);
     }
+    console.log(message);
 }
 
 /**
@@ -210,6 +211,7 @@ function showWarning(message) {
     } else {
         alert(message);
     }
+    console.warn(message);
 }
 
 // 全局弹窗清除函数
@@ -228,6 +230,7 @@ class PopupCentreManager {
         this.container = elements ? elements.popupCentreContainer : null;
         // 存储当前显示的弹窗
         this.currentPopup = null;
+        this.currentPopupId = null;
     }
 
     /**
@@ -250,7 +253,7 @@ class PopupCentreManager {
         }
 
         // 关闭之前的弹窗
-        this.closePopup();
+        this.closePopup(this.currentPopupId);
 
         // 创建弹窗元素
         const popup = this.createConfirmPopup(message, confirmCallback, cancelCallback, attachment);
@@ -259,11 +262,19 @@ class PopupCentreManager {
         this.container.appendChild(popup);
         this.currentPopup = popup;
 
+        // 存储弹窗ID
+        this.currentPopupId = popup.dataset.popupId;
+
         // 显示容器和弹窗
         this.container.classList.add('show');
         setTimeout(() => {
             popup.classList.add('show');
+
         }, 10);
+
+        // 返回弹窗ID，便于外部控制
+        return this.currentPopupId;
+
     }
 
     /**
@@ -272,18 +283,22 @@ class PopupCentreManager {
     createConfirmPopup(message, confirmCallback, cancelCallback, attachment = null) {
         const popup = document.createElement('div');
         popup.className = 'popup-centre';
-        
+
+        // 为弹窗生成唯一ID
+        const popupId = 'popup_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        popup.dataset.popupId = popupId;
+
         // 根据attachment参数决定是否添加输入框
         let inputHtml = '';
         if (attachment === 'input') {
             inputHtml = `
                 <div class="popup-centre-input">
-                    <input type="text" id="popup-input" placeholder="输入更改后的元素" 
+                    <input type="text" id="popup-input-${popupId}" placeholder="输入更改后的元素" 
                            style="margin-left: 10px; margin-right: 10px; padding: 8px 12px; border: 1px solid rgb(204, 204, 204); border-radius: 4px; width: 200px;">
                 </div>
             `;
         }
-        
+
         popup.innerHTML = `
             <div class="popup-centre-content">
                 <div class="popup-centre-message">${this.escapeHtml(message)}</div>
@@ -303,21 +318,21 @@ class PopupCentreManager {
             if (cancelCallback) {
                 cancelCallback();
             }
-            this.closePopup();
+            this.closePopup(popupId);
         });
 
         confirmBtn.addEventListener('click', () => {
             if (confirmCallback) {
                 // 如果attachment为input，将输入框的值作为参数传递给回调函数
                 if (attachment === 'input') {
-                    const inputElement = popup.querySelector('#popup-input');
+                    const inputElement = popup.querySelector(`#popup-input-${popupId}`);
                     const inputValue = inputElement ? inputElement.value : '';
                     confirmCallback(inputValue);
                 } else {
                     confirmCallback();
                 }
             }
-            this.closePopup();
+            this.closePopup(popupId);
         });
 
         return popup;
@@ -327,17 +342,38 @@ class PopupCentreManager {
     /**
      * 关闭弹窗
      */
-    closePopup() {
-        if (this.currentPopup) {
-            this.currentPopup.classList.remove('show');
+    closePopup(popupId = null) {
+        let targetPopup = null;
 
+        // 如果没有指定ID，关闭当前弹窗
+        if (!popupId) {
+            targetPopup = this.currentPopup;
+        } else {
+            // 根据ID查找弹窗
+            targetPopup = this.container.querySelector(`[data-popup-id="${popupId}"]`);
+        }
+
+        if (targetPopup) {
+            // 移除显示类，触发关闭动画
+            targetPopup.classList.remove('show');
+
+            // 300ms后移除DOM元素
             setTimeout(() => {
-                if (this.currentPopup && this.currentPopup.parentNode) {
-                    this.currentPopup.parentNode.removeChild(this.currentPopup);
+                if (targetPopup && targetPopup.parentNode) {
+                    targetPopup.parentNode.removeChild(targetPopup);
                 }
-                this.currentPopup = null;
-                // 隐藏容器
-                this.container.classList.remove('show');
+
+                // 如果关闭的是当前弹窗，清除状态
+                if (popupId === this.currentPopupId || !popupId) {
+                    this.currentPopup = null;
+                    this.currentPopupId = null;
+                }
+
+                // 检查是否还有弹窗存在，如果没有则隐藏容器
+                const remainingPopups = this.container.querySelectorAll('.popup-centre');
+                if (remainingPopups.length === 0) {
+                    this.container.classList.remove('show');
+                }
             }, 300);
         }
     }

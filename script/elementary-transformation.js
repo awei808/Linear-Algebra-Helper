@@ -162,7 +162,7 @@ function createMatrixDisplayTable() {
         elements.windowDiv.style.overflow = 'visible';
         elements.windowDiv.style.display = 'block';
         elements.inputMatrixDiv.style.display = 'block';
-        console.log('表格显示成功');
+        console.log('createMatrixDisplayTable 完成表格显示');
     }, 0);
 }
 
