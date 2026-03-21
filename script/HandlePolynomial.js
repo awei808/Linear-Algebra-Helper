@@ -63,13 +63,14 @@ function confirmReplaceElement() {
 /**
  * 当替换值与原值展开后不同，调用该函数进行确认
  */
-function confirmReplaceElementDifferent() {
+function confirmReplaceElementDifferent(originalValue) {
     const elementCount = state.selectedMatrixElements;
-    const confirmText = `替换值与原值展开后的结果不同，确定要替换${elementCount}号矩阵元素吗？`;
+    const confirmText = `替换值${originalValue}与原值${elementCount}号矩阵元素展开后的结果不同，再次输入以确认替换：`;
     popupCentreManager.showConfirmPopup(
         confirmText,
-        replaceElement,
+        inputValue => replaceElement(inputValue),
         null,
+        'input'
     );
 }
 
@@ -152,8 +153,7 @@ function handleFactorize() {
 /**
  * 处理替换矩阵元素的入口函数
  */
-function handleReplaceElement() {
-    const inputValue = document.getElementById('popup-input').value;
+function handleReplaceElement(inputValue) {
     if (!inputValue) {
         showWarning('请输入替换值');
         return;
@@ -174,15 +174,13 @@ function handleReplaceElement() {
     const col = (index - 1) % cols;
 
     const originalValue = state.matrixData.elements[row][col];
-
+    console.log(`尝试替换: ${originalValue} -> ${validationResult.formattedValue}`);
     try {
         // 如果新值与旧值展开后相同，进行替换
         if (math.rationalize(validationResult.formattedValue).toString() === math.rationalize(originalValue).toString()) {
-            replaceElement(validationResult.formattedValue, row, col, originalValue);
-            showSuccess(`替换成功`);
+            replaceElement(validationResult.formattedValue, row, col);
         } else {
-            console.log(`尝试替换: ${originalValue} -> ${validationResult.formattedValue}`);
-            confirmReplaceElementDifferent();
+            confirmReplaceElementDifferent(validationResult.formattedValue);
         }
 
     } catch (error) {
@@ -190,15 +188,23 @@ function handleReplaceElement() {
         showError('替换失败，请检查输入值格式');
     }
 }
+
 /**
  * 替换矩阵元素
  */
-function replaceElement(inputValue, row, col, originalValue) {
-    // 直接替换为输入的值
+function replaceElement(inputValue, row = -1, col = -1) {
+    if (row == -1 || col == -1) {
+        const index = state.selectedMatrixElements[0];
+        const cols = state.matrixData.cols;
+        row = Math.floor((index - 1) / cols);
+        col = (index - 1) % cols;
+    }
+
     state.matrixData.elements[row][col] = inputValue;
-    console.log(`矩阵元素替换: [${row},${col}] ${originalValue} -> ${inputValue}`);
     createMatrixDisplayTable();
 
     // 清除选中状态
     clearSelectedMatrixElements();
+    showSuccess(`替换成功`);
+    console.log(`替换成功: ${inputValue}`);
 }
