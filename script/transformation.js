@@ -385,7 +385,7 @@ function validateTransformationInputs(targetInput, coefficientInput, paramInput,
  */
 function parseAndSimplifyCoefficient(mathInput) {
     try {
-        // 核心：math.fraction()自动识别整数/小数/分数字符串/数字，自动化简
+        // math.fraction()自动识别整数/小数/分数字符串/数字，自动化简
         const fraction = math.fraction(mathInput);
 
         // 格式化输出：分母为1时返回整数，否则返回分数

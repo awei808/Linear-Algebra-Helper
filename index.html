@@ -48,15 +48,24 @@
 
     <div class="operator-buttons hidden">
         <div class="input-group">
-            <input type="text" id="transform-target" placeholder="目标行/列 (如 r1, c2)" class="t-i-group">
+            <div id="target" class="transform-group">
+                <p>目标行/列：</p>
+                <input type="text" id="transform-target" placeholder="目标行/列 (如 r1, c2)" class="t-i-group">
+            </div>
             <div id="arithmetic-symbols">
                 <button id="button-change">↔</button>
                 <button id="button-add">+</button>
                 <button id="button-sub">−</button>
                 <button id="button-mul">×</button>
             </div>
-            <input type="text" id="transform-coefficient" placeholder="系数，默认为1">
-            <input type="text" id="transform-param" placeholder="参数行/列 (如 r1，c2)" class="t-i-group">
+            <div id="coefficient" class="transform-group">
+                <p>系数：</p>
+                <input type="text" id="transform-coefficient" placeholder="系数，默认为1">
+            </div>
+            <div id="param" class="transform-group">
+                <p>参数行/列：</p>
+                <input type="text" id="transform-param" placeholder="参数行/列 (如 r1，c2)" class="t-i-group">
+            </div>
             <button id="button-translate">执行初等变换</button>
         </div>
     </div>

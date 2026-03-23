@@ -24,7 +24,7 @@ const PATTERNS = {
 };
 
 // ==================== 公共函数定义 ====================
-
+// 注意：math.fraction()无法识别包含未知数的系数，所以这里手搓了两个函数，用于处理带未知数的系数转换
 /**
  * 小数转分数处理 
  * @param {string} decimal - 小数字符串（支持带未知数，如1.2x）
@@ -233,10 +233,10 @@ function ValidMatrixElement(str) {
     const validCharsPattern = /^[0-9a-dm-nxyzλ+\-\*\.\/\(\)\^]+$/;
     if (!validCharsPattern.test(cleanedStr)) {
         return {
-                success: false,
-                formattedValue: str,
-                error: '格式错误，只能包含数字、未知数、加减号、乘号、乘方符号(^或**)、小数点、斜杠和括号'
-            };
+            success: false,
+            formattedValue: str,
+            error: '格式错误，只能包含数字、未知数、加减号、乘号、乘方符号(^或**)、小数点、斜杠和括号'
+        };
     }
     // 基本结构检查
     if (/[+\-]$/.test(cleanedStr)) {
