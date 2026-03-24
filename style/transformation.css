@@ -10,3 +10,37 @@
     color: #666666 !important;
     border: 1px solid #999999 !important;
 }
+
+/* 变换输入组样式 - 背景色 */
+.transform-group {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 5px;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.transform-group:hover {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.transform-group p {
+    margin: 0 5px 0 0;
+    white-space: nowrap;
+}
+
+.transform-group.active {
+    background-color: var(--target-param-active-color);
+}
+
+.transform-group.active .t-i-group {
+    background-color: var(--light-bg);
+    color: var(--dark-text);
+}

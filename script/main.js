@@ -30,6 +30,8 @@ const elements = {
     matrixDataDisplay: document.getElementById('matrixDataDisplay'),
 
     // 初等变换界面
+    target: document.getElementById('target'),
+    param: document.getElementById('param'),
     operatorButtons: document.querySelector('.operator-buttons'),
     transformTarget: document.getElementById('transform-target'),
     transformCoefficient: document.getElementById('transform-coefficient'),
@@ -68,6 +70,19 @@ function setupEventListeners() {
     elements.nextButton.addEventListener('click', Next);
     // 添加录入矩阵按钮点击事件
     elements.buttonInputMatrix.addEventListener('click', startMatrixInput);
+    
+    // 为target和param元素添加点击事件监听器
+    if (elements.target) {
+        elements.target.addEventListener('click', function() {
+            handleTransformGroupClick(this);
+        });
+    }
+    
+    if (elements.param) {
+        elements.param.addEventListener('click', function() {
+            handleTransformGroupClick(this);
+        });
+    }
 
     // 添加更多按钮点击事件
     if (elements.moreButton && elements.moreDropdown) {

@@ -13,6 +13,9 @@ const state = {
     isRowColumnIndexEventsBound: false,// 新增：标记行列索引事件是否已绑定
     selectedMatrixElements: [], // 存储用户选中的矩阵元素索引
     quickInputAdded : false,
+    transformTarget: null,// 初等变换目标行/列
+    transformCoefficient: null,// 初等变换系数
+    transformParam: null,// 初等变换参数行/列
 };
 
 // ==================== 状态机核心函数 ====================
