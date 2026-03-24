@@ -6,6 +6,22 @@ let symbolStatus = {
 };
 
 /**
+ * 重置选择的状态
+ * 清空已选择的目标、系数和参数值
+ */
+function resetSelectionState() {
+    state.transformTarget = null;
+    state.transformCoefficient = null;
+    state.transformParam = null;
+
+    // 重置UI显示
+    const transformTargetDiv = document.getElementById('transform-target');
+    const transformParamDiv = document.getElementById('transform-param');
+    if (transformTargetDiv) transformTargetDiv.textContent = '待定';
+    if (transformParamDiv) transformParamDiv.textContent = '待定';
+}
+
+/**
  * 设置活动符号和按钮样式
  * 更新符号状态并设置对应按钮的样式
  * @param {string} symbol - 操作符号
@@ -52,6 +68,50 @@ function resetButtonStyles() {
  */
 function getCurrentSymbol() {
     return symbolStatus.currentSymbol;
+}
+
+/**
+ * 处理变换组点击事件
+ * 切换目标组和参数组的激活状态
+ * @param {HTMLElement} element - 点击的变换组元素
+ */
+function handleTransformGroupClick(element) {
+    const isTarget = element === elements.target;
+    
+    // 检查当前元素是否已激活
+    const isActive = element.classList.contains('active');
+    
+    if (isActive) {
+        // 如果已激活，则取消激活
+        element.classList.remove('active');
+        // 更新状态
+        if (isTarget) {
+            state.targetIsActive = false;
+        } else {
+            state.paramIsActive = false;
+        }
+    } else {
+        // 如果未激活，则取消另一方的激活状态并激活自身
+        if (isTarget) {
+            // 取消param的激活状态
+            if (elements.param && elements.param.classList.contains('active')) {
+                elements.param.classList.remove('active');
+                state.paramIsActive = false;
+            }
+            // 激活自身
+            element.classList.add('active');
+            state.targetIsActive = true;
+        } else {
+            // 取消target的激活状态
+            if (elements.target && elements.target.classList.contains('active')) {
+                elements.target.classList.remove('active');
+                state.targetIsActive = false;
+            }
+            // 激活自身
+            element.classList.add('active');
+            state.paramIsActive = true;
+        }
+    }
 }
 
 // ==================== 初始化函数 ====================
@@ -160,11 +220,13 @@ function initTranslateButton() {
  * @returns {boolean} 操作是否成功
  */
 function executeElementaryTransformation() {
+    //将参数输入框中的值传入state
+    state.transformCoefficient = elements.transformCoefficient.value.trim();
     try {
-        // 1. 获取三个输入框的值
-        const targetInput = elements.transformTarget.value.trim();
-        const coefficientInput = elements.transformCoefficient.value.trim();
-        const paramInput = elements.transformParam.value.trim();
+        // 1. 从state中获取参数的值
+        const targetInput = state.transformTarget || '';
+        const coefficientInput = state.transformCoefficient || '';
+        const paramInput = state.transformParam || '';
 
         // 2. 获取当前符号
         const currentSymbol = getCurrentSymbol();
@@ -199,6 +261,8 @@ function executeElementaryTransformation() {
 
         if (transformationResult.success) {
             showSuccess(`初等变换执行成功: ${transformationResult.description}`);
+            // 重置选择状态
+            resetSelectionState();
             // 更新矩阵显示
             if (state.matrixData) {
                 createMatrixDisplayTable(state.matrixData);
@@ -215,6 +279,7 @@ function executeElementaryTransformation() {
     }
 }
 
+// 目标和参数不再是读取输入框的值，而是从state中获取值，理论上无需这么复杂的校验，但还是要防止意外，先不删除多余验证逻辑
 /**
  * 校验和解析输入数据
  * 验证用户输入的初等变换参数是否合法，并解析为可执行的格式
@@ -435,8 +500,8 @@ function parseAndSimplifyPolynomial(expression) {
  * @returns {boolean} 变量是否都在允许列表中
  */
 function validatePolynomialVariables(expression) {
-    // 提取所有变量
-    const variables = expression.match(/[a-zA-Zλ]/g) || [];
+    // 提取所有变量，使用validandpreprocess.js中定义的ALLOWED_VARIABLES
+    const variables = expression.match(new RegExp(`[${ALLOWED_VARIABLES.join('')}]`, 'g')) || [];
 
     // 检查每个变量是否在允许列表中
     for (const variable of variables) {
@@ -468,7 +533,7 @@ function executeRowColumnSwap(targetType, targetIndex, paramType, paramIndex) {
 
         return {
             success: true,
-            description: `交换第${targetIndex + 1}行和第${paramIndex + 1}行`
+            description: `r${targetIndex + 1}↔ r${paramIndex + 1}`
         };
     } else {
         // 交换列
@@ -480,7 +545,7 @@ function executeRowColumnSwap(targetType, targetIndex, paramType, paramIndex) {
 
         return {
             success: true,
-            description: `交换第${targetIndex + 1}列和第${paramIndex + 1}列`
+            description: `c${targetIndex + 1}↔ c${paramIndex + 1}`
         };
     }
 }
@@ -541,7 +606,7 @@ function executeRowColumnAddSubtract(targetType, targetIndex, paramType, paramIn
 
         return {
             success: true,
-            description: `${isAddition ? '加' : '减'}法：第${targetIndex + 1}行 ${isAddition ? '+' : '-'} ${coefficient}×第${paramIndex + 1}行`
+            description: `r${targetIndex + 1} ${isAddition ? '+' : '-'} ${coefficient}×r${paramIndex + 1}`
         };
     } else {
         // 列加减
@@ -579,7 +644,7 @@ function executeRowColumnAddSubtract(targetType, targetIndex, paramType, paramIn
 
         return {
             success: true,
-            description: `${isAddition ? '加' : '减'}法：第${targetIndex + 1}列 ${isAddition ? '+' : '-'} ${coefficient}×第${paramIndex + 1}列`
+            description: `c${targetIndex + 1} ${isAddition ? '+' : '-'} ${coefficient}×c${paramIndex + 1}`
         };
     }
 }
@@ -623,7 +688,7 @@ function executeRowColumnMultiply(targetType, targetIndex, coefficient) {
 
         return {
             success: true,
-            description: `倍乘：第${targetIndex + 1}行 × ${coefficient}`
+            description: `r${targetIndex + 1} × ${coefficient}`
         };
     } else {
         // 列倍乘
@@ -653,7 +718,7 @@ function executeRowColumnMultiply(targetType, targetIndex, coefficient) {
 
         return {
             success: true,
-            description: `倍乘：第${targetIndex + 1}列 × ${coefficient}`
+            description: `c${targetIndex + 1} × ${coefficient}`
         };
     }
 }

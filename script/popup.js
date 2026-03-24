@@ -185,7 +185,7 @@ function showError(message) {
     } else {
         alert(message);
     }
-    console.error(message);
+    console.error('报错弹窗:', message);
 }
 
 /**
@@ -198,7 +198,7 @@ function showSuccess(message) {
     } else {
         alert(message);
     }
-    console.log(message);
+    console.log('成功弹窗:', message);
 }
 
 /**
@@ -211,7 +211,7 @@ function showWarning(message) {
     } else {
         alert(message);
     }
-    console.warn(message);
+    console.warn('警告弹窗:', message);
 }
 
 // 全局弹窗清除函数

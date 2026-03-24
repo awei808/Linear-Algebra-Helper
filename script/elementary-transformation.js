@@ -166,8 +166,9 @@ function createMatrixDisplayTable() {
     }, 0);
 }
 
-/**
+/** 
  * 为行列索引按钮绑定事件（事件冒泡方式）
+ * 重构：不再向输入框添加值，改为修改对应div并将值传入state中的对应变量
  */
 function bindRowColumnIndexEvents() {
     // 在最外层添加条件判断：若事件监听器已绑定，则直接返回
@@ -187,40 +188,22 @@ function bindRowColumnIndexEvents() {
         const target = e.target;
         // 判断是否点击了行/列标识按钮（ID以button_add_r或button_add_c开头）
         if (target.id.startsWith('button_add_r') || target.id.startsWith('button_add_c')) {
-            const type = target.id.includes('r') ? 'r' : 'c';
-            const num = target.textContent.replace(type, ''); // 提取数字（如"r1"→"1"）
+            const fullValue = target.textContent; // 直接使用textContent作为完整值，如 "r1", "c2"
+            const number = fullValue.replace('r', '').replace('c', '');
+            const type = fullValue.startsWith('r') ? '行' : '列';
 
-            // 获取目标输入框和参数输入框
-            const transformTarget = document.getElementById('transform-target');
-            const transformParam = document.getElementById('transform-param');
-
-            if (transformTarget && transformParam) {
-                if (transformTarget.value.trim() === '') {
-                    // 如果目标框为空，将点击的行列索引添加到目标框
-                    transformTarget.value += type + num;
-                } else {
-                    // 如果目标框不为空，将点击的行列索引添加到参数框
-                    const currentParam = transformParam.value.trim();
-                    const rowColRegex = /[rc]\d+/g;
-                    const hasRowCol = rowColRegex.test(currentParam);
-
-                    if (hasRowCol) {
-                        // 如果已经包含行列索引，则替换最后一个行列索引
-                        const lastRowColMatch = currentParam.match(rowColRegex);
-                        if (lastRowColMatch && lastRowColMatch.length > 0) {
-                            const lastRowCol = lastRowColMatch[lastRowColMatch.length - 1];
-                            const lastIndex = currentParam.lastIndexOf(lastRowCol);
-                            transformParam.value = currentParam.substring(0, lastIndex) + type + num + currentParam.substring(lastIndex + lastRowCol.length);
-                        } else {
-                            transformParam.value += type + num;
-                        }
-                    } else {
-                        // 如果没有行列索引，直接添加
-                        transformParam.value += type + num;
-                    }
-                }
+            // 根据targetIsActive和paramIsActive的值来判断将值传给哪个变量
+            if (state.targetIsActive) {
+                // 如果targetIsActive为true，则传值给transformTarget
+                state.transformTarget = fullValue;
+                showSuccess(`选定目标${type}：${fullValue}（第${number}${type}）`);
+            } else {
+                // 否则传给transformParam
+                state.transformParam = fullValue;
+                showSuccess(`选定参数${type}：${fullValue}（第${number}${type}）`);
             }
         }
+        updateTransformationUIDisplay();
     };
 
     // 绑定事件监听器并保存引用
@@ -229,11 +212,33 @@ function bindRowColumnIndexEvents() {
     state.isRowColumnIndexEventsBound = true; // 标记为已绑定
 }
 
+// ==================== 辅助函数 ====================
+/**
+ * 更新初等变换UI显示
+ * 根据state中的值更新显示的div内容
+ */
+function updateTransformationUIDisplay() {
+    const transformTarget = elements.transformTarget;
+    const transformParam = elements.transformParam;
+    
+    if (transformTarget && state.transformTarget) {
+        transformTarget.textContent = state.transformTarget;
+    }
+    
+    if (transformParam && state.transformParam) {
+        transformParam.textContent = state.transformParam;
+    }
+}
+
 // ==================== 高级流程函数 ====================
 /**
  * 显示初等变换UI
  */
 function showElementaryTransformationUI() {
+    // 重置选择状态
+    state.transformTarget = null;
+    state.transformParam = null;
+    
     // 移除hidden类，显示初等变换界面
     const elementaryTransformationDiv = document.querySelector('.operator-buttons');
     if (elementaryTransformationDiv) {
