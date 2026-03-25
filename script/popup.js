@@ -93,14 +93,6 @@ class PopupManager {
             e.stopPropagation();
             this.removePopup(popupId);
         });
-
-        // 添加键盘支持
-        closeButton.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                this.removePopup(popupId);
-            }
-        });
     }
 
     /**
@@ -313,6 +305,21 @@ class PopupCentreManager {
         // 绑定按钮事件
         const cancelBtn = popup.querySelector('.cancel');
         const confirmBtn = popup.querySelector('.confirm');
+        const inputElement = attachment === 'input' ? popup.querySelector(`#popup-input-${popupId}`) : null;
+
+        // 定义确认操作函数
+        const performConfirm = () => {
+            if (confirmCallback) {
+                // 如果attachment为input，将输入框的值作为参数传递给回调函数
+                if (attachment === 'input' && inputElement) {
+                    const inputValue = inputElement.value;
+                    confirmCallback(inputValue);
+                } else {
+                    confirmCallback();
+                }
+            }
+            this.closePopup(popupId);
+        };
 
         cancelBtn.addEventListener('click', () => {
             if (cancelCallback) {
@@ -321,19 +328,32 @@ class PopupCentreManager {
             this.closePopup(popupId);
         });
 
-        confirmBtn.addEventListener('click', () => {
-            if (confirmCallback) {
-                // 如果attachment为input，将输入框的值作为参数传递给回调函数
-                if (attachment === 'input') {
-                    const inputElement = popup.querySelector(`#popup-input-${popupId}`);
-                    const inputValue = inputElement ? inputElement.value : '';
-                    confirmCallback(inputValue);
-                } else {
-                    confirmCallback();
+        confirmBtn.addEventListener('click', performConfirm);
+
+        // 添加键盘事件监听，按Enter键执行确认操作
+        // 使用{ once: true }选项，事件执行后自动移除监听器
+        document.addEventListener('keydown', (e) => {
+            // 阻止默认行为和事件冒泡
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (e.key === 'Enter') {
+                performConfirm();
+            } else if (e.key === 'Escape') {
+                if (cancelCallback) {
+                    cancelCallback();
                 }
+                this.closePopup(popupId);
             }
-            this.closePopup(popupId);
-        });
+        }, { once: true });
+
+        // 如果有输入框，自动聚焦到输入框
+        if (inputElement) {
+            inputElement.focus();
+        } else {
+            // 否则聚焦到确认按钮
+            confirmBtn.focus();
+        }
 
         return popup;
     }
