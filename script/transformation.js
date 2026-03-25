@@ -77,10 +77,10 @@ function getCurrentSymbol() {
  */
 function handleTransformGroupClick(element) {
     const isTarget = element === elements.target;
-    
+
     // 检查当前元素是否已激活
     const isActive = element.classList.contains('active');
-    
+
     if (isActive) {
         // 如果已激活，则取消激活
         element.classList.remove('active');
@@ -222,6 +222,16 @@ function initTranslateButton() {
 function executeElementaryTransformation() {
     //将参数输入框中的值传入state
     state.transformCoefficient = elements.transformCoefficient.value.trim();
+
+    // 保存当前矩阵状态到历史记录
+    let historyIndex = -1;
+    if (state.matrixData && state.matrixData.elements) {
+        // 深拷贝当前矩阵元素，避免引用问题
+        const currentMatrixElements = JSON.parse(JSON.stringify(state.matrixData.elements));
+        historyIndex = state.historyMatrixData.length;
+        state.historyMatrixData.push(currentMatrixElements);
+    }
+
     try {
         // 1. 从state中获取参数的值
         const targetInput = state.transformTarget || '';
@@ -235,6 +245,10 @@ function executeElementaryTransformation() {
         const validationResult = validateTransformationInputs(targetInput, coefficientInput, paramInput, currentSymbol);
         if (!validationResult.isValid) {
             showError(validationResult.message);
+            // 执行失败，删除本次存入的矩阵数据
+            if (historyIndex >= 0) {
+                state.historyMatrixData.pop();
+            }
             return false;
         }
 
@@ -256,11 +270,18 @@ function executeElementaryTransformation() {
                 break;
             default:
                 showError('请先选择初等变换操作类型');
+                // 执行失败，删除本次存入的矩阵数据
+                if (historyIndex >= 0) {
+                    state.historyMatrixData.pop();
+                }
                 return false;
         }
 
         if (transformationResult.success) {
             showSuccess(`初等变换执行成功: ${transformationResult.description}`);
+            // 执行成功，添加初等变换记录到历史记录，并显示
+            state.historyTransformate.push(transformationResult.description);
+            updatehistoryTransformation();
             // 重置选择状态
             resetSelectionState();
             // 更新矩阵显示
@@ -270,11 +291,19 @@ function executeElementaryTransformation() {
             return true;
         } else {
             showError(`初等变换执行失败: ${transformationResult.message}`);
+            // 执行失败，删除本次存入的矩阵数据
+            if (historyIndex >= 0) {
+                state.historyMatrixData.pop();
+            }
             return false;
         }
 
     } catch (error) {
         showError(`执行初等变换时发生错误: ${error.message}`);
+        // 执行失败，删除本次存入的矩阵数据
+        if (historyIndex >= 0) {
+            state.historyMatrixData.pop();
+        }
         return false;
     }
 }
@@ -722,3 +751,9 @@ function executeRowColumnMultiply(targetType, targetIndex, coefficient) {
         };
     }
 }
+
+// 更新历史记录显示
+function updatehistoryTransformation() {
+    elements.historyTransformation.innerText = `初等变换历史记录：${state.historyTransformate.join('，')}`;
+}
+

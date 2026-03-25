@@ -41,6 +41,7 @@ const elements = {
     buttonSub: document.getElementById('button-sub'),
     buttonMul: document.getElementById('button-mul'),
     buttonTranslate: document.getElementById('button-translate'),
+    historyTransformation: document.getElementById('historyTransformation'),
 
     // 调试相关
     buttonTest: document.getElementById('ButtonTest'),

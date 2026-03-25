@@ -9,10 +9,15 @@ const state = {
     currentState: CONFIG.STATES.INIT, // 默认状态为INIT
     matrixData: null, // 存储矩阵数据，预期格式{rows，cols，elements}
     previousStates: [],// 状态历史，用于撤销
+
+    historyMatrixData: [],// 历史矩阵数据，用于存储初等变换状态下的历史矩阵数据
+    historyTransformate: [],// 初等变换历史，用于存储初等变换状态下的初等变换操作
+
     rowColumnIndexEventListener: null, // 存储行列索引事件监听器引用
     isRowColumnIndexEventsBound: false,// 新增：标记行列索引事件是否已绑定
     selectedMatrixElements: [], // 存储用户选中的矩阵元素索引
     quickInputAdded : false,
+
     targetIsActive: false,// 是否目标组为active伪类
     paramIsActive: false,// 是否参数组为active伪类
     transformTarget: null,// 初等变换目标行/列

@@ -87,11 +87,11 @@ input[type="text"]:focus {
 
 #transform-target,
 #transform-param {
-    width: 140px;
+    width: 60px;
 }
 
 #transform-coefficient {
-    width: 140px;
+    width: 100px;
 }
 
 #transform-operator {
@@ -250,8 +250,9 @@ button#button-reset:hover {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-left: 20px;
     width: 200px;
+    align-items: center;
+    margin: 0 auto;
 }
 
 .assist-group button {

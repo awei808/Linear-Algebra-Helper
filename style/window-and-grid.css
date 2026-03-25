@@ -46,14 +46,6 @@
     /* 点击按钮后显示 */
 }
 
-.assist-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-left: 20px;
-    width: 200px;
-}
-
 .action-button {
     padding: 12px 24px;
     font-size: 16px;
