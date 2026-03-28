@@ -279,9 +279,12 @@ function executeElementaryTransformation() {
 
         if (transformationResult.success) {
             showSuccess(`初等变换执行成功: ${transformationResult.description}`);
-            // 执行成功，添加初等变换记录到历史记录，并显示
+            // 执行成功，添加初等变换记录到历史记录，并更新UI
             state.historyTransformate.push(transformationResult.description);
-            updatehistoryTransformation();
+            // 更新历史记录索引
+            state.historyTransformateIndex = state.historyMatrixData.length;
+            updateHistoryTransformation();
+            updateUIForCurrentState();
             // 重置选择状态
             resetSelectionState();
             // 更新矩阵显示
@@ -752,8 +755,10 @@ function executeRowColumnMultiply(targetType, targetIndex, coefficient) {
     }
 }
 
-// 更新历史记录显示
-function updatehistoryTransformation() {
-    elements.historyTransformation.innerText = `初等变换历史记录：${state.historyTransformate.join('，')}`;
+// 更新历史记录
+function updateHistoryTransformation() {
+    // 只显示到当前历史记录索引之前的内容
+    const validHistory = state.historyTransformate.slice(0, state.historyTransformateIndex);
+    elements.historyTransformation.innerText = `初等变换历史记录：${validHistory.join('，') || '暂无'}`;
+    console.log(`页面当前历史记录: ${elements.historyTransformation.innerText}`);
 }
-

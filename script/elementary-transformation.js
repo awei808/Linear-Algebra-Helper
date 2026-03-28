@@ -173,7 +173,6 @@ function createMatrixDisplayTable() {
 function bindRowColumnIndexEvents() {
     // 在最外层添加条件判断：若事件监听器已绑定，则直接返回
     if (state.isRowColumnIndexEventsBound && state.rowColumnIndexEventListener) {
-        console.log('行列索引事件监听器已绑定，跳过重复绑定');
         return;
     }
 

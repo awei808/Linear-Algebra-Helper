@@ -53,7 +53,7 @@ const elements = {
 
     //特殊element元素，无法直接在此处获取，在其他函数创建后才会进入elements对象
     /*
-    buttonInputMatrix   在quickinput.js中创建
+    buttonInputMatrix  
      */
 
 };
@@ -165,7 +165,7 @@ function resetToInitialState() {
 }
 
 /**
- * 处理“导入二维数组为矩阵”矩阵功能
+ * 处理“导入二维数组为矩阵”功能
  */
 function handleQuickInputMatrix() {
     // 严格通过elements对象访问，不直接获取DOM元素
@@ -187,12 +187,26 @@ function handleQuickInputMatrix() {
         return false;
     }
 
+    // 保存当前状态到历史记录（从INIT状态转换）
+    saveCurrentState();
+
     // 存储矩阵数据到state
     state.matrixData = {
         rows: validationResult.rows,
         cols: validationResult.cols,
         elements: validationResult.elements
     };
+
+    // 模拟完整的状态转换链：INIT → SELECT_DIMENSION → INPUT_ELEMENTS → ELEMENTARY_TRANSFORMATION
+    
+    // 保存SELECT_DIMENSION状态
+    const originalState = state.currentState;
+    state.currentState = CONFIG.STATES.SELECT_DIMENSION;
+    saveCurrentState();
+    
+    // 保存INPUT_ELEMENTS状态
+    state.currentState = CONFIG.STATES.INPUT_ELEMENTS;
+    saveCurrentState();
 
     // 设置状态为初等变换
     state.currentState = CONFIG.STATES.ELEMENTARY_TRANSFORMATION;
