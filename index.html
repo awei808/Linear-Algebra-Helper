@@ -68,7 +68,14 @@
             </div>
             <button id="button-translate">执行初等变换</button>
         </div>
-        <p id="historyTransformation">初等变换历史记录：暂无</p>
+        <div class="transform-group flex-column">
+            <p id="historyTransformation">初等变换历史记录：暂无</p>
+            <div>
+                <button id="button-undoTransformation">撤销初等变换</button>
+                <button id="button-redoTransformation">重做初等变换</button>
+            </div>
+        </div>
+
     </div>
 
     <!-- 右下角弹窗容器 -->
@@ -87,6 +94,7 @@
     <script src="./script/main.js"></script>
     <script src="./script/popup.js"></script>
     <script src="./script/state.js"></script>
+    <script src="./script/historyManager.js"></script>
     <script src="./script/VaildAndPreprocess.js"></script>
     <script src="./script/select-dimension.js"></script>
     <script src="./script/input-elements.js"></script>

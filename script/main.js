@@ -42,6 +42,8 @@ const elements = {
     buttonMul: document.getElementById('button-mul'),
     buttonTranslate: document.getElementById('button-translate'),
     historyTransformation: document.getElementById('historyTransformation'),
+    buttonUndo: document.getElementById('button-undoTransformation'),
+    buttonRedo: document.getElementById('button-redoTransformation'),
 
     // 调试相关
     buttonTest: document.getElementById('ButtonTest'),
@@ -109,6 +111,10 @@ function setupEventListeners() {
     elements.ButtonForceSimplify.addEventListener('click', confirmForceExpand);
     elements.ButtonForceFactorize.addEventListener('click', confirmForceFactorize);
     elements.ButtonReplaceElement.addEventListener('click', confirmReplaceElement);
+
+    // 添加初等变换按钮点击事件
+    elements.buttonUndo.addEventListener('click', undoTransformation);
+    elements.buttonRedo.addEventListener('click', redoTransformation);
 
 }
 
@@ -196,6 +202,9 @@ function handleQuickInputMatrix() {
         cols: validationResult.cols,
         elements: validationResult.elements
     };
+    
+    // 保存初始矩阵数据，用于撤销到初始状态
+    state.initialMatrixData = JSON.parse(JSON.stringify(state.matrixData));
 
     // 模拟完整的状态转换链：INIT → SELECT_DIMENSION → INPUT_ELEMENTS → ELEMENTARY_TRANSFORMATION
     

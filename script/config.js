@@ -63,6 +63,11 @@ const CONFIG = {
         BUTTON_STYLES: {
             ACTIVE: 'activeButton',
             INACTIVE: 'inactiveButton'
+        },
+        // 历史记录配置
+        HISTORY: {
+            MAX_UNDO_STACK_SIZE: 20, // 最大撤销栈大小
+            MAX_REDO_STACK_SIZE: 20, // 最大重做栈大小
         }
     },
 

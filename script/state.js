@@ -10,9 +10,11 @@ const state = {
     matrixData: null, // 存储矩阵数据，预期格式{rows，cols，elements}
     previousStates: [],// 状态历史，用于撤销
 
-    historyMatrixData: [],// 历史矩阵数据，用于存储初等变换状态下的历史矩阵数据
-    historyTransformate: [],// 初等变换历史，用于存储初等变换状态下的初等变换操作
-
+    // 历史记录双栈结构
+    undoStack: [],// 撤销栈：存放可回滚的历史命令
+    redoStack: [],// 重做栈：撤销后暂存命令，重做时恢复
+    initialMatrixData: null,// 初始矩阵数据，用于撤销到初始状态
+    
     rowColumnIndexEventListener: null, // 存储行列索引事件监听器引用
     isRowColumnIndexEventsBound: false,// 新增：标记行列索引事件是否已绑定
     selectedMatrixElements: [], // 存储用户选中的矩阵元素索引
@@ -115,11 +117,7 @@ function Next() {
     }
 
     // 保存当前状态到历史记录
-    state.previousStates.push({
-        state: state.currentState,
-        matrixData: state.matrixData ? JSON.parse(JSON.stringify(state.matrixData)) : null,
-        timestamp: Date.now()
-    });
+    saveCurrentState();
 
     let success = true;
     let nextState = null;

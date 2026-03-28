@@ -334,6 +334,11 @@ function handleDataValidation() {
     }
     // 4. 更新坐标显示和全局UI
     updateCoordinatesDisplay(`${state.matrixData.rows}×${state.matrixData.cols}`);
+    
+    // 5. 保存初始矩阵数据，用于撤销到初始状态
+    state.initialMatrixData = JSON.parse(JSON.stringify(state.matrixData));
+    console.log('初始矩阵数据已保存:', state.initialMatrixData);
+    
     return true; // 返回处理成功
 }
 

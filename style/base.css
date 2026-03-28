@@ -184,3 +184,8 @@ h1 {
 .dropdown-item:last-child {
     border-bottom: none;
 }
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}

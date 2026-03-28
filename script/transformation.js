@@ -220,17 +220,8 @@ function initTranslateButton() {
  * @returns {boolean} 操作是否成功
  */
 function executeElementaryTransformation() {
-    //将参数输入框中的值传入state
+    // 将参数输入框中的值传入state
     state.transformCoefficient = elements.transformCoefficient.value.trim();
-
-    // 保存当前矩阵状态到历史记录
-    let historyIndex = -1;
-    if (state.matrixData && state.matrixData.elements) {
-        // 深拷贝当前矩阵元素，避免引用问题
-        const currentMatrixElements = JSON.parse(JSON.stringify(state.matrixData.elements));
-        historyIndex = state.historyMatrixData.length;
-        state.historyMatrixData.push(currentMatrixElements);
-    }
 
     try {
         // 1. 从state中获取参数的值
@@ -245,10 +236,6 @@ function executeElementaryTransformation() {
         const validationResult = validateTransformationInputs(targetInput, coefficientInput, paramInput, currentSymbol);
         if (!validationResult.isValid) {
             showError(validationResult.message);
-            // 执行失败，删除本次存入的矩阵数据
-            if (historyIndex >= 0) {
-                state.historyMatrixData.pop();
-            }
             return false;
         }
 
@@ -270,19 +257,24 @@ function executeElementaryTransformation() {
                 break;
             default:
                 showError('请先选择初等变换操作类型');
-                // 执行失败，删除本次存入的矩阵数据
-                if (historyIndex >= 0) {
-                    state.historyMatrixData.pop();
-                }
                 return false;
         }
 
         if (transformationResult.success) {
             showSuccess(`初等变换执行成功: ${transformationResult.description}`);
-            // 执行成功，添加初等变换记录到历史记录，并更新UI
-            state.historyTransformate.push(transformationResult.description);
-            // 更新历史记录索引
-            state.historyTransformateIndex = state.historyMatrixData.length;
+
+            // 执行成功，保存变换前的状态到撤销栈
+            if (state.matrixData && state.matrixData.elements) {
+                // 保存变换前的矩阵状态
+                const previousMatrixData = JSON.parse(JSON.stringify(state.matrixData));
+                HistoryManager.addHistory(previousMatrixData, transformationResult.description);
+                console.log('保存变换前矩阵状态:', {
+                    rows: previousMatrixData.rows,
+                    cols: previousMatrixData.cols,
+                    elements: previousMatrixData.elements
+                });
+            }
+
             updateHistoryTransformation();
             updateUIForCurrentState();
             // 重置选择状态
@@ -290,23 +282,20 @@ function executeElementaryTransformation() {
             // 更新矩阵显示
             if (state.matrixData) {
                 createMatrixDisplayTable(state.matrixData);
+                console.log('变换后矩阵状态:', {
+                    rows: state.matrixData.rows,
+                    cols: state.matrixData.cols,
+                    elements: state.matrixData.elements
+                });
             }
             return true;
         } else {
             showError(`初等变换执行失败: ${transformationResult.message}`);
-            // 执行失败，删除本次存入的矩阵数据
-            if (historyIndex >= 0) {
-                state.historyMatrixData.pop();
-            }
             return false;
         }
 
     } catch (error) {
         showError(`执行初等变换时发生错误: ${error.message}`);
-        // 执行失败，删除本次存入的矩阵数据
-        if (historyIndex >= 0) {
-            state.historyMatrixData.pop();
-        }
         return false;
     }
 }
@@ -755,10 +744,74 @@ function executeRowColumnMultiply(targetType, targetIndex, coefficient) {
     }
 }
 
-// 更新历史记录
+/**
+ * 更新初等变换历史记录
+ */
 function updateHistoryTransformation() {
-    // 只显示到当前历史记录索引之前的内容
-    const validHistory = state.historyTransformate.slice(0, state.historyTransformateIndex);
+    // 显示撤销栈中的历史记录
+    const validHistory = HistoryManager.getUndoHistoryDescriptions()
+        .filter(desc => desc); // 过滤掉空描述
+
     elements.historyTransformation.innerText = `初等变换历史记录：${validHistory.join('，') || '暂无'}`;
-    console.log(`页面当前历史记录: ${elements.historyTransformation.innerText}`);
+    console.log(`页面当前 ${elements.historyTransformation.innerText}`);
+}
+
+/**
+ * 撤销初等变换
+ */
+function undoTransformation() {
+    console.log(`撤销前检查: 撤销栈大小=${HistoryManager.getUndoStackSize()}, 重做栈大小=${HistoryManager.getRedoStackSize()}`);
+    
+    // 执行撤销操作
+    const historyEntry = HistoryManager.undo();
+    
+    if (historyEntry) {
+        // 恢复矩阵数据
+        if (historyEntry.matrixData) {
+            state.matrixData = JSON.parse(JSON.stringify(historyEntry.matrixData));
+            
+            // 强制更新矩阵显示
+            if (state.matrixData) {
+                createMatrixDisplayTable(state.matrixData);
+            }
+        }
+        
+        updateHistoryTransformation();
+        updateUIForCurrentState();
+        showSuccess(`成功撤销：${historyEntry.description}`);
+    } else {
+        showError('没有可撤销的初等变换');
+    }
+    
+    console.log(`撤销后状态: 撤销栈大小=${HistoryManager.getUndoStackSize()}, 重做栈大小=${HistoryManager.getRedoStackSize()}`);
+}
+
+/**
+ * 重做初等变换
+ */
+function redoTransformation() {
+    console.log(`重做前检查: 撤销栈大小=${HistoryManager.getUndoStackSize()}, 重做栈大小=${HistoryManager.getRedoStackSize()}`);
+
+    // 执行重做操作
+    const historyEntry = HistoryManager.redo();
+    
+    if (historyEntry) {
+        // 恢复矩阵数据
+        if (historyEntry.matrixData) {
+            state.matrixData = JSON.parse(JSON.stringify(historyEntry.matrixData));
+            
+            // 强制更新矩阵显示
+            if (state.matrixData) {
+                createMatrixDisplayTable(state.matrixData);
+            }
+        }
+        
+        updateHistoryTransformation();
+        updateUIForCurrentState();
+        showSuccess(`成功重做：${historyEntry.description}`);
+    } else {
+        showError('没有可重做的初等变换');
+    }
+
+    console.log(`重做后状态: 撤销栈大小=${HistoryManager.getUndoStackSize()}, 重做栈大小=${HistoryManager.getRedoStackSize()}`);
 }
