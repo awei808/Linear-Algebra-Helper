@@ -48,10 +48,15 @@ const elements = {
     // 调试相关
     buttonTest: document.getElementById('ButtonTest'),
 
-
     // 弹窗相关
     popupBox: document.getElementById('popupBox'),
     popupCentreContainer: document.getElementById('popupCentreContainer'),
+
+    // 帮助相关
+    helpDiv: document.getElementById('help'),
+    contentbox: document.getElementById('contentbox'),
+    scrollLeft: document.getElementById('scroll-left'),
+    scrollRight: document.getElementById('scroll-right'),
 
     //特殊element元素，无法直接在此处获取，在其他函数创建后才会进入elements对象
     /*
@@ -73,16 +78,16 @@ function setupEventListeners() {
     elements.nextButton.addEventListener('click', Next);
     // 添加录入矩阵按钮点击事件
     elements.buttonInputMatrix.addEventListener('click', startMatrixInput);
-    
+
     // 为target和param元素添加点击事件监听器
     if (elements.target) {
-        elements.target.addEventListener('click', function() {
+        elements.target.addEventListener('click', function () {
             handleTransformGroupClick(this);
         });
     }
-    
+
     if (elements.param) {
-        elements.param.addEventListener('click', function() {
+        elements.param.addEventListener('click', function () {
             handleTransformGroupClick(this);
         });
     }
@@ -116,6 +121,10 @@ function setupEventListeners() {
     elements.buttonUndo.addEventListener('click', undoTransformation);
     elements.buttonRedo.addEventListener('click', redoTransformation);
 
+    // 添加帮助按钮点击事件
+    elements.scrollLeft.addEventListener('click', () => switchContent(false));
+    elements.scrollRight.addEventListener('click', () => switchContent(true));
+
 }
 
 // ==================== 初始化函数 ====================
@@ -129,6 +138,7 @@ function init() {
     // 确保初始状态为INIT
     state.currentState = CONFIG.STATES.INIT;
     updateUIForCurrentState();
+    createNavigationDots();//显示帮助板块的导航小点
 }
 // 初始化应用, 添加窗口大小变化监听
 document.addEventListener('DOMContentLoaded', () => {
@@ -202,17 +212,17 @@ function handleQuickInputMatrix() {
         cols: validationResult.cols,
         elements: validationResult.elements
     };
-    
+
     // 保存初始矩阵数据，用于撤销到初始状态
     state.initialMatrixData = JSON.parse(JSON.stringify(state.matrixData));
 
     // 模拟完整的状态转换链：INIT → SELECT_DIMENSION → INPUT_ELEMENTS → ELEMENTARY_TRANSFORMATION
-    
+
     // 保存SELECT_DIMENSION状态
     const originalState = state.currentState;
     state.currentState = CONFIG.STATES.SELECT_DIMENSION;
     saveCurrentState();
-    
+
     // 保存INPUT_ELEMENTS状态
     state.currentState = CONFIG.STATES.INPUT_ELEMENTS;
     saveCurrentState();

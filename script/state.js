@@ -10,21 +10,22 @@ const state = {
     matrixData: null, // 存储矩阵数据，预期格式{rows，cols，elements}
     previousStates: [],// 状态历史，用于撤销
 
-    // 历史记录双栈结构
     undoStack: [],// 撤销栈：存放可回滚的历史命令
     redoStack: [],// 重做栈：撤销后暂存命令，重做时恢复
     initialMatrixData: null,// 初始矩阵数据，用于撤销到初始状态
-    
+
     rowColumnIndexEventListener: null, // 存储行列索引事件监听器引用
     isRowColumnIndexEventsBound: false,// 新增：标记行列索引事件是否已绑定
     selectedMatrixElements: [], // 存储用户选中的矩阵元素索引
-    quickInputAdded : false,
+    quickInputAdded: false,
 
     targetIsActive: false,// 是否目标组为active伪类
     paramIsActive: false,// 是否参数组为active伪类
     transformTarget: null,// 初等变换目标行/列
     transformCoefficient: null,// 初等变换系数
     transformParam: null,// 初等变换参数行/列
+
+    helpContentIndex: -1,// 帮助内容索引，用于显示在帮助窗口中
 };
 
 // ==================== 状态机核心函数 ====================
