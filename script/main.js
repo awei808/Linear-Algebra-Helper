@@ -213,15 +213,18 @@ function handleQuickInputMatrix() {
         elements: validationResult.elements
     };
 
+
     // 保存初始矩阵数据，用于撤销到初始状态
     state.initialMatrixData = JSON.parse(JSON.stringify(state.matrixData));
 
     // 模拟完整的状态转换链：INIT → SELECT_DIMENSION → INPUT_ELEMENTS → ELEMENTARY_TRANSFORMATION
 
+
     // 保存SELECT_DIMENSION状态
     const originalState = state.currentState;
     state.currentState = CONFIG.STATES.SELECT_DIMENSION;
     saveCurrentState();
+
 
     // 保存INPUT_ELEMENTS状态
     state.currentState = CONFIG.STATES.INPUT_ELEMENTS;
