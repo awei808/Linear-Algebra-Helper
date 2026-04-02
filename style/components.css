@@ -35,23 +35,6 @@ td:hover {
     color: var(--primary-color);
 }
 
-.row-label button,
-.col-label button {
-    background: transparent;
-    color: var(--primary-color);
-    padding: 4px 8px;
-    margin: 0;
-    border: 1px dashed transparent;
-}
-
-.row-label button:hover,
-.col-label button:hover {
-    background-color: rgba(74, 111, 165, 0.1);
-    border-color: var(--primary-color);
-    transform: none;
-    box-shadow: none;
-}
-
 /* 输入框样式 */
 input[type="text"] {
     padding: 10px 12px;

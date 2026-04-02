@@ -92,13 +92,11 @@ function createMatrixDisplayTable() {
             tr.appendChild(td);
         }
 
-        // 添加行索引按钮（放在行末尾）
+        // 添加行索引标签（放在行末尾）
         const rowIndexTd = document.createElement('td');
         rowIndexTd.className = 'row-label';
-        const rowButton = document.createElement('button');
-        rowButton.textContent = `r${row + 1}`;
-        rowButton.id = `button_add_r${row + 1}`;
-        rowIndexTd.appendChild(rowButton);
+        rowIndexTd.textContent = `r${row + 1}`;
+        rowIndexTd.id = `add_r${row + 1}`;
         tr.appendChild(rowIndexTd);
         table.appendChild(tr);
     }
@@ -106,14 +104,12 @@ function createMatrixDisplayTable() {
     // 创建列索引行（放在表格下方）
     const colTr = document.createElement('tr');
 
-    // 添加列索引按钮（直接与数据列对齐）
+    // 添加列索引标签（直接与数据列对齐）
     for (let col = 0; col < cols; col++) {
         const colTd = document.createElement('td');
         colTd.className = 'col-label';
-        const colButton = document.createElement('button');
-        colButton.textContent = `c${col + 1}`;
-        colButton.id = `button_add_c${col + 1}`;
-        colTd.appendChild(colButton);
+        colTd.textContent = `c${col + 1}`;
+        colTd.id = `add_c${col + 1}`;
         colTr.appendChild(colTd);
     }
 
@@ -182,11 +178,12 @@ function bindRowColumnIndexEvents() {
         state.rowColumnIndexEventListener = null;
     }
 
-    // 为windowDiv添加点击事件监听器，处理行列索引按钮点击
+    // 为windowDiv添加点击事件监听器，处理行列索引标签点击
     const eventListener = function (e) {
         const target = e.target;
-        // 判断是否点击了行/列标识按钮（ID以button_add_r或button_add_c开头）
-        if (target.id.startsWith('button_add_r') || target.id.startsWith('button_add_c')) {
+        // 判断是否点击了行/列标识标签（ID以add_r或add_c开头，或者class包含row-label/col-label）
+        if (target.id.startsWith('add_r') || target.id.startsWith('add_c') || 
+            target.className.includes('row-label') || target.className.includes('col-label')) {
             const fullValue = target.textContent; // 直接使用textContent作为完整值，如 "r1", "c2"
             const number = fullValue.replace('r', '').replace('c', '');
             const type = fullValue.startsWith('r') ? '行' : '列';
@@ -213,6 +210,59 @@ function bindRowColumnIndexEvents() {
 
 // ==================== 辅助函数 ====================
 /**
+ * 将行列索引作为option添加到目标行/列和参数行/列的选择器中
+ * 在初等变换状态下，为transform-target和transform-param选择器添加行列索引选项
+ * @param {number} rows - 矩阵的行数
+ * @param {number} cols - 矩阵的列数
+ */
+function addRowColumnIndexOptions(rows, cols) {
+    // 获取目标行/列和参数行/列的选择器元素
+    const targetSelect = elements.transformTarget;
+    const paramSelect = elements.transformParam;
+    
+    if (!targetSelect || !paramSelect) {
+        console.error('未找到目标行/列或参数行/列的选择器元素');
+        return;
+    }
+    
+    // 清空现有的选项（保留第一个"无"选项）
+    while (targetSelect.options.length > 1) {
+        targetSelect.remove(1);
+    }
+    while (paramSelect.options.length > 1) {
+        paramSelect.remove(1);
+    }
+    
+    // 添加行索引选项
+    for (let i = 0; i < rows; i++) {
+        const rowValue = `r${i + 1}`;
+        
+        // 添加到目标选择器
+        const targetOption = new Option(rowValue, rowValue);
+        targetSelect.add(targetOption);
+        
+        // 添加到参数选择器
+        const paramOption = new Option(rowValue, rowValue);
+        paramSelect.add(paramOption);
+    }
+    
+    // 添加列索引选项
+    for (let i = 0; i < cols; i++) {
+        const colValue = `c${i + 1}`;
+        
+        // 添加到目标选择器
+        const targetOption = new Option(colValue, colValue);
+        targetSelect.add(targetOption);
+        
+        // 添加到参数选择器
+        const paramOption = new Option(colValue, colValue);
+        paramSelect.add(paramOption);
+    }
+    
+    console.log(`已添加 ${rows} 个行选项和 ${cols} 个列选项到选择器中`);
+}
+
+/**
  * 更新初等变换UI显示
  * 根据state中的值更新显示的div内容
  */
@@ -221,11 +271,11 @@ function updateTransformationUIDisplay() {
     const transformParam = elements.transformParam;
     
     if (transformTarget && state.transformTarget) {
-        transformTarget.textContent = state.transformTarget;
+        transformTarget.value = state.transformTarget;
     }
     
     if (transformParam && state.transformParam) {
-        transformParam.textContent = state.transformParam;
+        transformParam.value = state.transformParam;
     }
 }
 
@@ -255,6 +305,11 @@ function showElementaryTransformationUI() {
 
     // 为行列索引按钮添加事件冒泡绑定（现在有双重保护）
     bindRowColumnIndexEvents();
+
+    // 添加行列索引选项到选择器中
+    if (state.matrixData && state.matrixData.rows && state.matrixData.cols) {
+        addRowColumnIndexOptions(state.matrixData.rows, state.matrixData.cols);
+    }
 
     // 重新组织布局，避免元素重叠
     reorganizeLayoutForElementaryTransformation();

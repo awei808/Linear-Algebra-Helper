@@ -51,7 +51,9 @@
         <div class="input-group">
             <div id="target" class="transform-group">
                 <p>目标行/列：</p>
-                <div id="transform-target" class="t-i-group">待定</div>
+                <select id="transform-target" class="t-i-group">
+                <option value="row">无</option>
+                </select>
             </div>
             <div id="arithmetic-symbols">
                 <button id="button-change">↔</button>
@@ -61,11 +63,13 @@
             </div>
             <div id="coefficient" class="transform-group">
                 <p>系数：</p>
-                <input type="text" id="transform-coefficient" placeholder="系数，默认为1">
+                <input type="text" id="transform-coefficient" placeholder="默认为1">
             </div>
             <div id="param" class="transform-group">
                 <p>参数行/列：</p>
-                <div id="transform-param" class="t-i-group">待定</div>
+                <select id="transform-param" class="t-i-group">
+                <option value="row">无</option>
+                </select>
             </div>
             <button id="button-translate">执行初等变换</button>
         </div>
@@ -83,6 +87,7 @@
             <h4>怎样开始使用本工具？</h4>
             <p>要有矩阵，才能使用，点击录入矩阵按钮录入需要变换的矩阵。</p>
             <p>完成录入后，再选择好初等变换数据，最后点击执行初等变换按钮，即可进行初等变换。</p>
+            <p>点击两侧的箭头，可以切换帮助内容。</p>
         </div>
         <div id="scroll-left"></div>
         <div id="scroll-right"></div>

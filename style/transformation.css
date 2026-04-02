@@ -34,6 +34,38 @@
 .transform-group p {
     margin: 0 5px 0 0;
     white-space: nowrap;
+    height: 40px;
+    line-height: 40px;
+    display: flex;
+    align-items: center;
+    color: #333;
+}
+
+/* 确保输入框和选择框有统一的高度 */
+#transform-coefficient,
+.t-i-group {
+    height: 40px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0 10px;
+    font-size: 14px;
+}
+
+#transform-coefficient {
+    width: 100px;
+}
+
+.t-i-group {
+    width: 60px;
+    background-color: white;
+}
+
+/* 确保transform-group内部元素垂直居中 */
+.transform-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .transform-group.active {
