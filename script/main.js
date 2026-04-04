@@ -25,6 +25,7 @@ const elements = {
     ButtonForceFactorize: document.getElementById('ButtonForceFactorize'),
     ButtonQuickInput: document.getElementById('ButtonQuickInput'),
     ButtonReplaceElement: document.getElementById('ButtonReplaceElement'),
+    ButtonToggleHelp: document.getElementById('ButtonToggleHelp'),
 
     // 矩阵数据显示
     matrixDataDisplay: document.getElementById('matrixDataDisplay'),
@@ -111,11 +112,10 @@ function setupEventListeners() {
     });
     // 为导入二维数组为矩阵按钮绑定点击事件
     elements.ButtonQuickInput.addEventListener('click', handleQuickInputClick);
-
-    // 添加多项式处理功能事件绑定
     elements.ButtonForceSimplify.addEventListener('click', confirmForceExpand);
     elements.ButtonForceFactorize.addEventListener('click', confirmForceFactorize);
     elements.ButtonReplaceElement.addEventListener('click', confirmReplaceElement);
+    elements.ButtonToggleHelp.addEventListener('click', toggleHelp);
 
     // 添加初等变换按钮点击事件
     elements.buttonUndo.addEventListener('click', undoTransformation);
@@ -138,7 +138,8 @@ function init() {
     // 确保初始状态为INIT
     state.currentState = CONFIG.STATES.INIT;
     updateUIForCurrentState();
-    createNavigationDots();//显示帮助板块的导航小点
+    // 初始化帮助板块显示状态
+    updateDisplayHelp();
 }
 // 初始化应用, 添加窗口大小变化监听
 document.addEventListener('DOMContentLoaded', () => {
@@ -411,6 +412,15 @@ function startMatrixInput() {
     elements.inputMatrixDiv.classList.toggle('visible');
 }
 
+/**
+ * 切换帮助板块显示状态和对应按钮文本
+ */
+function toggleHelp() {
+    CONFIG.UI_CONFIG.DISPLAY_HELP = !CONFIG.UI_CONFIG.DISPLAY_HELP;
+    updateDisplayHelp();
+    elements.ButtonToggleHelp.textContent = CONFIG.UI_CONFIG.DISPLAY_HELP ? '关闭帮助板块' : '显示帮助板块';
+    console.log("若需要永久切换显示状态，需在config.js中修改UI_CONFIG.DISPLAY_HELP的值");
+}
 // ====================  UI操作函数 ====================
 
 //该函数疑似可以用toggle优化

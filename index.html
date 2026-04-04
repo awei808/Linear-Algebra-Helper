@@ -31,6 +31,7 @@
             <button class="dropdown-item" id="ButtonForceSimplify">多项式展开</button>
             <button class="dropdown-item" id="ButtonForceFactorize">一元多项式因式分解</button>
             <button class="dropdown-item" id="ButtonReplaceElement">替换矩阵元素</button>
+            <button class="dropdown-item" id="ButtonToggleHelp">关闭帮助板块</button>
             <a href="https://github.com/awei808/awei" class="dropdown-item" target="_blank">跳转GitHub仓库</a>
         </div>
     </div>
@@ -52,7 +53,7 @@
             <div id="target" class="transform-group">
                 <p>目标行/列：</p>
                 <select id="transform-target" class="t-i-group">
-                <option value="row">无</option>
+                    <option value="row">无</option>
                 </select>
             </div>
             <div id="arithmetic-symbols">
@@ -68,7 +69,7 @@
             <div id="param" class="transform-group">
                 <p>参数行/列：</p>
                 <select id="transform-param" class="t-i-group">
-                <option value="row">无</option>
+                    <option value="row">无</option>
                 </select>
             </div>
             <button id="button-translate">执行初等变换</button>
@@ -89,8 +90,12 @@
             <p>完成录入后，再选择好初等变换数据，最后点击执行初等变换按钮，即可进行初等变换。</p>
             <p>点击两侧的箭头，可以切换帮助内容。</p>
         </div>
-        <div id="scroll-left"></div>
-        <div id="scroll-right"></div>
+        <svg class="arrow" id="scroll-left" viewBox="0 0 24 24">
+            <path d="M15 6l-6 6 6 6" />
+        </svg>
+        <svg class="arrow" id="scroll-right" viewBox="0 0 24 24">
+            <path d="M9 6l6 6-6 6" />
+        </svg>
     </div>
 
     <!-- 右下角弹窗容器 -->

@@ -26,16 +26,15 @@ const CONFIG = {
 
     // 弹窗配置
     POPUP_CONFIG: {
-        MAX_POPUPS: 3,
-        TIMEOUT: 3500,
+        MAX_POPUPS: 3,//最大弹窗数量
+        TIMEOUT: 2500,//弹窗显示时间（毫秒）
         STYLES: {
             SUCCESS: 'success-popup',
             ERROR: 'error-popup',
             WARNING: 'warning-popup'
         },
-        // 新增配置项
         ANIMATION: {
-            DURATION: 300,
+            DURATION: 300,//动画持续时间（毫秒）
             EASING: 'ease-out'
         },
     },
@@ -47,11 +46,11 @@ const CONFIG = {
 
     // 初等变换配置
     TRANSFORMATION_CONFIG: {
-        VALUE_PROCESSING:{
-            ALLOWED_VARIABLES: ['a', 'b', 'c', 'd', 'm', 'n', 'x', 'y', 'z', 'λ'],
+        VALUE_PROCESSING: {
+            ALLOWED_VARIABLES: ['a', 'b', 'c', 'd', 'm', 'n', 'x', 'y', 'z', 'λ'],//允许作为未知数的字符
             LEADING_ZERO_FOR_DECIMAL: true,
         },
-        
+
         SYMBOLS: ['↔', '+', '−', '×'],
         OPERATORS: {
             SWAP: '↔',
@@ -96,6 +95,7 @@ const CONFIG = {
             HIGHLIGHT: '#ffeb3b',
             NORMAL: '#f0f0f0',
             BORDER: '#ccc'
-        }
+        },
+        DISPLAY_HELP: true,//是否显示帮助板块
     }
 };

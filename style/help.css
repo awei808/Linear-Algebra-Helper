@@ -1,214 +1,200 @@
-        /* 基础样式 - 移动端优先 */
-        #help {
-            width: 100%;
-            margin: 20px 0;
-            position: relative;
-            background-color: #b1f8f5;
-            padding: 20px;
-            border-radius: 8px;
-            height: 400px;
-            min-height: 400px;
-            box-sizing: border-box;
-        }
+/* 基础样式 - 移动端优先 */
+#help {
+    width: 100%;
+    margin: 20px 0;
+    position: relative;
+    background-color: #b1f8f5;
+    padding: 20px;
+    border-radius: 8px;
+    height: 320px;
+    min-height: 320px;
+    box-sizing: border-box;
+}
 
-        /* 内容展示区域 */
-        #contentbox {
-            width: 100%;
-            height: 100%;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            align-items: center;
-            justify-content: center;
-            box-sizing: border-box;
-            padding: 15px;
-            overflow: hidden;
-        }
+/* 内容展示区域 */
+#contentbox {
+    width: 100%;
+    height: 100%;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 15px;
+    overflow: hidden;
+}
 
-        /* 平板设备适配 */
-        @media (min-width: 769px) and (max-width: 1024px) {
-            #help {
-                padding: 30px;
-                height: 450px;
-                min-height: 450px;
-                margin: 25px 0;
-            }
+/* 平板设备适配 */
+@media (min-width: 769px) and (max-width: 1024px) {
+    #help {
+        padding: 30px;
+        height: 300px;
+        min-height: 300px;
+        margin: 25px 0;
+    }
 
-            #contentbox {
-                padding: 20px;
-            }
-        }
+    #contentbox {
+        padding: 20px;
+    }
+}
 
-        /* 桌面设备适配 */
-        @media (min-width: 1025px) {
-            #help {
-                padding: 40px;
-                height: 300px;
-                min-height: 300px;
-                margin: 30px 0;
-            }
+/* 桌面设备适配 */
+@media (min-width: 1025px) {
+    #help {
+        padding: 40px;
+        height: 300px;
+        min-height: 300px;
+        margin: 30px 0;
+    }
 
-            #contentbox {
-                padding: 25px;
-            }
-        }
+    #contentbox {
+        padding: 25px;
+    }
+}
 
-        /* 内容区域样式 */
-        #contentbox p {
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            line-height: 1.4;
-        }
+/* 内容区域样式 */
+#contentbox p {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
 
-        #contentbox h4 {
-            margin: 0 0 15px 0;
-            font-size: 16px;
-            font-weight: bold;
-        }
+#contentbox h4 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    font-weight: bold;
+}
 
-        /* 平板设备字体适配 */
-        @media (min-width: 769px) and (max-width: 1024px) {
-            #contentbox p {
-                font-size: 15px;
-            }
+/* 平板设备字体适配 */
+@media (min-width: 769px) and (max-width: 1024px) {
+    #contentbox p {
+        font-size: 15px;
+    }
 
-            #contentbox h4 {
-                font-size: 17px;
-            }
-        }
+    #contentbox h4 {
+        font-size: 17px;
+    }
+}
 
-        /* 桌面设备字体适配 */
-        @media (min-width: 1025px) {
-            #contentbox p {
-                font-size: 16px;
-            }
+/* 桌面设备字体适配 */
+@media (min-width: 1025px) {
+    #contentbox p {
+        font-size: 16px;
+    }
 
-            #contentbox h4 {
-                font-size: 18px;
-            }
-        }
+    #contentbox h4 {
+        font-size: 18px;
+    }
+}
 
-        /* 左右箭头通用样式 */
-        #scroll-left,
-        #scroll-right {
-            width: 0;
-            height: 0;
-            cursor: pointer;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 5;
-        }
+.arrow {
+    width: 40px;
+    height: 40px;
+    stroke: #333;
+    stroke-width: 2;
+    fill: none;
+    vertical-align: middle;
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+}
 
-        /* 箭头悬浮放大效果 */
-        #scroll-left:hover,
-        #scroll-right:hover {
-            transform: translateY(-50%) scale(1.1);
-        }
+/* 左箭头：固定在内容框正左边 */
+#scroll-left {
+    left: 10px;
+}
 
-        /* 左箭头：固定在内容框正左边 */
-        #scroll-left {
-            left: 10px;
-            border-top: 12px solid transparent;
-            border-bottom: 12px solid transparent;
-            border-right: 16px solid #666;
-        }
+/* 右箭头：固定在内容框正右边 */
+#scroll-right {
+    right: 10px;
+}
 
-        /* 右箭头：固定在内容框正右边 */
-        #scroll-right {
-            right: 10px;
-            border-top: 12px solid transparent;
-            border-bottom: 12px solid transparent;
-            border-left: 16px solid #666;
-        }
+/* 箭头悬浮效果 */
+#scroll-left:hover,
+#scroll-right:hover {
+    transform: translateY(-50%) scale(1.1);
+    stroke: #0066cc;
+    /* 悬浮变色 */
+}
 
-        /* 平板设备箭头适配 */
-        @media (min-width: 769px) and (max-width: 1024px) {
-            #scroll-left {
-                left: 15px;
-                border-top: 14px solid transparent;
-                border-bottom: 14px solid transparent;
-                border-right: 18px solid #666;
-            }
+/* 平板设备箭头适配 */
+@media (min-width: 769px) and (max-width: 1024px) {
+    #scroll-left {
+        left: 15px;
+    }
 
-            #scroll-right {
-                right: 15px;
-                border-top: 14px solid transparent;
-                border-bottom: 14px solid transparent;
-                border-left: 18px solid #666;
-            }
-        }
+    #scroll-right {
+        right: 15px;
+    }
+}
 
-        /* 桌面设备箭头适配 */
-        @media (min-width: 1025px) {
-            #scroll-left {
-                left: 20px;
-                border-top: 16px solid transparent;
-                border-bottom: 16px solid transparent;
-                border-right: 20px solid #666;
-            }
+/* 桌面设备箭头适配 */
+@media (min-width: 1025px) {
+    #scroll-left {
+        left: 20px;
+    }
 
-            #scroll-right {
-                right: 20px;
-                border-top: 16px solid transparent;
-                border-bottom: 16px solid transparent;
-                border-left: 20px solid #666;
-            }
-        }
+    #scroll-right {
+        right: 20px;
+    }
+}
 
-        /* 导航小点容器 */
-        #navigation-dots {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            display: flex;
-            gap: 6px;
-            z-index: 10;
-        }
+/* 导航小点容器 */
+#navigation-dots {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    gap: 6px;
+    z-index: 10;
+}
 
-        /* 导航小点样式 */
-        .nav-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: #ccc;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
+/* 导航小点样式 */
+.nav-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ccc;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
 
-        /* 导航小点悬浮效果 */
-        .nav-dot:hover {
-            background-color: #999;
-        }
+/* 导航小点悬浮效果 */
+.nav-dot:hover {
+    background-color: #999;
+}
 
-        /* 当前选中的导航小点 */
-        .nav-dot.active {
-            background-color: #333;
-        }
+/* 当前选中的导航小点 */
+.nav-dot.active {
+    background-color: #333;
+}
 
-        /* 平板设备导航小点适配 */
-        @media (min-width: 769px) and (max-width: 1024px) {
-            #navigation-dots {
-                bottom: 12px;
-                right: 12px;
-                gap: 7px;
-            }
+/* 平板设备导航小点适配 */
+@media (min-width: 769px) and (max-width: 1024px) {
+    #navigation-dots {
+        bottom: 12px;
+        right: 12px;
+        gap: 7px;
+    }
 
-            .nav-dot {
-                width: 11px;
-                height: 11px;
-            }
-        }
+    .nav-dot {
+        width: 11px;
+        height: 11px;
+    }
+}
 
-        /* 桌面设备导航小点适配 */
-        @media (min-width: 1025px) {
-            #navigation-dots {
-                bottom: 15px;
-                right: 15px;
-                gap: 8px;
-            }
+/* 桌面设备导航小点适配 */
+@media (min-width: 1025px) {
+    #navigation-dots {
+        bottom: 15px;
+        right: 15px;
+        gap: 8px;
+    }
 
-            .nav-dot {
-                width: 12px;
-                height: 12px;
-            }
-        }
+    .nav-dot {
+        width: 12px;
+        height: 12px;
+    }
+}

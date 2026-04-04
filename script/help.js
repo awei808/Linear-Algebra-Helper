@@ -119,3 +119,17 @@ function updateNavigationDots() {
         }
     });
 }
+
+/**
+ * 更新帮助板块显示状态
+ */
+function updateDisplayHelp() {
+    if (CONFIG.UI_CONFIG.DISPLAY_HELP) {
+        elements.helpDiv.style.display = 'block';
+        createNavigationDots();//显示帮助板块的导航小点
+        console.log('帮助板块已显示');
+    } else {
+        elements.helpDiv.style.display = 'none';
+        console.log('帮助板块已关闭');
+    }
+}
