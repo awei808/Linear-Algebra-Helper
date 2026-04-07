@@ -156,8 +156,7 @@ function createMatrixDisplayTable() {
         elements.windowDiv.style.gridTemplateRows = 'none';
         // 确保windowDiv能正确显示表格
         elements.windowDiv.style.overflow = 'visible';
-        elements.windowDiv.style.display = 'block';
-        elements.inputMatrixDiv.style.display = 'block';
+        elements.inputMatrixDiv.classList.remove('hidden');
         console.log('createMatrixDisplayTable 完成表格显示');
     }, 0);
 }
@@ -185,18 +184,16 @@ function bindRowColumnIndexEvents() {
         if (target.id.startsWith('add_r') || target.id.startsWith('add_c') || 
             target.className.includes('row-label') || target.className.includes('col-label')) {
             const fullValue = target.textContent; // 直接使用textContent作为完整值，如 "r1", "c2"
-            const number = fullValue.replace('r', '').replace('c', '');
-            const type = fullValue.startsWith('r') ? '行' : '列';
 
             // 根据targetIsActive和paramIsActive的值来判断将值传给哪个变量
             if (state.targetIsActive) {
                 // 如果targetIsActive为true，则传值给transformTarget
                 state.transformTarget = fullValue;
-                showSuccess(`选定目标${type}：${fullValue}（第${number}${type}）`);
+                showSuccess(`目标行/列已更新：${fullValue}`);
             } else {
                 // 否则传给transformParam
                 state.transformParam = fullValue;
-                showSuccess(`选定参数${type}：${fullValue}（第${number}${type}）`);
+                showSuccess(`参数行/列已更新：${fullValue}`);
             }
         }
         updateTransformationUIDisplay();
@@ -263,6 +260,32 @@ function addRowColumnIndexOptions(rows, cols) {
 }
 
 /**
+ * 处理选择器值变化，将value传入state中对应的变量
+ * 当目标行/列或参数行/列选择器的值发生变化时调用
+ * @param {string} selectorType - 选择器类型：'target' 或 'param'
+ * @param {string} value - 选择器的新值
+ */
+function handleSelectorChange(selectorType, value) {
+    // 验证输入参数
+    if (selectorType !== 'target' && selectorType !== 'param') {
+        console.error('无效的选择器类型:', selectorType);
+        return;
+    }
+    
+    // 根据选择器类型更新对应的state变量
+    if (selectorType === 'target') {
+        state.transformTarget = value;
+        showSuccess(`目标行/列已更新：${value}`);
+    } else if (selectorType === 'param') {
+        state.transformParam = value;
+        showSuccess(`参数行/列已更新：${value}`);
+    }
+    
+    // 更新UI显示
+    updateTransformationUIDisplay();
+}
+
+/**
  * 更新初等变换UI显示
  * 根据state中的值更新显示的div内容
  */
@@ -270,11 +293,11 @@ function updateTransformationUIDisplay() {
     const transformTarget = elements.transformTarget;
     const transformParam = elements.transformParam;
     
-    if (transformTarget && state.transformTarget) {
+    if (transformTarget && state.transformTarget&&transformTarget.value !== state.transformTarget) {
         transformTarget.value = state.transformTarget;
     }
     
-    if (transformParam && state.transformParam) {
+    if (transformParam && state.transformParam&&transformParam.value !== state.transformParam) {
         transformParam.value = state.transformParam;
     }
 }

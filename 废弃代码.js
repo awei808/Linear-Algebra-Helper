@@ -1,3 +1,5 @@
+/* 
+这里所有函数都被注废弃了，因为它们的功能已被其他函数替代 ，无需查看本文件，本文件只是为了防止未来再次使用而保留
 //构建多项式展开规则，并与默认规则合并
 const expand = [
   { l: 'n1*(n2+n3)', r: 'n1*n2 + n1*n3' },
@@ -25,10 +27,10 @@ try {
         }
 
 
-/**
+
  * 显示矩阵表格（使用与createMatrixDisplayTable相同的格式）
  * 弃用，因为其功能已被createMatrixDisplayTable替代
- */
+
 function displayMatrixTable() {
     if (!state.matrixData) return;
 
@@ -155,10 +157,10 @@ const factorRules = [
     { l: 'n1^4 - n2^4', r: '(n1^2 - n2^2) * (n1^2 + n2^2)' },
 ];
 
-/**
+
  * 检查当前状态是否可以进行下一步操作
  * @returns {boolean} 是否可以继续
- */
+
 function canProceedToNextState() {
     switch (state.currentState) {
         case CONFIG.STATES.SELECT_DIMENSION:
@@ -171,3 +173,4 @@ function canProceedToNextState() {
             return false;
     }
 }
+*/

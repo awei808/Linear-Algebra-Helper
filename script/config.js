@@ -70,7 +70,7 @@ const CONFIG = {
         }
     },
 
-    // 矩阵配置
+    // 矩阵配置，暂未使用
     MATRIX_CONFIG: {
         MAX_ROWS: 10,
         MAX_COLS: 10,

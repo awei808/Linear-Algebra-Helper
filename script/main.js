@@ -26,6 +26,7 @@ const elements = {
     ButtonQuickInput: document.getElementById('ButtonQuickInput'),
     ButtonReplaceElement: document.getElementById('ButtonReplaceElement'),
     ButtonToggleHelp: document.getElementById('ButtonToggleHelp'),
+    ButtonReset: document.getElementById('ButtonReset'),
 
     // 矩阵数据显示
     matrixDataDisplay: document.getElementById('matrixDataDisplay'),
@@ -35,6 +36,7 @@ const elements = {
     param: document.getElementById('param'),
     operatorButtons: document.querySelector('.operator-buttons'),
     transformTarget: document.getElementById('transform-target'),
+    //以上4个元素的功能疑似重复，应该可以合并
     transformCoefficient: document.getElementById('transform-coefficient'),
     transformParam: document.getElementById('transform-param'),
     buttonChange: document.getElementById('button-change'),
@@ -80,16 +82,21 @@ function setupEventListeners() {
     // 添加录入矩阵按钮点击事件
     elements.buttonInputMatrix.addEventListener('click', startMatrixInput);
 
-    // 为target和param元素添加点击事件监听器
-    if (elements.target) {
-        elements.target.addEventListener('click', function () {
-            handleTransformGroupClick(this);
+    // 添加初等变换按钮点击事件
+    elements.target.addEventListener('click', function () {handleTransformGroupClick(this);});
+    elements.param.addEventListener('click', function () {handleTransformGroupClick(this);});
+    elements.buttonUndo.addEventListener('click', undoTransformation);
+    elements.buttonRedo.addEventListener('click', redoTransformation);
+    
+    // 添加选择器值变化事件监听器
+    if (elements.transformTarget) {
+        elements.transformTarget.addEventListener('change', function() {
+            handleSelectorChange('target', this.value);
         });
     }
-
-    if (elements.param) {
-        elements.param.addEventListener('click', function () {
-            handleTransformGroupClick(this);
+    if (elements.transformParam) {
+        elements.transformParam.addEventListener('change', function() {
+            handleSelectorChange('param', this.value);
         });
     }
 
@@ -105,21 +112,18 @@ function setupEventListeners() {
         });
     }
 
-    // 添加导出矩阵按钮点击事件
+    // 添加更多菜单中的按钮点击事件
     elements.exportMatrixButton.addEventListener('click', function (event) {
         event.preventDefault();
         exportMatrixToArray();
     });
-    // 为导入二维数组为矩阵按钮绑定点击事件
     elements.ButtonQuickInput.addEventListener('click', handleQuickInputClick);
     elements.ButtonForceSimplify.addEventListener('click', confirmForceExpand);
     elements.ButtonForceFactorize.addEventListener('click', confirmForceFactorize);
     elements.ButtonReplaceElement.addEventListener('click', confirmReplaceElement);
     elements.ButtonToggleHelp.addEventListener('click', toggleHelp);
+    elements.ButtonReset.addEventListener('click', resetToInitialState);
 
-    // 添加初等变换按钮点击事件
-    elements.buttonUndo.addEventListener('click', undoTransformation);
-    elements.buttonRedo.addEventListener('click', redoTransformation);
 
     // 添加帮助按钮点击事件
     elements.scrollLeft.addEventListener('click', () => switchContent(false));
@@ -152,34 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-/**
- * 重置到初始状态，暂未使用
- */
-function resetToInitialState() {
-    // 清空窗口内容
-    elements.windowDiv.innerHTML = '';
 
-    // 移除行列索引事件监听器
-    unbindRowColumnIndexEvents();
-
-    // 重置窗口样式
-    elements.windowDiv.classList.remove('dynamic');
-    elements.windowDiv.style.width = '400px';
-    elements.windowDiv.style.height = '400px';
-    elements.windowDiv.style.gridTemplateColumns = 'repeat(10, 40px)';
-    elements.windowDiv.style.gridTemplateRows = 'repeat(10, 40px)';
-    elements.windowDiv.style.display = 'grid'; // 恢复网格布局
-
-    // 重新创建网格
-    createGrid();
-
-    // 清空输入框状态
-    state.gridInputs = [];
-
-    // 重置坐标显示
-    updateCoordinatesDisplay('0×0');
-    state.lastSelectedDimension = '0×0';
-}
 
 /**
  * 处理“导入二维数组为矩阵”功能
