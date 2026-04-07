@@ -14,11 +14,6 @@ function resetSelectionState() {
     state.transformCoefficient = null;
     state.transformParam = null;
 
-    // 重置UI显示
-    const transformTargetDiv = document.getElementById('transform-target');
-    const transformParamDiv = document.getElementById('transform-param');
-    if (transformTargetDiv) transformTargetDiv.textContent = '待定';
-    if (transformParamDiv) transformParamDiv.textContent = '待定';
 }
 
 /**
