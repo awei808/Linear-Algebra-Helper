@@ -27,6 +27,7 @@ const elements = {
     ButtonReplaceElement: document.getElementById('ButtonReplaceElement'),
     ButtonToggleHelp: document.getElementById('ButtonToggleHelp'),
     ButtonReset: document.getElementById('ButtonReset'),
+    ButtonComputeDiagonalProduct: document.getElementById('ButtonComputeDiagonalProduct'),
 
     // 矩阵数据显示
     matrixDataDisplay: document.getElementById('matrixDataDisplay'),
@@ -61,6 +62,8 @@ const elements = {
     scrollLeft: document.getElementById('scroll-left'),
     scrollRight: document.getElementById('scroll-right'),
 
+    // 计算结果显示
+    result: document.getElementById('result'),
     //特殊element元素，无法直接在此处获取，在其他函数创建后才会进入elements对象
     /*
     buttonInputMatrix  
@@ -122,8 +125,8 @@ function setupEventListeners() {
     elements.ButtonForceFactorize.addEventListener('click', confirmForceFactorize);
     elements.ButtonReplaceElement.addEventListener('click', confirmReplaceElement);
     elements.ButtonToggleHelp.addEventListener('click', toggleHelp);
-    elements.ButtonReset.addEventListener('click', resetToInitialState);
-
+    elements.ButtonReset.addEventListener('click', performReset);
+    elements.ButtonComputeDiagonalProduct.addEventListener('click', computeDiagonalProduct);
 
     // 添加帮助按钮点击事件
     elements.scrollLeft.addEventListener('click', () => switchContent(false));

@@ -198,33 +198,35 @@ function Undo() {
             if (typeof restoreOriginalGrid === 'function') {
                 restoreOriginalGrid();
             }
+            performUndoOperation(prevStateType, prevMatrixData, prevMatrixData);
             break;
 
         case CONFIG.STATES.ELEMENTARY_TRANSFORMATION:
             console.log('初等变换下, undo');
             if (typeof restoreGridForInputElements === 'function') {
-                restoreGridForInputElements();
+                if (state.undoStack && state.undoStack.length > 0) {
+                    popupCentreManager.showConfirmPopup('撤销将清空所有变换历史，确定撤销？',
+                        () => {
+                            restoreGridForInputElements();
+                            state.undoStack = [];
+                            state.redoStack = [];
+                            initialMatrixData = null;
+                            performUndoOperation(prevStateType, prevMatrixData, prevMatrixData);
+                        });
+                } else {
+                    restoreGridForInputElements();
+                    state.undoStack = [];
+                    state.redoStack = [];
+                    initialMatrixData = null;
+                    performUndoOperation(prevStateType, prevMatrixData, prevMatrixData);
+                }
             }
             break;
 
         default:
             console.log(`当前状态 ${state.currentState} 下执行撤销操作`);
+            performUndoOperation(prevStateType, prevMatrixData, prevMatrixData);
             break;
-    }
-
-    // 3. 全局状态回滚
-    state.currentState = prevStateType;
-    state.matrixData = prevMatrixData;
-
-    // 4. 恢复坐标显示和UI
-    const dim = state.matrixData ? `${state.matrixData.rows}×${state.matrixData.cols}` : CONFIG.INITIAL_DIMENSION;
-    if (typeof updateCoordinatesDisplay === 'function') {
-        updateCoordinatesDisplay(dim);
-    }
-    state.lastSelectedDimension = dim;
-
-    if (typeof updateUIForCurrentState === 'function') {
-        updateUIForCurrentState();
     }
 }
 
@@ -291,4 +293,24 @@ function isValidStateTransition(fromState, toState) {
     };
 
     return validTransitions[fromState] && validTransitions[fromState].includes(toState);
+}
+
+/**
+ * 撤销操作中的可复用代码
+ */
+function performUndoOperation(prevStateType, prevMatrixData, prevMatrixData) {
+    // 全局状态回滚
+    state.currentState = prevStateType;
+    state.matrixData = prevMatrixData;
+
+    // 恢复坐标显示和UI
+    const dim = state.matrixData ? `${state.matrixData.rows}×${state.matrixData.cols}` : CONFIG.INITIAL_DIMENSION;
+    if (typeof updateCoordinatesDisplay === 'function') {
+        updateCoordinatesDisplay(dim);
+    }
+    state.lastSelectedDimension = dim;
+
+    if (typeof updateUIForCurrentState === 'function') {
+        updateUIForCurrentState();
+    }
 }

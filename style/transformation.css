@@ -22,6 +22,8 @@
     display: flex;
     align-items: center;
     cursor: pointer;
+    align-items: center;
+    gap: 10px;
 }
 
 .transform-group:hover {
@@ -62,11 +64,6 @@
 }
 
 /* 确保transform-group内部元素垂直居中 */
-.transform-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
 
 .transform-group.active {
     background-color: var(--target-param-active-color);
@@ -75,4 +72,18 @@
 .transform-group.active .t-i-group {
     background-color: var(--light-bg);
     color: var(--dark-text);
+}
+
+.transform-center {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    margin-left: auto; /* 水平居中 */
+    margin-right: auto; /* 水平居中 */
+    max-width: 100%; /* 防止溢出父容器 */
+    box-sizing: border-box; 
 }

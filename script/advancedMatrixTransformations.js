@@ -15,9 +15,12 @@
  * 4.清除历史记录
  */
 function resetToInitialState() {
-    // 1. 隐藏初等变换部分的HTML
+    // 1. 隐藏不需要的HTML
     if (elements.operatorButtons) {
         elements.operatorButtons.classList.add('hidden');
+    }
+    if (elements.result) {
+        elements.result.classList.add('hidden');
     }
     // 2. 重置快速输入框
     if (elements.quickInput) {
@@ -70,10 +73,12 @@ function resetToInitialState() {
     state.transformTarget = null;
     state.transformCoefficient = null;
     state.transformParam = null;
-
-    showSuccess('重置完成：应用已恢复到初始状态');
 }
 
+function performReset() {
+    popupCentreManager.showConfirmPopup("此操作将完全重置网页，确定重置？", () => resetToInitialState());
+    showSuccess('重置完成：应用已恢复到初始状态');
+}
 /**
  * 计算对角线乘积
  * 使用math.js处理，支持包含未知数的表达式
@@ -83,22 +88,39 @@ function computeDiagonalProduct() {
         showError('请先输入矩阵');
         return;
     }
-    
-    // 初始化乘积为1（使用math.js的常量）
-    let product = math.parse('1');
-    
-    // 遍历对角线元素，使用math.js进行乘法运算
-    for (let i = 0; i < state.matrixData.rows; i++) {
-        const element = state.matrixData.elements[i][i] || '0';
-        const elementExpr = math.parse(element);
-        product = math.multiply(product, elementExpr);
+    if (state.matrixData.rows !== state.matrixData.cols) {
+        showError('当前矩阵不是方阵，无法计算');
+        return;
     }
-    
-    // 简化表达式
-    const simplifiedProduct = math.simplify(product);
-    
-    // 转换为字符串显示
-    const productStr = math.format(simplifiedProduct, { format: 'latex' });
-    
-    showSuccess(`对角线乘积为：${productStr}`);
+
+    try {
+        // 构建对角线乘积表达式
+        let expression = '1';
+        for (let i = 0; i < state.matrixData.rows; i++) {
+            const element = state.matrixData.elements[i][i] || '0';
+            expression += ` * (${element})`;
+        }
+
+        // 使用math.js解析和简化数学表达式
+        // 本函数在transformation.js中定义
+        const result = parseAndSimplifyPolynomial(expression);
+
+        // 验证变量
+        if (!validatePolynomialVariables(result)) {
+            throw new Error('表达式包含不允许的变量');
+        }
+        const parsedExpr = math.parse(result || '0');
+        const latexStr = math.format(parsedExpr, { format: 'latex' });
+        katex.render(latexStr, elements.result, {
+            displayMode: true, // 块级渲染（公式居中，更美观）
+            throwOnError: false, // 容错处理
+            errorColor: '#d32f2f'
+        });
+        elements.result.classList.remove('hidden');
+        elements.result.classList.add('transform-center');
+        showSuccess(`计算完成！结果显示在初等变换区域下方`);
+    } catch (error) {
+        console.error('计算对角线乘积时出错:', error);
+        showError('计算对角线乘积失败，请检查矩阵数据');
+    }
 }
