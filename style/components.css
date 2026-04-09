@@ -265,6 +265,6 @@ button#button-reset:hover {
     cursor: pointer;
 }
 
-warn{
+.warn{
     background: linear-gradient(135deg, #ffa726, #f57c00);
 }
