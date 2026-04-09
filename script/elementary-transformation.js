@@ -155,7 +155,6 @@ function createMatrixDisplayTable() {
         elements.windowDiv.style.gridTemplateColumns = 'none';
         elements.windowDiv.style.gridTemplateRows = 'none';
         // 确保windowDiv能正确显示表格
-        elements.windowDiv.style.overflow = 'visible';
         elements.inputMatrixDiv.classList.remove('hidden');
         console.log('createMatrixDisplayTable 完成表格显示');
     }, 0);

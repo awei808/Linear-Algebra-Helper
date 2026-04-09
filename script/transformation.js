@@ -13,7 +13,6 @@ function resetSelectionState() {
     state.transformTarget = null;
     state.transformCoefficient = null;
     state.transformParam = null;
-
 }
 
 /**
@@ -410,10 +409,7 @@ function validateTransformationInputs(targetInput, coefficientInput, paramInput,
                 return { isValid: false, message: '加减操作只能在同行或同列之间进行' };
             }
 
-            // 检验目标行列和参数行列不能相同
-            if (targetIndex === paramIndex) {
-                return { isValid: false, message: '目标行列和参数行列不能相同' };
-            }
+            // 取消检验：目标行列和参数行列能不能相同
             break;
 
         case '×':

@@ -381,12 +381,12 @@ function startMatrixInput() {
         // 切换到维度选择状态
         state.currentState = CONFIG.STATES.SELECT_DIMENSION;
         updateUIForCurrentState();
-        elements.inputMatrixDiv.classList.toggle('visible');
+        elements.inputMatrixDiv.classList.toggle('hidden');
         return;
     }
 
     // 否则执行原有的toggleInputMatrix功能
-    elements.inputMatrixDiv.classList.toggle('visible');
+    elements.inputMatrixDiv.classList.toggle('hidden');
 }
 
 /**
