@@ -8,36 +8,36 @@
 
 // ==================== 校验操作 ====================
 /**
- * 验证对角线乘积是否可以计算
- * 只校验不计算
- * @returns {boolean} 是否需要计算对角线乘积
+ * 统一验证函数：验证矩阵是否满足特定操作的条件
+ * 使用switch case处理不同操作的验证逻辑
+ * @param {string} operationType - 操作类型：'diagonalProduct' | 'augmentedIdentity' | 'addLamada'
+ * @returns {boolean} 是否可以执行该操作
  */
-function validDiagonalProduct() {
+function validateMatrixForOperation(operationType) {
+    // 检查矩阵是否存在
     if (!state.matrixData) {
         showError('请先输入矩阵');
         return false;
     }
+    
+    // 检查是否为方阵（所有操作都需要方阵）
     if (state.matrixData.rows !== state.matrixData.cols) {
-        showError('当前矩阵不是方阵，无法计算');
+        switch (operationType) {
+            case 'diagonalProduct':
+                showError('当前矩阵不是方阵，无法计算对角线乘积');
+                break;
+            case 'augmentedIdentity':
+                showError('当前矩阵不是方阵，无法计算增广矩阵');
+                break;
+            case 'addLamada':
+                showError('当前矩阵不是方阵，无法添加lamada');
+                break;
+            default:
+                showError('当前矩阵不是方阵，无法执行该操作');
+        }
         return false;
     }
-    return true;
-}
-
-/**
- * 验证增广单位矩阵是否可以计算
- * 只校验不计算
- * @returns {boolean} 是否需要计算增广单位矩阵
- */
-function validAugmentedIdentity() {
-    if (!state.matrixData) {
-        showError('请先输入矩阵');
-        return false;
-    }
-    if (state.matrixData.rows !== state.matrixData.cols) {
-        showError('当前矩阵不是方阵，无法计算增广矩阵');
-        return false;
-    }
+    
     return true;
 }
 
@@ -113,7 +113,7 @@ function resetToInitialState() {
 
 /**
  * 计算对角线乘积
- * 使用math.js处理，只计算不校验
+ * 使用math.js处理
  */
 function computeDiagonalProduct() {
     try {
@@ -212,6 +212,74 @@ function createAugmentedIdentity() {
     }
 }
 
+/**
+ * 向对角线元素添加-lamada
+ * 用于特征值计算，将原矩阵转换为A-λI形式
+ */
+function addLamada() {
+    try {
+        // 使用tempMatrix变量存储现有的矩阵数据
+        const tempMatrix = JSON.parse(JSON.stringify(state.matrixData.elements));
+        const rows = state.matrixData.rows;
+        const cols = state.matrixData.cols;
+
+        // 重置到初始状态
+        resetToInitialState();
+
+        // 修改对角线元素：a_ii - λ
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                if (i === j) {
+                    // 对角线元素：原值 - λ
+                    const originalValue = tempMatrix[i][j];
+                    if (originalValue === '0') {
+                        tempMatrix[i][j] = '-λ';
+                    } else {
+                        tempMatrix[i][j] = `${originalValue} - λ`;
+                    }
+                }
+                // 非对角线元素保持不变
+            }
+        }
+
+        // 将矩阵转换为与main.js相同的二维数组字符串格式
+        const matrixArray = [];
+        for (let i = 0; i < tempMatrix.length; i++) {
+            const row = [];
+            for (let j = 0; j < tempMatrix[i].length; j++) {
+                row.push(tempMatrix[i][j] || '0');
+            }
+            matrixArray.push(`[${row.join(', ')}]`);
+        }
+
+        const matrixString = `[${matrixArray.join(', ')}]`;
+
+        // 设置快速录入输入框的值并处理
+        if (!elements.quickInput) {
+            // 如果快速录入输入框不存在，先创建
+            handleQuickInputClick();
+
+            // 等待输入框创建完成
+            setTimeout(() => {
+                if (elements.quickInput) {
+                    elements.quickInput.value = matrixString;
+                    handleQuickInputMatrix();
+                    showSuccess('特征值矩阵创建成功！对角线元素已添加-λ');
+                }
+            }, 100);
+        } else {
+            // 直接设置值并处理
+            elements.quickInput.value = matrixString;
+            handleQuickInputMatrix();
+            showSuccess('特征值矩阵创建成功！对角线元素已添加-λ');
+        }
+
+    } catch (error) {
+        console.error('创建特征值矩阵时出错:', error);
+        showError('创建特征值矩阵失败，请检查矩阵数据');
+    }
+}
+
 // ==================== 执行操作 ====================
 // 执行重置操作
 function performReset() {
@@ -220,9 +288,19 @@ function performReset() {
         showSuccess('重置完成：应用已恢复到初始状态');
     });
 }
+
+// 执行对角线乘积计算
+function performDiagonalProduct() {
+    const isValid = validateMatrixForOperation('diagonalProduct');
+    if (!isValid) {
+        return;
+    }
+    computeDiagonalProduct();
+}
+
 // 执行增广单位矩阵计算
 function performAugmentedIdentity() {
-    const isValid = validAugmentedIdentity();
+    const isValid = validateMatrixForOperation('augmentedIdentity');
     if (!isValid) {
         return;
     }
@@ -231,12 +309,14 @@ function performAugmentedIdentity() {
     });
 }
 
-// 执行对角线乘积计算
-function performDiagonalProduct() {
-    const isValid = validDiagonalProduct();
+
+// 执行添加lamada操作
+function performAddLamada() {
+    const isValid = validateMatrixForOperation('addLamada');
     if (!isValid) {
         return;
     }
-    computeDiagonalProduct();
+    popupCentreManager.showConfirmPopup("此操作将完全重置矩阵，并生成含λ的矩阵，用于特征值计算，确定执行？", () => {
+        addLamada();
+    });
 }
-

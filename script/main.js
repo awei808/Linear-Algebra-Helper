@@ -29,6 +29,7 @@ const elements = {
     ButtonReset: document.getElementById('ButtonReset'),
     ButtonComputeDiagonalProduct: document.getElementById('ButtonComputeDiagonalProduct'),
     ButtonCreateAugmentedIdentity: document.getElementById('ButtonCreateAugmentedIdentity'),
+    ButtonAddLamada: document.getElementById('ButtonAddLamada'),
 
     // 矩阵数据显示
     matrixDataDisplay: document.getElementById('matrixDataDisplay'),
@@ -121,6 +122,7 @@ function setupEventListeners() {
     elements.ButtonReset.addEventListener('click', performReset);
     elements.ButtonComputeDiagonalProduct.addEventListener('click', performDiagonalProduct);
     elements.ButtonCreateAugmentedIdentity.addEventListener('click', performAugmentedIdentity);
+    elements.ButtonAddLamada.addEventListener('click', performAddLamada);
 
     // 添加帮助按钮点击事件
     elements.scrollLeft.addEventListener('click', () => switchContent(false));
