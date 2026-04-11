@@ -28,6 +28,7 @@ const elements = {
     ButtonToggleHelp: document.getElementById('ButtonToggleHelp'),
     ButtonReset: document.getElementById('ButtonReset'),
     ButtonComputeDiagonalProduct: document.getElementById('ButtonComputeDiagonalProduct'),
+    ButtonCreateAugmentedIdentity: document.getElementById('ButtonCreateAugmentedIdentity'),
 
     // 矩阵数据显示
     matrixDataDisplay: document.getElementById('matrixDataDisplay'),
@@ -92,16 +93,8 @@ function setupEventListeners() {
     elements.buttonRedo.addEventListener('click', redoTransformation);
     
     // 添加选择器值变化事件监听器
-    if (elements.transformTarget) {
-        elements.transformTarget.addEventListener('change', function() {
-            handleSelectorChange('target', this.value);
-        });
-    }
-    if (elements.transformParam) {
-        elements.transformParam.addEventListener('change', function() {
-            handleSelectorChange('param', this.value);
-        });
-    }
+    if (elements.transformTarget) { elements.transformTarget.addEventListener('change', function() {handleSelectorChange('target', this.value);});}
+    if (elements.transformParam) {elements.transformParam.addEventListener('change', function() {handleSelectorChange('param', this.value);});}
 
     // 添加更多按钮点击事件
     if (elements.moreButton && elements.moreDropdown) {
@@ -127,6 +120,7 @@ function setupEventListeners() {
     elements.ButtonToggleHelp.addEventListener('click', toggleHelp);
     elements.ButtonReset.addEventListener('click', performReset);
     elements.ButtonComputeDiagonalProduct.addEventListener('click', computeDiagonalProduct);
+    elements.ButtonCreateAugmentedIdentity.addEventListener('click', performAugmentedIdentity);
 
     // 添加帮助按钮点击事件
     elements.scrollLeft.addEventListener('click', () => switchContent(false));
