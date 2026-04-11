@@ -6,13 +6,49 @@
 3.重新创建网格，显示修改后的矩阵数据
 */
 
+// ==================== 校验操作 ====================
+/**
+ * 验证对角线乘积是否可以计算
+ * 只校验不计算
+ * @returns {boolean} 是否需要计算对角线乘积
+ */
+function validDiagonalProduct() {
+    if (!state.matrixData) {
+        showError('请先输入矩阵');
+        return false;
+    }
+    if (state.matrixData.rows !== state.matrixData.cols) {
+        showError('当前矩阵不是方阵，无法计算');
+        return false;
+    }
+    return true;
+}
+
+/**
+ * 验证增广单位矩阵是否可以计算
+ * 只校验不计算
+ * @returns {boolean} 是否需要计算增广单位矩阵
+ */
+function validAugmentedIdentity() {
+    if (!state.matrixData) {
+        showError('请先输入矩阵');
+        return false;
+    }
+    if (state.matrixData.rows !== state.matrixData.cols) {
+        showError('当前矩阵不是方阵，无法计算增广矩阵');
+        return false;
+    }
+    return true;
+}
+
+//// ==================== 计算操作 ====================
 /**
  * 重置到初始状态
  * 为进阶变换功能提供干净的初始环境
- * 1.清空窗口内容，重置样式，重置坐标显示
- * 2.移除行列索引事件监听器
- * 3.清除state中的数据，恢复默认状态
- * 4.清除历史记录
+ * 清空窗口内容，重置样式，重置坐标显示
+ * 移除行列索引事件监听器
+ * 清除state中的数据，恢复默认状态
+ * 清除历史记录
  */
 function resetToInitialState() {
     // 1. 隐藏不需要的HTML
@@ -75,28 +111,11 @@ function resetToInitialState() {
     state.transformParam = null;
 }
 
-function performReset() {
-    popupCentreManager.showConfirmPopup("此操作将完全重置网页，确定重置？", () => {
-        resetToInitialState();
-        showSuccess('重置完成：应用已恢复到初始状态');
-    });
-    
-}
-
 /**
  * 计算对角线乘积
- * 使用math.js处理，支持包含未知数的表达式
+ * 使用math.js处理，只计算不校验
  */
 function computeDiagonalProduct() {
-    if (!state.matrixData) {
-        showError('请先输入矩阵');
-        return;
-    }
-    if (state.matrixData.rows !== state.matrixData.cols) {
-        showError('当前矩阵不是方阵，无法计算');
-        return;
-    }
-
     try {
         // 构建对角线乘积表达式
         let expression = '1';
@@ -129,32 +148,21 @@ function computeDiagonalProduct() {
     }
 }
 
-
 /**
  * 创建增广单位矩阵
  * 将当前矩阵与单位矩阵合并，形成增广矩阵
  */
 function createAugmentedIdentity() {
     try {
-        // 1. 检查矩阵数据是否存在
-        if (!state.matrixData) {
-            showError('请先输入矩阵');
-            return;
-        }
-        if (state.matrixData.rows !== state.matrixData.cols) {
-            showError('当前矩阵不是方阵，无法计算增广矩阵');
-            return;
-        }
-        
-        // 2. 使用tempMatrix变量存储现有的矩阵数据
+        // 使用tempMatrix变量存储现有的矩阵数据
         const tempMatrix = JSON.parse(JSON.stringify(state.matrixData.elements));
         const rows = state.matrixData.rows;
         const cols = state.matrixData.cols;
-        
-        // 3. 重置到初始状态
+
+        // 重置到初始状态
         resetToInitialState();
-        
-        // 4. 直接在tempMatrix中添加单位矩阵部分
+
+        // 直接在tempMatrix中添加单位矩阵部分
         for (let i = 0; i < rows; i++) {
             // 为每一行添加单位矩阵部分
             for (let j = 0; j < cols; j++) {
@@ -165,8 +173,8 @@ function createAugmentedIdentity() {
                 }
             }
         }
-        
-        // 5. 将增广矩阵转换为与main.js相同的二维数组字符串格式
+
+        // 将增广矩阵转换为与main.js相同的二维数组字符串格式
         const matrixArray = [];
         for (let i = 0; i < tempMatrix.length; i++) {
             const row = [];
@@ -175,14 +183,14 @@ function createAugmentedIdentity() {
             }
             matrixArray.push(`[${row.join(', ')}]`);
         }
-        
+
         const matrixString = `[${matrixArray.join(', ')}]`;
-        
-        // 6. 设置快速录入输入框的值并处理
+
+        // 设置快速录入输入框的值并处理
         if (!elements.quickInput) {
             // 如果快速录入输入框不存在，先创建
             handleQuickInputClick();
-            
+
             // 等待输入框创建完成
             setTimeout(() => {
                 if (elements.quickInput) {
@@ -197,16 +205,38 @@ function createAugmentedIdentity() {
             handleQuickInputMatrix();
             showSuccess('增广矩阵创建成功！');
         }
-        
+
     } catch (error) {
         console.error('创建增广矩阵时出错:', error);
         showError('创建增广矩阵失败，请检查矩阵数据');
     }
 }
 
+// ==================== 执行操作 ====================
+// 执行重置操作
+function performReset() {
+    popupCentreManager.showConfirmPopup("此操作将完全重置网页，确定重置？", () => {
+        resetToInitialState();
+        showSuccess('重置完成：应用已恢复到初始状态');
+    });
+}
+// 执行增广单位矩阵计算
 function performAugmentedIdentity() {
+    const isValid = validAugmentedIdentity();
+    if (!isValid) {
+        return;
+    }
     popupCentreManager.showConfirmPopup("此操作将完全重置矩阵，并生成用于求逆的增广矩阵，确定执行？", () => {
         createAugmentedIdentity();
     });
-    
 }
+
+// 执行对角线乘积计算
+function performDiagonalProduct() {
+    const isValid = validDiagonalProduct();
+    if (!isValid) {
+        return;
+    }
+    computeDiagonalProduct();
+}
+

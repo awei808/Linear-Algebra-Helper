@@ -119,7 +119,7 @@ function setupEventListeners() {
     elements.ButtonReplaceElement.addEventListener('click', confirmReplaceElement);
     elements.ButtonToggleHelp.addEventListener('click', toggleHelp);
     elements.ButtonReset.addEventListener('click', performReset);
-    elements.ButtonComputeDiagonalProduct.addEventListener('click', computeDiagonalProduct);
+    elements.ButtonComputeDiagonalProduct.addEventListener('click', performDiagonalProduct);
     elements.ButtonCreateAugmentedIdentity.addEventListener('click', performAugmentedIdentity);
 
     // 添加帮助按钮点击事件
