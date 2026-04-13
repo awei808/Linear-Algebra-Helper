@@ -22,7 +22,7 @@ const helpContent = [
 
     '<h4>“生成含λ的矩阵”有什么用？</h4><p>生成的矩阵的所有对角线元素都会变成原值-λ，可用于特征值计算。</p><p>搭配“计算对角线乘积”功能，可以快速计算特征值。</p>',
 
-    '<h4>这个帮助板块很显眼，能关闭吗？</h4><p>点击“更多”按钮，选择“关闭帮助”即可关闭。</p><p>若需要永久切换帮助板块的显示状态，需在config.js中修改UI_CONFIG.DISPLAY_HELP的值</p>',
+    '<h4>这个帮助板块很显眼，能关闭吗？</h4><p>点击“更多”按钮，选择“关闭帮助”即可关闭。</p><p>若使用本地完整版，在config.js中修改UI_CONFIG.DISPLAY_HELP的值为false，即可永久关闭帮助板块。</p>',
 ]
 let currentIndex = state.helpContentIndex;//值为-1
 

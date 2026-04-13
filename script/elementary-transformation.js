@@ -75,11 +75,12 @@ function createMatrixDisplayTable() {
         for (let col = 0; col < cols; col++) {
             const td = document.createElement('td');
             //使用mathjs解析，输出latex格式，使用katex渲染
+            //这里使用render直接渲染和显示；与squareMatriSpecialFunctionx.js中的显示方式不同
             const parsedExpr = math.parse(matrixElements[row][col] || '0');
             const latexStr = math.format(parsedExpr, { format: 'latex' });
             katex.render(latexStr, td, {
-                displayMode: true, // 块级渲染（公式居中，更美观）
-                throwOnError: false, // 容错处理
+                displayMode: true, // 块级居中
+                throwOnError: false, 
                 errorColor: '#d32f2f'
             }
             );

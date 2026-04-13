@@ -19,7 +19,7 @@ function validateMatrixForOperation(operationType) {
         showError('请先输入矩阵');
         return false;
     }
-    
+
     // 检查是否为方阵（所有操作都需要方阵）
     if (state.matrixData.rows !== state.matrixData.cols) {
         switch (operationType) {
@@ -37,7 +37,7 @@ function validateMatrixForOperation(operationType) {
         }
         return false;
     }
-    
+
     return true;
 }
 
@@ -124,7 +124,7 @@ function computeDiagonalProduct() {
             expression += ` * (${element})`;
         }
 
-        // 使用math.js解析和简化数学表达式
+        // 使用math.js简化
         // 本函数在transformation.js中定义
         const result = parseAndSimplifyPolynomial(expression);
 
@@ -132,13 +132,15 @@ function computeDiagonalProduct() {
         if (!validatePolynomialVariables(result)) {
             throw new Error('表达式包含不允许的变量');
         }
+        //这里使用renderToString渲染和innerHTML添加显示；与elementary-transformations.js中的显示方式不同
         const parsedExpr = math.parse(result || '0');
         const latexStr = math.format(parsedExpr, { format: 'latex' });
-        katex.render(latexStr, elements.result, {
-            displayMode: true, // 块级渲染（公式居中，更美观）
-            throwOnError: false, // 容错处理
+        const formulaHtml = katex.renderToString(latexStr, {
+            throwOnError: false,
             errorColor: '#d32f2f'
         });
+        const finalHtml = `对角线乘积计算结果：${formulaHtml} <span style="margin-left:10px;"></span>`;
+        elements.result.innerHTML = finalHtml;
         elements.result.classList.remove('hidden');
         elements.result.classList.add('transform-center');
         showSuccess(`计算完成！结果显示在初等变换区域下方`);

@@ -259,27 +259,27 @@ function exportMatrixToArray() {
     // 复制到剪贴板
     navigator.clipboard.writeText(matrixString).then(() => {
         // 显示成功消息
-        showSuccess('矩阵数据已复制到剪贴板！');
+        showSuccess('矩阵数据已复制到剪贴板，并显示在初等变换区域下方');
 
         // 显示矩阵数据
-        if (elements.matrixDataDisplay) {
-            elements.matrixDataDisplay.textContent = `矩阵数据: ${matrixString}`;
-            elements.matrixDataDisplay.style.display = 'block';
+        if (elements.result) {
+            elements.result.textContent = `矩阵数据: ${matrixString}`;
+            elements.result.style.display = 'block';
         }
 
-        // 关闭下拉菜单
+        // 关闭下拉菜单 
         if (elements.moreDropdown) {
             elements.moreDropdown.classList.remove('show');
         }
 
     }).catch(err => {
         console.error('复制失败:', err);
-        showError('复制失败，请手动复制以下内容: ' + matrixString);
+        showError('复制失败，请在初等变换区域下方手动复制以下内容');
 
         // 即使复制失败也显示数据
-        if (elements.matrixDataDisplay) {
-            elements.matrixDataDisplay.textContent = `矩阵数据: ${matrixString}`;
-            elements.matrixDataDisplay.style.display = 'block';
+        if (elements.result) {
+            elements.result.textContent = `矩阵数据: ${matrixString}`;
+            elements.result.style.display = 'block';    
         }
     });
 }

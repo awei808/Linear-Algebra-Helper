@@ -131,6 +131,24 @@ h1 {
     visibility: visible;
 }
 
+.dropdown-title {
+    display: block;
+    padding-left: 9px;
+    margin: 0;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: var(--primary-color);
+    background-color: transparent;
+    border: none;
+    border-left: 1px solid #e8e8e8;
+}
+
+.dropdown-title:hover {
+    background-color: transparent;
+    color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
+}
+
 .dropdown-item {
     display: block;
     padding: 10px 16px;
