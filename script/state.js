@@ -112,7 +112,7 @@ function Next() {
     for (const funcName of requiredFunctions) {
         if (typeof window[funcName] !== 'function') {
             console.error(`${funcName} 函数未定义，请检查文件加载顺序`);
-            showError('系统功能未完全加载，请刷新页面重试');
+            showError(`系统功能未完全加载，请刷新页面重试 ${funcName}`);
             return;
         }
     }
