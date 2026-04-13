@@ -40,6 +40,7 @@
             <button class="dropdown-title">其他功能</button>
             <button class="dropdown-item" id="ButtonReset">重置矩阵</button>
             <button class="dropdown-item" id="ButtonToggleHelp">关闭帮助板块</button>
+            <button class="dropdown-item" id="ButtonValidateFile">网页文件完整性验证</button>
             <a href="https://github.com/awei808/awei" class="dropdown-item" target="_blank">跳转GitHub仓库</a>
         </div>
     </div>
@@ -135,6 +136,111 @@
     <script src="./script/squareMatriSpecialFunctionx.js"></script>
     <script src="./script/help.js"></script>
     <script src="./script/test.js"></script>
+    <script>
+        // 网页文件完整性验证
+        document.getElementById('ButtonValidateFile').addEventListener('click', () => {
+            // 验证结果对象
+            const validationResult = {
+                domElements: [],
+                scripts: [],
+                styles: [],
+                coreFunctions: [],
+                overallStatus: 'success'
+            };
+
+            // 检查脚本文件
+            const scriptSources = [
+                './script/config.js', './script/main.js', './script/popup.js', './script/state.js',
+                './script/historyManager.js', './script/VaildAndPreprocess.js', './script/select-dimension.js',
+                './script/input-elements.js', './script/elementary-transformation.js', './script/transformation.js',
+                './script/HandlePolynomial.js', './script/squareMatriSpecialFunctionx.js', './script/help.js',
+                './script/test.js'
+            ];
+
+            scriptSources.forEach(src => {
+                const script = document.querySelector(`script[src="${src}"]`);
+                const status = script ? 'success' : 'error';
+                validationResult.scripts.push({ src, status });
+                if (status === 'error') validationResult.overallStatus = 'error';
+            });
+
+            // 检查样式文件
+            const styleSources = [
+                './style/window-and-grid.css', './style/base.css', './style/components.css',
+                './style/popup.css', './style/responsive.css', './style/transformation.css',
+                './third-party-script/katex/katex.min.css', './style/help.css'
+            ];
+
+            styleSources.forEach(href => {
+                const link = document.querySelector(`link[href="${href}"]`);
+                const status = link ? 'success' : 'error';
+                validationResult.styles.push({ href, status });
+                if (status === 'error') validationResult.overallStatus = 'error';
+            });
+
+            // 检查核心函数
+            const coreFunctions = [
+                'init', 'setupEventListeners', 'updateUIForCurrentState', 'Next', 'Undo',
+                'saveCurrentState', 'createGrid', 'handleDimensionSelection', 'handleDataValidation',
+                'showElementaryTransformationUI', 'hideElementaryTransformationUI'
+            ];
+
+            coreFunctions.forEach(funcName => {
+                const status = typeof window[funcName] === 'function' ? 'success' : 'error';
+                validationResult.coreFunctions.push({ name: funcName, status });
+                if (status === 'error') validationResult.overallStatus = 'error';
+            });
+
+
+
+            // 显示验证结果
+            // 转换HTML格式为纯文本格式
+            let alertMessage = '网页文件完整性验证结果\n';
+            alertMessage += `总体状态：${validationResult.overallStatus === 'success' ? '通过' : '失败'}\n\n`;
+
+
+            // 脚本文件验证结果
+            alertMessage += '脚本文件检查：\n';
+            const missingScripts = validationResult.scripts.filter(item => item.status === 'error');
+            if (missingScripts.length === 0) {
+                alertMessage += '所有脚本文件存在\n';
+            } else {
+                alertMessage += '缺失的脚本文件：\n';
+                missingScripts.forEach(item => {
+                    alertMessage += `- ${item.src}\n`;
+                });
+            }
+            alertMessage += '\n';
+
+            // 样式文件验证结果
+            alertMessage += '样式文件检查：\n';
+            const missingStyles = validationResult.styles.filter(item => item.status === 'error');
+            if (missingStyles.length === 0) {
+                alertMessage += '所有样式文件存在\n';
+            } else {
+                alertMessage += '缺失的样式文件：\n';
+                missingStyles.forEach(item => {
+                    alertMessage += `- ${item.href}\n`;
+                });
+            }
+            alertMessage += '\n';
+
+            // 核心函数验证结果
+            alertMessage += '核心函数检查：\n';
+            const missingFunctions = validationResult.coreFunctions.filter(item => item.status === 'error');
+            if (missingFunctions.length === 0) {
+                alertMessage += '所有核心函数存在\n';
+            } else {
+                alertMessage += '缺失的核心函数：\n';
+                missingFunctions.forEach(item => {
+                    alertMessage += `- ${item.name}\n`;
+                });
+            }
+
+            // 使用alert显示验证结果
+            alert(alertMessage);
+        });
+    </script>
 </body>
 
 </html>
