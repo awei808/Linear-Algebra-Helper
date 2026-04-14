@@ -65,7 +65,7 @@
 /* 手机设备适配 (480px - 768px) */
 @media (max-width: 768px) {
     body {
-        padding: 10px;
+        padding: 6px;
         font-size: 14px;
     }
 
@@ -84,29 +84,29 @@
     }
 
     .grid-cell {
-        width: 30px;
-        height: 30px;
+        width: 26px;
+        height: 26px;
         font-size: 12px;
     }
 
     .grid-cell-input {
-        width: 45px;
-        height: 40px;
+        width: 40px;
+        height: 35px;
         font-size: 14px;
         padding: 0 3px;
     }
 
     #InputMatrix {
-        gap: 12px;
+        gap: 10px;
     }
 
     .assist-group {
         max-width: 280px;
-        gap: 8px;
+        gap: 6px;
     }
 
     .action-button {
-        padding: 12px 20px;
+        padding: 10px 16px;
         font-size: 14px;
         min-width: 100px;
     }
@@ -123,26 +123,26 @@
 /* 小屏手机适配 (320px - 480px) */
 @media (max-width: 480px) {
     body {
-        padding: 8px;
-        font-size: 13px;
+        padding: 6px;
+        font-size: 12px;
     }
 
     #ButtonInputMartix {
-        padding: 10px 20px;
-        font-size: 14px;
-        margin-bottom: 12px;
+        padding: 8px 14px;
+        font-size: 12px;
+        margin-bottom: 8px;
     }
 
     #window {
-        width: 280px;
-        height: 280px;
-        grid-template-columns: repeat(10, 28px);
-        grid-template-rows: repeat(10, 28px);
+        width: 260px;
+        height: 260px;
+        grid-template-columns: repeat(10, 24px);
+        grid-template-rows: repeat(10, 24px);
     }
 
     .grid-cell {
-        width: 28px;
-        height: 28px;
+        width: 24px;
+        height: 24px;
         font-size: 11px;
     }
 
@@ -151,11 +151,11 @@
         height: 35px;
         font-size: 13px;
         padding: 0 2px;
-        max-width: 3;
+        max-width: 20px;
     }
 
     #InputMatrix {
-        gap: 10px;
+        gap: 8px;
     }
 
     .assist-group {
@@ -164,15 +164,15 @@
     }
 
     .action-button {
-        padding: 10px 16px;
-        font-size: 13px;
-        min-width: 90px;
+        padding: 8px 12px;
+        font-size: 12px;
+        min-width: 80px;
     }
 
     #coordinates {
         font-size: 14px;
-        margin-top: 12px;
-        margin-bottom: 10px;
+        margin-top: 10px;
+        margin-bottom: 8px;
     }
 
     #tip {
@@ -186,6 +186,9 @@
     body {
         padding: 5px;
         font-size: 12px;
+        align-items: flex-start;
+        max-width: 100%;
+        margin: 0;
     }
 
     #ButtonInputMartix {
@@ -217,6 +220,7 @@
 
     #InputMatrix {
         gap: 8px;
+        width: 100%;
     }
 
     .assist-group {
@@ -239,6 +243,28 @@
 
 }
 
+/* 小屏幕设备禁止body居中显示 */
+@media (max-width: 768px) {
+    body {
+        align-items: flex-start;
+        max-width: 100%;
+        margin: 0;
+    }
+    
+    #InputMatrix {
+        width: 100%;
+    }
+    
+    .operator-buttons {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    #help {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
 /* 横屏模式适配 */
 @media (max-height: 500px) and (orientation: landscape) {
     #InputMatrix {
