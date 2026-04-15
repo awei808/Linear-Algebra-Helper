@@ -133,8 +133,9 @@ function computeDiagonalProduct() {
             throw new Error('表达式包含不允许的变量');
         }
         //这里使用renderToString渲染和innerHTML添加显示；与elementary-transformations.js中的显示方式不同
-        const parsedExpr = math.parse(result || '0');
-        const latexStr = math.format(parsedExpr, { format: 'latex' });
+        const value = result || '0';
+        // 字符串渲染，使用数字渲染可能导致转为科学计数法
+        const latexStr = String(value);
         const formulaHtml = katex.renderToString(latexStr, {
             throwOnError: false,
             errorColor: '#d32f2f'

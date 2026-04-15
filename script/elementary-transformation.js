@@ -76,11 +76,12 @@ function createMatrixDisplayTable() {
             const td = document.createElement('td');
             //使用mathjs解析，输出latex格式，使用katex渲染
             //这里使用render直接渲染和显示；与squareMatriSpecialFunctionx.js中的显示方式不同
-            const parsedExpr = math.parse(matrixElements[row][col] || '0');
-            const latexStr = math.format(parsedExpr, { format: 'latex' });
+            const value = matrixElements[row][col] || '0';
+            // 字符串渲染，使用数字渲染可能导致转为科学计数法
+            const latexStr = String(value);
             katex.render(latexStr, td, {
                 displayMode: true, // 块级居中
-                throwOnError: false, 
+                throwOnError: false,
                 errorColor: '#d32f2f'
             }
             );
@@ -181,7 +182,7 @@ function bindRowColumnIndexEvents() {
     const eventListener = function (e) {
         const target = e.target;
         // 判断是否点击了行/列标识标签（ID以add_r或add_c开头，或者class包含row-label/col-label）
-        if (target.id.startsWith('add_r') || target.id.startsWith('add_c') || 
+        if (target.id.startsWith('add_r') || target.id.startsWith('add_c') ||
             target.className.includes('row-label') || target.className.includes('col-label')) {
             const fullValue = target.textContent; // 直接使用textContent作为完整值，如 "r1", "c2"
 
@@ -216,12 +217,12 @@ function addRowColumnIndexOptions(rows, cols) {
     // 获取目标行/列和参数行/列的选择器元素
     const targetSelect = elements.transformTarget;
     const paramSelect = elements.transformParam;
-    
+
     if (!targetSelect || !paramSelect) {
         console.error('未找到目标行/列或参数行/列的选择器元素');
         return;
     }
-    
+
     // 清空现有的选项（保留第一个"无"选项）
     while (targetSelect.options.length > 1) {
         targetSelect.remove(1);
@@ -229,33 +230,33 @@ function addRowColumnIndexOptions(rows, cols) {
     while (paramSelect.options.length > 1) {
         paramSelect.remove(1);
     }
-    
+
     // 添加行索引选项
     for (let i = 0; i < rows; i++) {
         const rowValue = `r${i + 1}`;
-        
+
         // 添加到目标选择器
         const targetOption = new Option(rowValue, rowValue);
         targetSelect.add(targetOption);
-        
+
         // 添加到参数选择器
         const paramOption = new Option(rowValue, rowValue);
         paramSelect.add(paramOption);
     }
-    
+
     // 添加列索引选项
     for (let i = 0; i < cols; i++) {
         const colValue = `c${i + 1}`;
-        
+
         // 添加到目标选择器
         const targetOption = new Option(colValue, colValue);
         targetSelect.add(targetOption);
-        
+
         // 添加到参数选择器
         const paramOption = new Option(colValue, colValue);
         paramSelect.add(paramOption);
     }
-    
+
     console.log(`已添加 ${rows} 个行选项和 ${cols} 个列选项到选择器中`);
 }
 
@@ -271,7 +272,7 @@ function handleSelectorChange(selectorType, value) {
         console.error('无效的选择器类型:', selectorType);
         return;
     }
-    
+
     // 根据选择器类型更新对应的state变量
     if (selectorType === 'target') {
         state.transformTarget = value;
@@ -280,7 +281,7 @@ function handleSelectorChange(selectorType, value) {
         state.transformParam = value;
         showSuccess(`参数行/列已更新：${value}`);
     }
-    
+
     // 更新UI显示
     updateTransformationUIDisplay();
 }
@@ -292,12 +293,12 @@ function handleSelectorChange(selectorType, value) {
 function updateTransformationUIDisplay() {
     const transformTarget = elements.transformTarget;
     const transformParam = elements.transformParam;
-    
-    if (transformTarget && state.transformTarget&&transformTarget.value !== state.transformTarget) {
+
+    if (transformTarget && state.transformTarget && transformTarget.value !== state.transformTarget) {
         transformTarget.value = state.transformTarget;
     }
-    
-    if (transformParam && state.transformParam&&transformParam.value !== state.transformParam) {
+
+    if (transformParam && state.transformParam && transformParam.value !== state.transformParam) {
         transformParam.value = state.transformParam;
     }
 }
@@ -310,7 +311,7 @@ function showElementaryTransformationUI() {
     // 重置选择状态
     state.transformTarget = null;
     state.transformParam = null;
-    
+
     // 移除hidden类，显示初等变换界面
     const elementaryTransformationDiv = document.querySelector('.operator-buttons');
     if (elementaryTransformationDiv) {
