@@ -9,6 +9,8 @@ const state = {
     currentState: CONFIG.STATES.INIT, // 默认状态为INIT
     matrixData: null, // 存储矩阵数据，预期格式{rows，cols，elements}
     previousStates: [],// 状态历史，用于撤销
+    quickInputAdded: false,// 是否已添加快速输入框
+    isMobile: false,// 是否为移动端设备（如PC端、移动端）
 
     undoStack: [],// 撤销栈：存放可回滚的历史命令
     redoStack: [],// 重做栈：撤销后暂存命令，重做时恢复
@@ -17,7 +19,6 @@ const state = {
     rowColumnIndexEventListener: null, // 存储行列索引事件监听器引用
     isRowColumnIndexEventsBound: false,// 新增：标记行列索引事件是否已绑定
     selectedMatrixElements: [], // 存储用户选中的矩阵元素索引
-    quickInputAdded: false,
 
     targetIsActive: false,// 是否目标组为active伪类
     paramIsActive: false,// 是否参数组为active伪类

@@ -88,14 +88,14 @@ function setupEventListeners() {
     elements.buttonInputMatrix.addEventListener('click', startMatrixInput);
 
     // 添加初等变换按钮点击事件
-    elements.target.addEventListener('click', function () {handleTransformGroupClick(this);});
-    elements.param.addEventListener('click', function () {handleTransformGroupClick(this);});
+    elements.target.addEventListener('click', function () { handleTransformGroupClick(this); });
+    elements.param.addEventListener('click', function () { handleTransformGroupClick(this); });
     elements.buttonUndo.addEventListener('click', undoTransformation);
     elements.buttonRedo.addEventListener('click', redoTransformation);
-    
+
     // 添加选择器值变化事件监听器
-    if (elements.transformTarget) { elements.transformTarget.addEventListener('change', function() {handleSelectorChange('target', this.value);});}
-    if (elements.transformParam) {elements.transformParam.addEventListener('change', function() {handleSelectorChange('param', this.value);});}
+    if (elements.transformTarget) { elements.transformTarget.addEventListener('change', function () { handleSelectorChange('target', this.value); }); }
+    if (elements.transformParam) { elements.transformParam.addEventListener('change', function () { handleSelectorChange('param', this.value); }); }
 
     // 添加更多按钮点击事件
     if (elements.moreButton && elements.moreDropdown) {
@@ -136,12 +136,12 @@ function setupEventListeners() {
  */
 function init() {
     createGrid();
+    getScreenSizeType();
     setupEventListeners();
 
     // 确保初始状态为INIT
     state.currentState = CONFIG.STATES.INIT;
     updateUIForCurrentState();
-    // 初始化帮助板块显示状态
     updateDisplayHelp();
 }
 // 初始化应用, 添加窗口大小变化监听
@@ -279,7 +279,7 @@ function exportMatrixToArray() {
         // 即使复制失败也显示数据
         if (elements.result) {
             elements.result.textContent = `矩阵数据: ${matrixString}`;
-            elements.result.style.display = 'block';    
+            elements.result.style.display = 'block';
         }
     });
 }
@@ -501,7 +501,14 @@ function getInputElementDimensions() {
  */
 function getScreenSizeType() {
     const width = window.innerWidth;
-    if (width <= CONFIG.SCREEN_SIZES.MOBILE_MAX) return 'mobile';
-    if (width <= CONFIG.SCREEN_SIZES.TABLET_MAX) return 'tablet';
+    if (width <= CONFIG.SCREEN_SIZES.MOBILE_MAX) {
+        state.isMobile = true;
+        return 'mobile'
+    };
+    if (width <= CONFIG.SCREEN_SIZES.TABLET_MAX) {
+        state.isMobile = true;
+        return 'tablet';
+    };
+    state.isMobile = false;
     return 'desktop';
 }

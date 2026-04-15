@@ -154,6 +154,62 @@ function handleInputChange(event) {
 
 // ==================== 高级流程函数 ====================
 /**
+ * 处理输入框内容变化（移动端优化版本）
+ */
+function handleInputChangeMobile(event) {
+    const input = event.target;
+    
+    // 检查是否支持 Visual Viewport API
+    if (window.visualViewport) {
+        // 保存当前输入框引用
+        const currentInput = input;
+        
+        // 监听 visualViewport 变化事件
+        const handleViewportChange = () => {
+            // 检查键盘是否收起（viewport 高度增加）
+            if (window.visualViewport.height > window.innerHeight * 0.8) {
+                // 键盘已收起，调整输入框宽度
+                adjustInputWidth(currentInput);
+                
+                // 移除事件监听器
+                window.visualViewport.removeEventListener('resize', handleViewportChange);
+            }
+        };
+        
+        // 添加 visualViewport 变化监听
+        window.visualViewport.addEventListener('resize', handleViewportChange);
+        
+        // 设置超时保护，防止监听器一直存在
+        setTimeout(() => {
+            window.visualViewport.removeEventListener('resize', handleViewportChange);
+        }, 5000); // 5秒后自动移除监听器
+        
+    } else {
+        // 不支持 Visual Viewport API，使用时间差 + 焦点重置检查
+        setTimeout(() => {
+            const activeEl = document.activeElement;
+            const isInputFocused = activeEl && activeEl.tagName === 'INPUT';
+            
+            if (!isInputFocused) {
+                // 100ms 后焦点不在输入框，用户确实离开了
+                adjustInputWidth(input);
+            } else {
+                // 焦点仍在输入框，用户还在输入，等待下一次检查
+                setTimeout(() => {
+                    const activeEl2 = document.activeElement;
+                    const isInputFocused2 = activeEl2 && activeEl2.tagName === 'INPUT';
+                    
+                    if (!isInputFocused2) {
+                        // 200ms 后焦点不在输入框，用户确实离开了
+                        adjustInputWidth(input);
+                    }
+                }, 100);
+            }
+        }, 100);
+    }
+}
+
+/**
  * 启用输入框交互
 */
 function enableInputInteraction() {
@@ -164,10 +220,18 @@ function enableInputInteraction() {
         input.style.backgroundColor = 'white';
         input.style.cursor = 'text';
 
-        // 为每个输入框添加输入事件监听器
-        input.removeEventListener('input', handleInputChange); // 避免重复添加
-        input.addEventListener('input', handleInputChange);
-
+        // 根据设备类型选择不同的事件处理方式
+        if (state.isMobile) {
+            // 移动端：使用优化版本，避免输入法干扰
+            input.removeEventListener('input', handleInputChange);
+            input.removeEventListener('input', handleInputChangeMobile);
+            input.addEventListener('input', handleInputChangeMobile);
+        } else {
+            // PC端：使用原版处理方式
+            input.removeEventListener('input', handleInputChange);
+            input.removeEventListener('input', handleInputChangeMobile);
+            input.addEventListener('input', handleInputChange);
+        }
         // 初始化时也调整宽度
         adjustInputWidth(input);
     });
