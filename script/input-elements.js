@@ -91,6 +91,7 @@ function adjustInputWidth(input) {
         // 重新计算整个窗口的宽度
         const totalWidth = gridColumnSizes.reduce((sum, size) => sum + parseFloat(size), 0);
         elements.windowDiv.style.width = totalWidth + 'px';
+        console.log(`调整后的总宽度: ${totalWidth}px`);
     }
 }
 
@@ -150,9 +151,8 @@ function clearSelectedMatrixElements() {
  */
 function handleInputChange(event) {
     adjustInputWidth(event.target);
+    console.log(`桌面端输入框宽度调整`);
 }
-
-// ==================== 高级流程函数 ====================
 /**
  * 处理输入框内容变化（移动端优化版本）
  */
@@ -163,6 +163,7 @@ function handleInputChangeMobile(event) {
     if (window.visualViewport) {
         // 保存当前输入框引用
         const currentInput = input;
+        console.log(`移动端api输入框宽度调整`);
         
         // 监听 visualViewport 变化事件
         const handleViewportChange = () => {
@@ -208,6 +209,8 @@ function handleInputChangeMobile(event) {
         }, 100);
     }
 }
+// ==================== 高级流程函数 ====================
+
 
 /**
  * 启用输入框交互
