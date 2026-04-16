@@ -23,7 +23,7 @@ function getTextWidth(text, font) {
 }
 
 /**
- * 根据输入内容调整输入框宽度，该函数可优化
+ * 根据输入内容调整输入框宽度，该函数可优化，该函数目前被屏蔽
  */
 function adjustInputWidth(input) {
     /*
