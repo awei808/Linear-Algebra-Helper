@@ -26,6 +26,7 @@ function getTextWidth(text, font) {
  * 根据输入内容调整输入框宽度，该函数可优化
  */
 function adjustInputWidth(input) {
+    /*
     const value = input.value.toString();
 
     // 获取输入框的字体样式
@@ -93,6 +94,7 @@ function adjustInputWidth(input) {
         elements.windowDiv.style.width = totalWidth + 'px';
         console.log(`调整后的总宽度: ${totalWidth}px`);
     }
+    */
 }
 
 /**
