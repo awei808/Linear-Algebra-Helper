@@ -105,6 +105,7 @@ function setupEventListeners() {
         document.addEventListener('click', function (event) {
             if (!elements.moreButton.contains(event.target) && !elements.moreDropdown.contains(event.target)) {
                 elements.moreDropdown.classList.remove('show');
+                console.log('关闭下拉菜单');
             }
         });
     }
