@@ -147,12 +147,12 @@ function init() {
 // 初始化应用, 添加窗口大小变化监听
 document.addEventListener('DOMContentLoaded', () => {
     init();
-    // 窗口大小变化时重新计算， 该函数目前被屏蔽
-    /*window.addEventListener('resize', () => {
+    // 窗口大小变化时重新计算
+    window.addEventListener('resize', () => {
         if (state.currentState === CONFIG.STATES.INPUT_ELEMENTS && state.matrixData) {
             restoreGridForInputElements();
         }
-    });*/
+    });
 });
 
 
