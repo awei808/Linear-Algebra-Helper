@@ -23,7 +23,7 @@ function getTextWidth(text, font) {
 }
 
 /**
- * 根据输入内容调整输入框宽度
+ * 根据输入内容调整输入框宽度，该函数可优化
  */
 function adjustInputWidth(input) {
     const value = input.value.toString();
@@ -163,7 +163,7 @@ function handleInputChangeMobile(event) {
     if (window.visualViewport) {
         // 保存当前输入框引用
         const currentInput = input;
-        console.log(`移动端api输入框宽度调整`);
+        
         
         // 监听 visualViewport 变化事件
         const handleViewportChange = () => {
@@ -171,7 +171,7 @@ function handleInputChangeMobile(event) {
             if (window.visualViewport.height > window.innerHeight * 0.8) {
                 // 键盘已收起，调整输入框宽度
                 adjustInputWidth(currentInput);
-                
+                showSuccess('移动端api输入框宽度调整');
                 // 移除事件监听器
                 window.visualViewport.removeEventListener('resize', handleViewportChange);
             }
@@ -203,6 +203,7 @@ function handleInputChangeMobile(event) {
                     if (!isInputFocused2) {
                         // 200ms 后焦点不在输入框，用户确实离开了
                         adjustInputWidth(input);
+                        showSuccess('移动端时间差输入框宽度调整');
                     }
                 }, 100);
             }
@@ -228,7 +229,7 @@ function enableInputInteraction() {
             // 移动端：使用优化版本，避免输入法干扰
             input.removeEventListener('input', handleInputChange);
             input.removeEventListener('input', handleInputChangeMobile);
-            input.addEventListener('input', handleInputChangeMobile);
+            /*input.addEventListener('input', handleInputChangeMobile);*/
         } else {
             // PC端：使用原版处理方式
             input.removeEventListener('input', handleInputChange);
