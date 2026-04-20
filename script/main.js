@@ -150,12 +150,6 @@ function init() {
 document.addEventListener('DOMContentLoaded', () => {
     init();
     displayVersionInfo();
-    // 窗口大小变化时重新计算
-    window.addEventListener('resize', () => {
-        if (state.currentState === CONFIG.STATES.INPUT_ELEMENTS && state.matrixData) {
-            restoreGridForInputElements();
-        }
-    });
 });
 
 
