@@ -30,6 +30,7 @@ const elements = {
     ButtonComputeDiagonalProduct: document.getElementById('ButtonComputeDiagonalProduct'),
     ButtonCreateAugmentedIdentity: document.getElementById('ButtonCreateAugmentedIdentity'),
     ButtonAddLamada: document.getElementById('ButtonAddLamada'),
+    ButtonShowVersionAndUpdateTime: document.getElementById('ButtonShowVersionAndUpdateTime'),
 
     // 矩阵数据显示
     matrixDataDisplay: document.getElementById('matrixDataDisplay'),
@@ -124,6 +125,7 @@ function setupEventListeners() {
     elements.ButtonComputeDiagonalProduct.addEventListener('click', performDiagonalProduct);
     elements.ButtonCreateAugmentedIdentity.addEventListener('click', performAugmentedIdentity);
     elements.ButtonAddLamada.addEventListener('click', performAddLamada);
+    elements.ButtonShowVersionAndUpdateTime.addEventListener('click', showVersionAndUpdateTime);
 
     // 添加帮助按钮点击事件
     elements.scrollLeft.addEventListener('click', () => switchContent(false));
@@ -148,6 +150,7 @@ function init() {
 // 初始化应用, 添加窗口大小变化监听
 document.addEventListener('DOMContentLoaded', () => {
     init();
+    displayVersionInfo();
     // 窗口大小变化时重新计算
     window.addEventListener('resize', () => {
         if (state.currentState === CONFIG.STATES.INPUT_ELEMENTS && state.matrixData) {
@@ -512,4 +515,24 @@ function getScreenSizeType() {
     };
     state.isMobile = false;
     return 'desktop';
+}
+
+function showVersionAndUpdateTime() {
+    const version = VERSION ? VERSION.NUMBER : '1.0.0';
+    const updateTime = VERSION ? VERSION.DATE : '2023-12-31';
+    alert(`当前版本：${version}\n更新时间：${updateTime}`);
+}
+
+/**
+ * 显示版本信息到页面右下角
+ */
+function displayVersionInfo() {
+    if (document.getElementById('version-info')) return;
+    const versionDiv = document.createElement('div');
+    versionDiv.id = 'version-info';
+    versionDiv.style.cssText = 'position:fixed;bottom:5px;right:5px;font-size:12px;color:#999;z-index:100;';
+    const version = VERSION ? VERSION.NUMBER : '1.0.0';
+    const date = VERSION ? VERSION.DATE : '2023-12-31';
+    versionDiv.innerHTML = `版本 ${version} | ${date}`;
+    document.body.appendChild(versionDiv);
 }

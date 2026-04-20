@@ -7,3 +7,4 @@ script/test.js
 试错区.code-workspace
 .node_modules/
 destoryed/
+update-version.js
