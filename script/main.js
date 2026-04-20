@@ -353,6 +353,7 @@ function restoreGridForInputElements() {
         // 8. 无数据时恢复初始网格
         createGrid();
         updateCoordinatesDisplay(CONFIG.INITIAL_DIMENSION);
+        showSuccess('已恢复到初始网格');
     }
 }
 
