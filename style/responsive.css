@@ -136,8 +136,8 @@
     #window {
         width: 260px;
         height: 260px;
-        grid-template-columns: repeat(10, 24px);
-        grid-template-rows: repeat(10, 24px);
+        grid-template-columns: repeat(10, 26px);
+        grid-template-rows: repeat(10, 26px);
     }
 
     .grid-cell {

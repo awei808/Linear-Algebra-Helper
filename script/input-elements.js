@@ -26,7 +26,7 @@ function getTextWidth(text, font) {
  * 根据输入内容调整输入框宽度，该函数可优化，该函数目前被屏蔽
  */
 function adjustInputWidth(input) {
-    /*
+    
     const value = input.value.toString();
 
     // 获取输入框的字体样式
@@ -94,7 +94,7 @@ function adjustInputWidth(input) {
         elements.windowDiv.style.width = totalWidth + 'px';
         console.log(`调整后的总宽度: ${totalWidth}px`);
     }
-    */
+    
 }
 
 /**
@@ -156,7 +156,7 @@ function handleInputChange(event) {
     console.log(`桌面端输入框宽度调整`);
 }
 /**
- * 处理输入框内容变化（移动端优化版本）
+ * 处理输入框内容变化（移动端优化版本） 可优化掉
  */
 function handleInputChangeMobile(event) {
     const input = event.target;
@@ -231,7 +231,7 @@ function enableInputInteraction() {
             // 移动端：使用优化版本，避免输入法干扰
             input.removeEventListener('input', handleInputChange);
             input.removeEventListener('input', handleInputChangeMobile);
-            /*input.addEventListener('input', handleInputChangeMobile);*/
+            input.addEventListener('input', handleInputChangeMobile);
         } else {
             // PC端：使用原版处理方式
             input.removeEventListener('input', handleInputChange);
@@ -257,9 +257,7 @@ function disableGridInteraction() {
  * 隐藏初等变换UI（核心：清理初等变换操作框）
  */
 function hideElementaryTransformationUI() {
-    // 移除初等变换相关的DOM元素（根据实际DOM结构调整选择器）
-    const transformUI = document.querySelector('.operator-buttons');
-    transformUI.classList.add('hidden');
+    elements.operatorButtons.classList.add('hidden');
     // 移除行列索引事件监听器
     unbindRowColumnIndexEvents();
 }

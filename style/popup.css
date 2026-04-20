@@ -1,8 +1,8 @@
 /* 弹窗容器样式 - 固定在右下角或中心 */
 .popup-box-container {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: max(20px, env(safe-area-inset-bottom, 20px));
+    right: max(20px, env(safe-area-inset-right, 20px));
     z-index: 1000;
     display: flex;
     flex-direction: column-reverse;
