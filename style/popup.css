@@ -6,7 +6,7 @@
     z-index: 1000;
     display: flex;
     flex-direction: column-reverse;
-    /* 新的在最下面 */
+    /* 新的在最上面 */
     gap: 10px;
     max-width: 350px;
 }
