@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function initTransformationButtons() {
 
     // 交换按钮
-    elements.buttonChange.addEventListener('click', function () {
+    elements.buttonChange.addEventListener('pointerup', function () {
         setActiveSymbol('↔', elements.buttonChange);
         // 使用空白占位方式隐藏系数输入框和参数框
         elements.transformCoefficient.style.visibility = 'hidden';
@@ -139,7 +139,7 @@ function initTransformationButtons() {
     });
 
     //加法按钮
-    elements.buttonAdd.addEventListener('click', function () {
+    elements.buttonAdd.addEventListener('pointerup', function () {
         setActiveSymbol('+', elements.buttonAdd);
         // 显示系数输入框和参数框
         elements.transformCoefficient.style.visibility = 'visible';
@@ -156,7 +156,7 @@ function initTransformationButtons() {
     });
 
     //减法按钮
-    elements.buttonSub.addEventListener('click', function () {
+    elements.buttonSub.addEventListener('pointerup', function () {
         setActiveSymbol('−', elements.buttonSub);
         // 显示系数输入框和参数框
         elements.transformCoefficient.style.visibility = 'visible';
@@ -173,7 +173,7 @@ function initTransformationButtons() {
     });
 
     //倍乘按钮
-    elements.buttonMul.addEventListener('click', function () {
+    elements.buttonMul.addEventListener('pointerup', function () {
         setActiveSymbol('×', elements.buttonMul);
         // 显示系数输入框
         elements.transformCoefficient.style.visibility = 'visible';
@@ -203,7 +203,7 @@ function initTransformationButtons() {
  */
 function initTranslateButton() {
     if (elements && elements.buttonTranslate) {
-        elements.buttonTranslate.addEventListener('click', executeElementaryTransformation);
+        elements.buttonTranslate.addEventListener('pointerup', executeElementaryTransformation);
     }
 }
 

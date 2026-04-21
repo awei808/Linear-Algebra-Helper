@@ -86,7 +86,7 @@ function createNavigationDots() {
         `;
 
         // 点击小点切换内容
-        dot.addEventListener('click', function () {
+        dot.addEventListener('pointerup', function () {
             currentIndex = parseInt(this.dataset.index);
             elements.contentbox.innerHTML = helpContent[currentIndex];
             updateNavigationDots();

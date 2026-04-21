@@ -78,32 +78,31 @@ const elements = {
  * 设置事件监听器
  */
 function setupEventListeners() {
-
     // 使用事件委托，减少事件监听器数量
     elements.windowDiv.addEventListener('mousedown', handleMouseDown);
     elements.windowDiv.addEventListener('mouseleave', handleMouseLeave);
     // 添加按钮事件监听器
-    elements.undoButton.addEventListener('click', Undo);
-    elements.nextButton.addEventListener('click', Next);
+    elements.undoButton.addEventListener('pointerup', Undo);
+    elements.nextButton.addEventListener('pointerup', Next);
     // 添加录入矩阵按钮点击事件
-    elements.buttonInputMatrix.addEventListener('click', startMatrixInput);
+    elements.buttonInputMatrix.addEventListener('pointerup', startMatrixInput);
 
     // 添加初等变换按钮点击事件
-    elements.target.addEventListener('click', function () { handleTransformGroupClick(this); });
-    elements.param.addEventListener('click', function () { handleTransformGroupClick(this); });
-    elements.buttonUndo.addEventListener('click', undoTransformation);
-    elements.buttonRedo.addEventListener('click', redoTransformation);
+    elements.target.addEventListener('pointerup', (e) => handleTransformGroupClick(e.target));
+    elements.param.addEventListener('pointerup', (e) => handleTransformGroupClick(e.target));
+    elements.buttonUndo.addEventListener('pointerup', undoTransformation);
+    elements.buttonRedo.addEventListener('pointerup', redoTransformation);
 
     // 添加选择器值变化事件监听器
-    if (elements.transformTarget) { elements.transformTarget.addEventListener('change', function () { handleSelectorChange('target', this.value); }); }
-    if (elements.transformParam) { elements.transformParam.addEventListener('change', function () { handleSelectorChange('param', this.value); }); }
+    if (elements.transformTarget) { elements.transformTarget.addEventListener('change', (e) => handleSelectorChange('target', e.target.value)); }
+    if (elements.transformParam) { elements.transformParam.addEventListener('change', (e) => handleSelectorChange('param', e.target.value)); }
 
     // 添加更多按钮点击事件
     if (elements.moreButton && elements.moreDropdown) {
-        elements.moreButton.addEventListener('click', toggleMoreDropdown);
+        elements.moreButton.addEventListener('pointerup', toggleMoreDropdown);
 
         // 点击页面其他区域时关闭下拉菜单
-        document.addEventListener('click', function (event) {
+        document.addEventListener('pointerup', function (event) {
             if (!elements.moreButton.contains(event.target) && !elements.moreDropdown.contains(event.target)) {
                 elements.moreDropdown.classList.remove('show');
             }
@@ -111,24 +110,24 @@ function setupEventListeners() {
     }
 
     // 添加更多菜单中的按钮点击事件
-    elements.exportMatrixButton.addEventListener('click', function (event) {
+    elements.exportMatrixButton.addEventListener('pointerup', function (event) {
         event.preventDefault();
         exportMatrixToArray();
     });
-    elements.ButtonQuickInput.addEventListener('click', handleQuickInputClick);
-    elements.ButtonForceSimplify.addEventListener('click', confirmForceExpand);
-    elements.ButtonForceFactorize.addEventListener('click', confirmForceFactorize);
-    elements.ButtonReplaceElement.addEventListener('click', confirmReplaceElement);
-    elements.ButtonToggleHelp.addEventListener('click', toggleHelp);
-    elements.ButtonReset.addEventListener('click', performReset);
-    elements.ButtonComputeDiagonalProduct.addEventListener('click', performDiagonalProduct);
-    elements.ButtonCreateAugmentedIdentity.addEventListener('click', performAugmentedIdentity);
-    elements.ButtonAddLamada.addEventListener('click', performAddLamada);
-    elements.ButtonShowVersionAndUpdateTime.addEventListener('click', showVersionAndUpdateTime);
+    elements.ButtonQuickInput.addEventListener('pointerup', handleQuickInputClick);
+    elements.ButtonForceSimplify.addEventListener('pointerup', confirmForceExpand);
+    elements.ButtonForceFactorize.addEventListener('pointerup', confirmForceFactorize);
+    elements.ButtonReplaceElement.addEventListener('pointerup', confirmReplaceElement);
+    elements.ButtonToggleHelp.addEventListener('pointerup', toggleHelp);
+    elements.ButtonReset.addEventListener('pointerup', performReset);
+    elements.ButtonComputeDiagonalProduct.addEventListener('pointerup', performDiagonalProduct);
+    elements.ButtonCreateAugmentedIdentity.addEventListener('pointerup', performAugmentedIdentity);
+    elements.ButtonAddLamada.addEventListener('pointerup', performAddLamada);
+    elements.ButtonShowVersionAndUpdateTime.addEventListener('pointerup', showVersionAndUpdateTime);
 
     // 添加帮助按钮点击事件
-    elements.scrollLeft.addEventListener('click', () => switchContent(false));
-    elements.scrollRight.addEventListener('click', () => switchContent(true));
+    elements.scrollLeft.addEventListener('pointerup', () => switchContent(false));
+    elements.scrollRight.addEventListener('pointerup', () => switchContent(true));
 
 }
 
@@ -145,6 +144,7 @@ function init() {
     state.currentState = CONFIG.STATES.INIT;
     updateUIForCurrentState();
     updateDisplayHelp();
+    showSuccess('初始化完成');
 }
 // 初始化应用, 添加窗口大小变化监听
 document.addEventListener('DOMContentLoaded', () => {
@@ -494,14 +494,14 @@ function getInputElementDimensions() {
 }
 
 /**
- * 获取当前屏幕尺寸类型
+ * 获取当前屏幕尺寸类型并更新state.isMobile
  * @returns {string} 屏幕尺寸类型：'mobile', 'tablet', 'desktop'
  */
 function getScreenSizeType() {
     const width = window.innerWidth;
     if (width <= CONFIG.SCREEN_SIZES.MOBILE_MAX) {
         state.isMobile = true;
-        return 'mobile'
+        return 'mobile';
     };
     if (width <= CONFIG.SCREEN_SIZES.TABLET_MAX) {
         state.isMobile = true;

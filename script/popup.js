@@ -89,7 +89,7 @@ class PopupManager {
      */
     bindCloseButton(popupDiv, popupId) {
         const closeButton = popupDiv.querySelector('.popup-close');
-        closeButton.addEventListener('click', (e) => {
+        closeButton.addEventListener('pointerup', (e) => {
             e.stopPropagation();
             this.removePopup(popupId);
         });
@@ -321,14 +321,14 @@ class PopupCentreManager {
             this.closePopup(popupId);
         };
 
-        cancelBtn.addEventListener('click', () => {
+        cancelBtn.addEventListener('pointerup', () => {
             if (cancelCallback) {
                 cancelCallback();
             }
             this.closePopup(popupId);
         });
 
-        confirmBtn.addEventListener('click', performConfirm);
+        confirmBtn.addEventListener('pointerup', performConfirm);
 
         // 添加键盘事件监听，按Enter键执行确认操作
         // 使用{ once: true }选项，事件执行后自动移除监听器

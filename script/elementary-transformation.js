@@ -22,7 +22,7 @@ function disableInputInteraction() {
  */
 function unbindRowColumnIndexEvents() {
     if (state.rowColumnIndexEventListener) {
-        elements.windowDiv.removeEventListener('click', state.rowColumnIndexEventListener);
+        elements.windowDiv.removeEventListener('pointerup', state.rowColumnIndexEventListener);
         state.rowColumnIndexEventListener = null;
         state.isRowColumnIndexEventsBound = false; // 标记为未绑定
         console.log('行列索引事件监听器已移除');
@@ -122,7 +122,7 @@ function createMatrixDisplayTable() {
     table.appendChild(colTr);
 
     // 为表格添加事件委托（事件冒泡）
-    table.addEventListener('click', function (event) {
+    table.addEventListener('pointerup', function (event) {
         const target = event.target;
 
         // 检查是否点击了矩阵单元格
@@ -174,7 +174,7 @@ function bindRowColumnIndexEvents() {
 
     // 先移除已存在的事件监听器（安全措施）
     if (state.rowColumnIndexEventListener) {
-        elements.windowDiv.removeEventListener('click', state.rowColumnIndexEventListener);
+        elements.windowDiv.removeEventListener('pointerup', state.rowColumnIndexEventListener);
         state.rowColumnIndexEventListener = null;
     }
 
@@ -201,7 +201,7 @@ function bindRowColumnIndexEvents() {
     };
 
     // 绑定事件监听器并保存引用
-    elements.windowDiv.addEventListener('click', eventListener);
+    elements.windowDiv.addEventListener('pointerup', eventListener);
     state.rowColumnIndexEventListener = eventListener;
     state.isRowColumnIndexEventsBound = true; // 标记为已绑定
 }
