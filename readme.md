@@ -5,8 +5,7 @@
 ## 快速开始
 
 ### 在线使用
-[点击链接](https://awei808.github.io/Linear-Algebra-Helper/) 紧跟最新更新版本。
-或者打开[压缩版](https://awei808.github.io/awei/)，只更新大版本，体积更小，保留全部功能。
+[点击链接](https://awei808.github.io/Linear-Algebra-Helper/) 
 
 ### 本地运行
 1. 下载或克隆项目到本地
