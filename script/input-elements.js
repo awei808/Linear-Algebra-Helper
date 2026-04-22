@@ -173,7 +173,6 @@ function handleInputChangeMobile(event) {
             if (window.visualViewport.height > window.innerHeight * 0.8) {
                 // 键盘已收起，调整输入框宽度
                 adjustInputWidth(currentInput);
-                showSuccess('移动端api输入框宽度调整');
                 // 移除事件监听器
                 window.visualViewport.removeEventListener('resize', handleViewportChange);
             }
