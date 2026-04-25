@@ -75,8 +75,23 @@ function createMatrixDisplayTable() {
         for (let col = 0; col < cols; col++) {
             const td = document.createElement('td');
             //使用mathjs解析，输出latex格式，使用katex渲染
-            //这里使用render直接渲染和显示；与squareMatriSpecialFunctionx.js中的显示方式不同
-            const value = matrixElements[row][col] || '0';
+            //这里使用render直接渲染和显示；与squareMatriSpecialFunction.js中的显示方式不同
+            let value = matrixElements[row][col] || '0';
+            
+            // 处理科学计数法问题：检查值是否为纯数字
+            if (!isNaN(value) && isFinite(value)) {
+                const num = Number(value);
+                // 对于纯数字，使用math.format避免科学计数法
+                if (num.toString().includes('e') || num.toString().includes('E')) {
+                    value = math.format(num, { notation: 'fixed' });
+                    // 移除尾随零和小数点
+                    value = value.replace(/\.?0+$/, '');
+                    if (value.endsWith('.')) {
+                        value = value.slice(0, -1);
+                    }
+                }
+            }
+            
             // 字符串渲染，使用数字渲染可能导致转为科学计数法
             const latexStr = String(value);
             katex.render(latexStr, td, {

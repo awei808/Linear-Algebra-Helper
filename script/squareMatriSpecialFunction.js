@@ -51,20 +51,20 @@ function validateMatrixForOperation(operationType) {
  * 清除历史记录
  */
 function resetToInitialState() {
-    // 1. 隐藏不需要的HTML
+    // 隐藏不需要的HTML
     if (elements.operatorButtons) {
         elements.operatorButtons.classList.add('hidden');
     }
     if (elements.result) {
         elements.result.classList.add('hidden');
     }
-    // 2. 重置快速输入框
+    // 重置快速输入框
     if (elements.quickInput) {
         elements.quickInput.remove();
         elements.quickInput = null; // 清除引用
     }
 
-    // 3. 重置windowDiv内容
+    // 重置windowDiv内容
     if (elements.windowDiv) {
         elements.windowDiv.innerHTML = '';
         elements.windowDiv.classList.remove('dynamic');
@@ -75,30 +75,28 @@ function resetToInitialState() {
         elements.windowDiv.style.display = 'grid';
     }
 
-    // 4. 重新创建网格
+    // 重新创建网格
     createGrid();
 
-    // 5. 重置坐标显示
+    // 重置坐标显示
     if (elements.coordinatesDiv) {
         updateCoordinatesDisplay('0×0');
     }
 
-    // 6. 最后隐藏windowDiv，确保隐藏操作不会被后续操作覆盖
+    // 最后隐藏windowDiv，确保隐藏操作不会被后续操作覆盖
     if (elements.inputMatrixDiv) {
         elements.inputMatrixDiv.classList.add('hidden');
     }
 
-    // 7. 移除行列索引事件监听器
+    // 移除行列索引事件监听器
     unbindRowColumnIndexEvents();
 
-    // 8. 清除state中的数据，恢复默认状态   
+    // 清除state中的数据，恢复默认状态   
     state.gridInputs = [];
     state.matrixData = null;
     state.lastSelectedDimension = '0×0';
     state.currentState = CONFIG.STATES.INIT;
     state.previousStates = [];
-    state.undoStack = [];
-    state.redoStack = [];
     state.initialMatrixData = null;
     state.quickInputAdded = false;
     state.rowColumnIndexEventListener = null;
@@ -109,6 +107,26 @@ function resetToInitialState() {
     state.transformTarget = null;
     state.transformCoefficient = null;
     state.transformParam = null;
+
+    // 清空所有历史记录
+    if (typeof HistoryManager !== 'undefined' && HistoryManager.clearAllHistory) {
+        HistoryManager.clearAllHistory();
+    } else {
+        // 如果HistoryManager不可用，手动清空历史记录栈
+        state.undoStack = [];
+        state.redoStack = [];
+    }
+
+    // 更新历史记录显示区域
+    if (elements.historyTransformation) {
+        elements.historyTransformation.innerText = '初等变换历史记录：暂无';
+    }
+
+    // 如果updateHistoryTransformation函数可用，调用它更新显示
+    if (typeof updateHistoryTransformation === 'function') {
+        updateHistoryTransformation();
+    }
+
 }
 
 /**

@@ -462,6 +462,15 @@ function validateTransformationInputs(targetInput, coefficientInput, paramInput,
  */
 function parseAndSimplifyCoefficient(mathInput) {
     try {
+        // 检查输入是否为纯数字
+        if (!isNaN(mathInput) && isFinite(mathInput)) {
+            const num = Number(mathInput);
+            // 对于纯数字，使用math.format避免科学计数法
+            if (num.toString().includes('e') || num.toString().includes('E')) {
+                mathInput = math.format(num, { notation: 'fixed' });
+            }
+        }
+        
         // math.fraction()自动识别整数/小数/分数字符串/数字，自动化简
         const fraction = math.fraction(mathInput);
 
@@ -486,8 +495,20 @@ function parseAndSimplifyPolynomial(expression) {
         // 简化表达式
         const simplified = math.simplify(parsed);
 
-        // 转换为字符串
+        // 转换为字符串，使用math.format避免科学计数法
         let result = simplified.toString();
+
+        // 检查结果是否为纯数字
+        if (!isNaN(result) && isFinite(result)) {
+            // 对于纯数字，使用math.format避免科学计数法
+            const num = Number(result);
+            result = math.format(num, { notation: 'fixed' });
+            // 移除尾随零和小数点
+            result = result.replace(/\.?0+$/, '');
+            if (result.endsWith('.')) {
+                result = result.slice(0, -1);
+            }
+        }
 
         // 替换math.js的lambda符号为希腊字母λ
         result = result.replace(/lambda/g, 'λ');
