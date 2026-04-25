@@ -1,6 +1,7 @@
 // 自动生成版本信息
 const VERSION = {
-    NUMBER: 'e4dbea0',
-    DATE: '2026-04-22',
+    NUMBER: '4349538',
+    DATE: '2026-04-25',
     DESCRIPTION: '初等变换辅助学习',
+    VERSION: '3.1',
 };
