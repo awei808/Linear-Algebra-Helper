@@ -5,7 +5,8 @@
 ## 快速开始
 
 ### 在线使用
-[点击链接](https://awei808.github.io/Linear-Algebra-Helper/) 
+[点击链接](https://www.awei808.cn/Linear-Algebra-Helper/) 
+初次访问需耗时3-7s，加载完成后，会出现弹窗提示初始化完成
 
 ### 本地运行
 1. 下载或克隆项目到本地
