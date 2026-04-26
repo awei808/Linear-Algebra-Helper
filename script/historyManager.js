@@ -181,11 +181,62 @@ const HistoryManager = {
     },
 
     /**
+     * 格式化历史记录中的系数
+     * 将分数形式的系数转换为更友好的格式
+     * @param {string} description - 历史记录描述
+     * @returns {string} 格式化后的描述
+     */
+    formatHistoryDescription: function (description) {
+        if (!description || typeof description !== 'string') {
+            return description || '';
+        }
+        
+        let formattedDescription = description;
+        
+        // 模式1：处理加减操作中的系数（如 r3 + 1×r2 → r3 + r2）
+        const addSubtractPattern = /(r\d+|c\d+)\s*([+\-])\s*(\d+\/\d+|\d+)\s*×\s*(r\d+|c\d+)/g;
+        formattedDescription = formattedDescription.replace(addSubtractPattern, (match, target, operator, coefficient, param) => {
+            // 格式化系数
+            let formattedCoefficient = coefficient;
+            if (coefficient.includes('/')) {
+                const [numerator, denominator] = coefficient.split('/');
+                if (denominator === '1') {
+                    formattedCoefficient = numerator;
+                }
+            }
+            
+            // 如果系数为1，则简化显示（如 r3 + 1×r2 → r3 + r2）
+            if (formattedCoefficient === '1') {
+                return `${target} ${operator} ${param}`;
+            }
+            
+            return `${target} ${operator} ${formattedCoefficient}×${param}`;
+        });
+        
+        // 模式2：处理倍乘操作中的系数（如 r1 × 3/1 → r1 × 3）
+        const multiplyPattern = /(r\d+|c\d+)\s*×\s*(\d+\/\d+|\d+)/g;
+        formattedDescription = formattedDescription.replace(multiplyPattern, (match, target, coefficient) => {
+            // 格式化系数
+            let formattedCoefficient = coefficient;
+            if (coefficient.includes('/')) {
+                const [numerator, denominator] = coefficient.split('/');
+                if (denominator === '1') {
+                    formattedCoefficient = numerator;
+                }
+            }
+            
+            return `${target} × ${formattedCoefficient}`;
+        });
+        
+        return formattedDescription;
+    },
+
+    /**
      * 获取所有撤销历史记录的描述
      * @returns {Array} 历史记录描述数组
      */
     getUndoHistoryDescriptions: function () {
-        return state.undoStack.map(entry => entry.description);
+        return state.undoStack.map(entry => this.formatHistoryDescription(entry.description));
     }
 };
 

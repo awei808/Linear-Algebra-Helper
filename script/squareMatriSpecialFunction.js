@@ -51,17 +51,10 @@ function validateMatrixForOperation(operationType) {
  * 清除历史记录
  */
 function resetToInitialState() {
-    // 隐藏不需要的HTML
-    if (elements.operatorButtons) {
-        elements.operatorButtons.classList.add('hidden');
-    }
+    // 第一步：清空所有数据
+    // 清空result区内容
     if (elements.result) {
-        elements.result.classList.add('hidden');
-    }
-    // 重置快速输入框
-    if (elements.quickInput) {
-        elements.quickInput.remove();
-        elements.quickInput = null; // 清除引用
+        elements.result.innerHTML = '';
     }
 
     // 重置windowDiv内容
@@ -74,22 +67,6 @@ function resetToInitialState() {
         elements.windowDiv.style.gridTemplateRows = 'repeat(10, 40px)';
         elements.windowDiv.style.display = 'grid';
     }
-
-    // 重新创建网格
-    createGrid();
-
-    // 重置坐标显示
-    if (elements.coordinatesDiv) {
-        updateCoordinatesDisplay('0×0');
-    }
-
-    // 最后隐藏windowDiv，确保隐藏操作不会被后续操作覆盖
-    if (elements.inputMatrixDiv) {
-        elements.inputMatrixDiv.classList.add('hidden');
-    }
-
-    // 移除行列索引事件监听器
-    unbindRowColumnIndexEvents();
 
     // 清除state中的数据，恢复默认状态   
     state.gridInputs = [];
@@ -121,6 +98,37 @@ function resetToInitialState() {
     if (elements.historyTransformation) {
         elements.historyTransformation.innerText = '初等变换历史记录：暂无';
     }
+
+    // 第二步：隐藏DOM元素
+    // 隐藏不需要的HTML
+    if (elements.operatorButtons) {
+        elements.operatorButtons.classList.add('hidden');
+    }
+    if (elements.result) {
+        elements.result.classList.add('hidden');
+    }
+
+    // 重置快速输入框
+    if (elements.quickInput) {
+        elements.quickInput.remove();
+        elements.quickInput = null; // 清除引用
+    }
+
+    // 重新创建网格
+    createGrid();
+
+    // 重置坐标显示
+    if (elements.coordinatesDiv) {
+        updateCoordinatesDisplay('0×0');
+    }
+
+    // 最后隐藏windowDiv，确保隐藏操作不会被后续操作覆盖
+    if (elements.inputMatrixDiv) {
+        elements.inputMatrixDiv.classList.add('hidden');
+    }
+
+    // 移除行列索引事件监听器
+    unbindRowColumnIndexEvents();
 
     // 如果updateHistoryTransformation函数可用，调用它更新显示
     if (typeof updateHistoryTransformation === 'function') {

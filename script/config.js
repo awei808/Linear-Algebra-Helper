@@ -97,5 +97,8 @@ const CONFIG = {
             BORDER: '#ccc'
         },
         DISPLAY_HELP: true,//是否显示帮助板块
-    }
+    },
+    TEST_CONFIG: {
+        TEST_MODE: false, // 测试模式开关
+    },
 };
