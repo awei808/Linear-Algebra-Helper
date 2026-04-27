@@ -63,9 +63,37 @@ function confirmReplaceElement() {
 /**
  * 当替换值与原值展开后不同，调用该函数进行确认
  */
-function confirmReplaceElementDifferent(originalValue) {
+function confirmReplaceElementDifferent(newValue) {
     const elementCount = state.selectedMatrixElements;
-    const confirmText = `替换值${originalValue}与原值${elementCount}号矩阵元素展开后的结果不同，再次输入以确认替换：`;
+    const cols = state.matrixData.cols;
+    const index = state.selectedMatrixElements[0];
+    const row = Math.floor((index - 1) / cols);
+    const col = (index - 1) % cols;
+    const originalValue = state.matrixData.elements[row][col];
+    
+    // 计算化简后的值
+    let simplifiedNewValue = newValue;
+    let simplifiedOriginalValue = originalValue;
+    
+    try {
+        simplifiedNewValue = math.simplify(newValue).toString();
+    } catch (error) {
+        simplifiedNewValue = newValue;
+    }
+    
+    try {
+        simplifiedOriginalValue = math.simplify(originalValue).toString();
+    } catch (error) {
+        simplifiedOriginalValue = originalValue;
+    }
+    
+    const confirmText = `替换值与原值的化简结果不同：` +
+                       `替换值: ${newValue}` +
+                       `化简后: ${simplifiedNewValue}` +
+                       `原值: ${originalValue}` +
+                       `化简后: ${simplifiedOriginalValue}` +
+                       `再次输入以确认替换：`;
+    
     popupCentreManager.showConfirmPopup(
         confirmText,
         inputValue => replaceElement(inputValue),
@@ -176,16 +204,34 @@ function handleReplaceElement(inputValue) {
     const originalValue = state.matrixData.elements[row][col];
     console.log(`尝试替换: ${originalValue} -> ${validationResult.formattedValue}`);
     try {
-        // 如果新值与旧值展开后相同，进行替换
-        if (math.rationalize(validationResult.formattedValue).toString() === math.rationalize(originalValue).toString()) {
+        // 快速路径：字符串完全相同
+        if (validationResult.formattedValue === originalValue) {
+            replaceElement(validationResult.formattedValue, row, col);
+            return;
+        }
+
+        // 第一层：math.simplify 规范化后做字符串比较
+        const simplifiedNew = math.simplify(validationResult.formattedValue).toString();
+        const simplifiedOld = math.simplify(originalValue).toString();
+
+        if (simplifiedNew === simplifiedOld) {
+            replaceElement(validationResult.formattedValue, row, col);
+            return;
+        }
+
+        // 第二层：math.rationalize 展开幂等操作后再比较（simplify 不展开幂）
+        const rationalNew = math.rationalize(validationResult.formattedValue).toString();
+        const rationalOld = math.rationalize(originalValue).toString();
+
+        if (rationalNew === rationalOld) {
             replaceElement(validationResult.formattedValue, row, col);
         } else {
             confirmReplaceElementDifferent(validationResult.formattedValue);
         }
 
     } catch (error) {
-        console.error(`替换失败: ${originalValue} -> ${validationResult.formattedValue}`, error);
-        showError('替换失败，请检查输入值格式');
+        console.warn('数学等价性比较失败，进入二次确认:', error);
+        confirmReplaceElementDifferent(validationResult.formattedValue);
     }
 }
 
