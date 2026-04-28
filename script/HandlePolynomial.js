@@ -159,7 +159,8 @@ function handleFactorize() {
 
         try {
             //使用第三方库nerdamer进行因式分解，然后使用math.simplify进行格式化
-            const factoredStr = math.simplify(nerdamer('factor(' + originalValue + ')').toString()).toString();
+            const factoredStr = math.simplify(nerdamer('factor(' + originalValue + ')').toString()).toString()
+                .replace(/\b\d+\.?\d*[eE][+-]?\d+\b/g, match => math.format(Number(match), { notation: 'fixed' }));
             if (factoredStr !== originalValue) {
                 state.matrixData.elements[row][col] = factoredStr;
                 hasChanges = true;

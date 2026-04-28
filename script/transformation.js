@@ -495,20 +495,15 @@ function parseAndSimplifyPolynomial(expression) {
         // 简化表达式
         const simplified = math.simplify(parsed);
 
-        // 转换为字符串，使用math.format避免科学计数法
+        // 转换为字符串
         let result = simplified.toString();
 
-        // 检查结果是否为纯数字
-        if (!isNaN(result) && isFinite(result)) {
-            // 对于纯数字，使用math.format避免科学计数法
-            const num = Number(result);
-            result = math.format(num, { notation: 'fixed' });
-            // 移除尾随零和小数点
-            result = result.replace(/\.?0+$/, '');
-            if (result.endsWith('.')) {
-                result = result.slice(0, -1);
-            }
-        }
+        // 将结果中所有科学计数法数字替换为fixed格式
+        // math.js的toString可能对表达式内部的大量级数字使用科学计数法（如5.99997e+5）
+        result = result.replace(/\b\d+\.?\d*[eE][+-]?\d+\b/g, match => {
+            const num = Number(match);
+            return math.format(num, { notation: 'fixed' });
+        });
 
         // 替换math.js的lambda符号为希腊字母λ
         result = result.replace(/lambda/g, 'λ');
