@@ -1,28 +1,23 @@
-// ==================== 设计类并构造弹窗（popup）对象 ====================
-// 目前共有两个类，1个是右下角弹窗，另一个是居中弹窗
-//  右下角弹窗管理器
+import { CONFIG } from '../config.js';
+import { elements } from '../dom/elements.js';
+
 class PopupManager {
     constructor() {
-        // 使用elements对象中的popupBox引用
         this.popupBox = elements ? elements.popupBox : null;
         this.maxPopups = CONFIG.POPUP_CONFIG.MAX_POPUPS;
         this.popupTimeout = CONFIG.POPUP_CONFIG.TIMEOUT;
         this.animationDuration = CONFIG.POPUP_CONFIG.ANIMATION.DURATION;
         this.animationEasing = CONFIG.POPUP_CONFIG.ANIMATION.EASING;
-        this.currentPopups = new Map(); // 存储弹窗ID和对应的元素
+        this.currentPopups = new Map();
         this.init();
     }
 
     init() {
-        // 确保popupBox存在
         if (!this.popupBox) {
             this.createPopupBox();
         }
     }
 
-    /**
-     * 创建弹窗容器
-     */
     createPopupBox() {
         this.popupBox = document.createElement('div');
         this.popupBox.id = 'popupBox';
@@ -30,43 +25,27 @@ class PopupManager {
         document.body.appendChild(this.popupBox);
     }
 
-
-    /**
-     * 显示弹窗
-     * @param {string} message 信息内容
-     * @param {string} type 弹窗类型：error/warning/success
-     */
     showPopup(message, type = 'error') {
-        // 生成唯一ID
         const popupId = 'popup-' + Date.now() + '-' + Math.random().toString(36).substring(2, 11);
 
-        // 创建弹窗div
         const popupDiv = this.createPopup(message, type, popupId);
 
-        // 如果已经有3个弹窗，移除最先出现的
         if (this.currentPopups.size >= this.maxPopups) {
             this.removeOldestPopup();
         }
 
-        // 添加新的弹窗div
         this.popupBox.appendChild(popupDiv);
         this.currentPopups.set(popupId, popupDiv);
 
-        // 设置5秒后自动消失的计时器
         const timeoutId = setTimeout(() => {
             this.removePopup(popupId);
         }, this.popupTimeout);
 
-        // 存储timeout ID以便可以手动清除
         popupDiv.dataset.timeoutId = timeoutId;
     }
 
-    /**
-     * 创建弹窗元素
-     */
     createPopup(message, type, popupId) {
         const popupDiv = document.createElement('div');
-        // 从配置中读取对应的样式类名
         const styleClass = CONFIG.POPUP_CONFIG.STYLES[type.toUpperCase()] || 'popup-error';
         popupDiv.className = `popup ${styleClass}`;
         popupDiv.id = popupId;
@@ -78,15 +57,11 @@ class PopupManager {
             </div>
         `;
 
-        // 绑定关闭按钮事件
         this.bindCloseButton(popupDiv, popupId);
 
         return popupDiv;
     }
 
-    /**
-     * 绑定关闭按钮事件
-     */
     bindCloseButton(popupDiv, popupId) {
         const closeButton = popupDiv.querySelector('.popup-close');
         closeButton.addEventListener('pointerup', (e) => {
@@ -95,37 +70,25 @@ class PopupManager {
         });
     }
 
-    /**
-     * 移除最旧的弹窗
-     */
     removeOldestPopup() {
         if (this.currentPopups.size === 0) return;
-
-        // 获取最旧的弹窗ID（Map的第一个键）
         const oldestId = Array.from(this.currentPopups.keys())[0];
         this.removePopup(oldestId);
     }
 
-    /**
-     * 移除指定ID的弹窗
-     */
     removePopup(popupId) {
         const popupDiv = this.currentPopups.get(popupId);
         if (!popupDiv) return;
 
-        // 清除定时器
         const timeoutId = popupDiv.dataset.timeoutId;
         if (timeoutId) {
             clearTimeout(parseInt(timeoutId));
         }
 
-        // 立即从currentPopups中删除，确保弹窗数量限制正确生效
         this.currentPopups.delete(popupId);
 
-        // 添加淡出动画
         popupDiv.classList.add('fade-out');
 
-        // 动画结束后移除DOM元素
         setTimeout(() => {
             if (popupDiv.parentNode) {
                 popupDiv.parentNode.removeChild(popupDiv);
@@ -133,107 +96,31 @@ class PopupManager {
         }, this.animationDuration);
     }
 
-    /**
-     * 清除所有弹窗
-     */
     clearAllPopups() {
         Array.from(this.currentPopups.keys()).forEach(popupId => {
             this.removePopup(popupId);
         });
     }
 
-    /**
-     * HTML转义
-     */
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
 
-    /**
-     * 获取当前弹窗数量
-     */
     getPopupCount() {
         return this.currentPopups.size;
     }
 }
 
-// 全局弹窗管理器实例
-const popupManager = new PopupManager();
-
-// 全局弹窗显示函数
-function showPopup(message, type = 'error') {
-    popupManager.showPopup(message, type);
-}
-
-/**
- * 显示错误消息
- * @param {string} message - 错误消息
- */
-function showError(message) {
-    if (typeof showPopup === 'function') {
-        showPopup(message, 'error');
-    } else {
-        alert(message);
-    }
-    console.error('报错弹窗:', message);
-}
-
-/**
- * 显示成功消息
- * @param {string} message - 成功消息
- */
-function showSuccess(message) {
-    if (typeof showPopup === 'function') {
-        showPopup(message, 'success');
-    } else {
-        alert(message);
-    }
-    console.log('成功弹窗:', message);
-}
-
-/**
- * 显示警告消息
- * @param {string} message - 警告消息
- */
-function showWarning(message) {
-    if (typeof showPopup === 'function') {
-        showPopup(message, 'warning');
-    } else {
-        alert(message);
-    }
-    console.warn('警告弹窗:', message);
-}
-
-// 全局弹窗清除函数
-function clearAllPopups() {
-    popupManager.clearAllPopups();
-}
-
-
-
-/**
- * 中心弹窗管理器 - 用于在屏幕中心显示确认弹窗
- */
 class PopupCentreManager {
     constructor() {
-        // 使用elements对象中的popupCentreContainer引用
         this.container = elements ? elements.popupCentreContainer : null;
-        // 存储当前显示的弹窗
         this.currentPopup = null;
         this.currentPopupId = null;
     }
 
-    /**
-     * 显示中心确认弹窗
-     * @param {string} message - 信息文本
-     * @param {Function} confirmCallback - 确认按钮触发的回调函数
-     * @param {Function} cancelCallback - 取消按钮触发的回调函数（默认为空）
-     * @param {string} attachment - 附加内容（如输入框）
-     */
     showConfirmPopup(message, confirmCallback, cancelCallback = null, attachment = null) {
-        // 确保容器存在（参考PopupManager的设计）
         if (!this.container) {
             this.container = document.getElementById('popupCentreContainer');
             if (!this.container) {
@@ -244,48 +131,35 @@ class PopupCentreManager {
             }
         }
 
-        // 关闭之前的弹窗
         this.closePopup(this.currentPopupId);
 
-        // 创建弹窗元素
         const popup = this.createConfirmPopup(message, confirmCallback, cancelCallback, attachment);
 
-        // 添加到容器
         this.container.appendChild(popup);
         this.currentPopup = popup;
 
-        // 存储弹窗ID
         this.currentPopupId = popup.dataset.popupId;
 
-        // 显示容器和弹窗
         this.container.classList.add('show');
         setTimeout(() => {
             popup.classList.add('show');
-
         }, 10);
 
-        // 返回弹窗ID，便于外部控制
         return this.currentPopupId;
-
     }
 
-    /**
-     * 创建确认弹窗元素
-     */
     createConfirmPopup(message, confirmCallback, cancelCallback, attachment = null) {
         const popup = document.createElement('div');
         popup.className = 'popup-centre';
 
-        // 为弹窗生成唯一ID
         const popupId = 'popup_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         popup.dataset.popupId = popupId;
 
-        // 根据attachment参数决定是否添加输入框
         let inputHtml = '';
         if (attachment === 'input') {
             inputHtml = `
                 <div class="popup-centre-input">
-                    <input type="text" id="popup-input-${popupId}" placeholder="输入更改后的元素" 
+                    <input type="text" id="popup-input-${popupId}" placeholder="输入更改后的元素"
                            style="margin-left: 10px; margin-right: 10px; padding: 8px 12px; border: 1px solid rgb(204, 204, 204); border-radius: 4px; width: 200px;">
                 </div>
             `;
@@ -302,15 +176,12 @@ class PopupCentreManager {
             </div>
         `;
 
-        // 绑定按钮事件
         const cancelBtn = popup.querySelector('.cancel');
         const confirmBtn = popup.querySelector('.confirm');
         const inputElement = attachment === 'input' ? popup.querySelector(`#popup-input-${popupId}`) : null;
 
-        // 定义确认操作函数
         const performConfirm = () => {
             if (confirmCallback) {
-                // 如果attachment为input，将输入框的值作为参数传递给回调函数
                 if (attachment === 'input' && inputElement) {
                     const inputValue = inputElement.value;
                     confirmCallback(inputValue);
@@ -330,16 +201,14 @@ class PopupCentreManager {
 
         confirmBtn.addEventListener('pointerup', performConfirm);
 
-        // 添加键盘事件监听，按Enter键执行确认操作
-        // 使用{ once: true }选项，事件执行后自动移除监听器
         document.addEventListener('keydown', (e) => {
-            // 阻止默认行为和事件冒泡
-            e.preventDefault();
-            e.stopPropagation();
-            
             if (e.key === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
                 performConfirm();
             } else if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
                 if (cancelCallback) {
                     cancelCallback();
                 }
@@ -347,49 +216,37 @@ class PopupCentreManager {
             }
         }, { once: true });
 
-        // 如果有输入框，自动聚焦到输入框
         if (inputElement) {
             inputElement.focus();
         } else {
-            // 否则聚焦到确认按钮
             confirmBtn.focus();
         }
 
         return popup;
     }
 
-
-    /**
-     * 关闭弹窗
-     */
     closePopup(popupId = null) {
         let targetPopup = null;
 
-        // 如果没有指定ID，关闭当前弹窗
         if (!popupId) {
             targetPopup = this.currentPopup;
         } else {
-            // 根据ID查找弹窗
             targetPopup = this.container.querySelector(`[data-popup-id="${popupId}"]`);
         }
 
         if (targetPopup) {
-            // 移除显示类，触发关闭动画
             targetPopup.classList.remove('show');
 
-            // 300ms后移除DOM元素
             setTimeout(() => {
                 if (targetPopup && targetPopup.parentNode) {
                     targetPopup.parentNode.removeChild(targetPopup);
                 }
 
-                // 如果关闭的是当前弹窗，清除状态
                 if (popupId === this.currentPopupId || !popupId) {
                     this.currentPopup = null;
                     this.currentPopupId = null;
                 }
 
-                // 检查是否还有弹窗存在，如果没有则隐藏容器
                 const remainingPopups = this.container.querySelectorAll('.popup-centre');
                 if (remainingPopups.length === 0) {
                     this.container.classList.remove('show');
@@ -398,9 +255,6 @@ class PopupCentreManager {
         }
     }
 
-    /**
-     * HTML转义
-     */
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
@@ -408,23 +262,40 @@ class PopupCentreManager {
     }
 }
 
-// 全局中心弹窗管理器实例
-const popupCentreManager = new PopupCentreManager();
+export const popupManager = new PopupManager();
+export const popupCentreManager = new PopupCentreManager();
 
+export function showPopup(message, type = 'error') {
+    popupManager.showPopup(message, type);
+}
 
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', function () {
-    console.log('弹窗系统已初始化');
-});
+export function showError(message) {
+    if (typeof showPopup === 'function') {
+        showPopup(message, 'error');
+    } else {
+        alert(message);
+    }
+    console.error('报错弹窗:', message);
+}
 
-/* 这段代码应该是没用的，删除后还能正常运行，但ai总在提示不能删，先注释掉
-// 导出到全局作用域
-window.popupManager = popupManager;
-window.showPopup = showPopup;
-window.showError = showError;
-window.showSuccess = showSuccess;
-window.showWarning = showWarning;
-window.clearAllPopups = clearAllPopups;
-window.clearAllErrors = clearAllErrors;
-window.popupCentreManager = popupCentreManager;
-*/
+export function showSuccess(message) {
+    if (typeof showPopup === 'function') {
+        showPopup(message, 'success');
+    } else {
+        alert(message);
+    }
+    console.log('成功弹窗:', message);
+}
+
+export function showWarning(message) {
+    if (typeof showPopup === 'function') {
+        showPopup(message, 'warning');
+    } else {
+        alert(message);
+    }
+    console.warn('警告弹窗:', message);
+}
+
+export function clearAllPopups() {
+    popupManager.clearAllPopups();
+}

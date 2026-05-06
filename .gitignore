@@ -4,10 +4,14 @@ yangli.txt
 
 destoryed/
 update-version.js
+文件结构.md
 
 CLAUDE.md
 .claude
 .vscode/
 .trae/
-.node_modules/
+node_modules/
 试错区.code-workspace
+dist/
+package-lock.json
+package.json

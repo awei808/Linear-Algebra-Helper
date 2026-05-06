@@ -123,21 +123,7 @@
     <script src="./third-party-script/nerdamer/nerdamer.core.js"></script>
     <script src="./third-party-script/nerdamer/Algebra.js"></script>
     <!-- 脚本 -->
-    <script src="./script/config.js"></script>
-    <script src="./script/main.js"></script>
-    <script src="./script/popup.js"></script>
-    <script src="./script/state.js"></script>
-    <script src="./script/historyManager.js"></script>
-    <script src="./script/vaildAndPreprocess.js"></script>
-    <script src="./script/select-dimension.js"></script>
-    <script src="./script/input-elements.js"></script>
-    <script src="./script/elementary-transformation.js"></script>
-    <script src="./script/transformation.js"></script>
-    <script src="./script/HandlePolynomial.js"></script>
-    <script src="./script/squareMatriSpecialFunction.js"></script>
-    <script src="./script/help.js"></script>
-    <script src="./script/test.js"></script>
-    <script src="./script/version.js"></script>
+    <script type="module" src="./src/main.js"></script>
     <script>
         // 网页文件完整性验证
         document.getElementById('ButtonValidateFile').addEventListener('pointerup', () => {
@@ -150,13 +136,13 @@
                 overallStatus: 'success'
             };
 
-            // 检查脚本文件
+            // 检查脚本文件（第三方库）
             const scriptSources = [
-                './script/config.js', './script/main.js', './script/popup.js', './script/state.js',
-                './script/historyManager.js', './script/vaildAndPreprocess.js', './script/select-dimension.js',
-                './script/input-elements.js', './script/elementary-transformation.js', './script/transformation.js',
-                './script/HandlePolynomial.js', './script/squareMatriSpecialFunction.js', './script/help.js',
-                './script/test.js', './script/version.js'
+                './third-party-script/katex/katex.min.js',
+                './third-party-script/katex/contrib/auto-render.min.js',
+                './third-party-script/mathjs/math.js',
+                './third-party-script/nerdamer/nerdamer.core.js',
+                './third-party-script/nerdamer/Algebra.js'
             ];
 
             scriptSources.forEach(src => {
@@ -180,20 +166,7 @@
                 if (status === 'error') validationResult.overallStatus = 'error';
             });
 
-            // 检查核心函数
-            const coreFunctions = [
-                'init', 'setupEventListeners', 'updateUIForCurrentState', 'Next', 'Undo',
-                'saveCurrentState', 'createGrid', 'handleDimensionSelection', 'handleDataValidation',
-                'showElementaryTransformationUI', 'hideElementaryTransformationUI'
-            ];
-
-            coreFunctions.forEach(funcName => {
-                const status = typeof window[funcName] === 'function' ? 'success' : 'error';
-                validationResult.coreFunctions.push({ name: funcName, status });
-                if (status === 'error') validationResult.overallStatus = 'error';
-            });
-
-
+            // ES6 模块架构：不再检查全局函数
 
             // 显示验证结果
             // 转换HTML格式为纯文本格式
@@ -226,18 +199,6 @@
                 });
             }
             alertMessage += '\n';
-
-            // 核心函数验证结果
-            alertMessage += '核心函数检查：\n';
-            const missingFunctions = validationResult.coreFunctions.filter(item => item.status === 'error');
-            if (missingFunctions.length === 0) {
-                alertMessage += '所有核心函数存在\n';
-            } else {
-                alertMessage += '缺失的核心函数：\n';
-                missingFunctions.forEach(item => {
-                    alertMessage += `- ${item.name}\n`;
-                });
-            }
 
             // 使用alert显示验证结果
             alert(alertMessage);

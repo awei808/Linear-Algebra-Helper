@@ -1,0 +1,53 @@
+export const elements = {
+    windowDiv: document.getElementById('window'),
+    coordinatesDiv: document.getElementById('coordinates'),
+    undoButton: document.getElementById('undoButton'),
+    nextButton: document.getElementById('nextButton'),
+    inputMatrixDiv: document.getElementById('InputMatrix'),
+    buttonInputMatrix: document.getElementById('ButtonInputMartix'),
+    tipDiv: document.getElementById('tip'),
+    header: document.querySelector('header'),
+
+    moreButton: document.getElementById('moreButton'),
+    moreDropdown: document.getElementById('moreDropdown'),
+    exportMatrixButton: document.getElementById('exportMatrixButton'),
+    ButtonForceSimplify: document.getElementById('ButtonForceSimplify'),
+    ButtonForceFactorize: document.getElementById('ButtonForceFactorize'),
+    ButtonQuickInput: document.getElementById('ButtonQuickInput'),
+    ButtonReplaceElement: document.getElementById('ButtonReplaceElement'),
+    ButtonToggleHelp: document.getElementById('ButtonToggleHelp'),
+    ButtonReset: document.getElementById('ButtonReset'),
+    ButtonComputeDiagonalProduct: document.getElementById('ButtonComputeDiagonalProduct'),
+    ButtonCreateAugmentedIdentity: document.getElementById('ButtonCreateAugmentedIdentity'),
+    ButtonAddLamada: document.getElementById('ButtonAddLamada'),
+    ButtonShowVersionAndUpdateTime: document.getElementById('ButtonShowVersionAndUpdateTime'),
+
+    matrixDataDisplay: document.getElementById('matrixDataDisplay'),
+
+    target: document.getElementById('target'),
+    param: document.getElementById('param'),
+    operatorButtons: document.querySelector('.operator-buttons'),
+    transformTarget: document.getElementById('transform-target'),
+    transformCoefficient: document.getElementById('transform-coefficient'),
+    transformParam: document.getElementById('transform-param'),
+    buttonChange: document.getElementById('button-change'),
+    buttonAdd: document.getElementById('button-add'),
+    buttonSub: document.getElementById('button-sub'),
+    buttonMul: document.getElementById('button-mul'),
+    buttonTranslate: document.getElementById('button-translate'),
+    historyTransformation: document.getElementById('historyTransformation'),
+    buttonUndo: document.getElementById('button-undoTransformation'),
+    buttonRedo: document.getElementById('button-redoTransformation'),
+
+    buttonTest: document.getElementById('ButtonTest'),
+
+    popupBox: document.getElementById('popupBox'),
+    popupCentreContainer: document.getElementById('popupCentreContainer'),
+
+    helpDiv: document.getElementById('help'),
+    contentbox: document.getElementById('contentbox'),
+    scrollLeft: document.getElementById('scroll-left'),
+    scrollRight: document.getElementById('scroll-right'),
+
+    result: document.getElementById('result'),
+};

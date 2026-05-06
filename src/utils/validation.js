@@ -1,42 +1,33 @@
-/* 数据校验和预处理 
-在输入元素状态到初等变换状态的跳转过程中，或在“导入二维数组为矩阵”功能（初始状态跳转到初等变换状态）中使用
-*/
-// ==================== 公共常量定义 ====================
-// 正则表达式常量
-// 允许的未知数常量
-const ALLOWED_VARIABLES = CONFIG.TRANSFORMATION_CONFIG.VALUE_PROCESSING.ALLOWED_VARIABLES;
+import { CONFIG } from '../config.js';
+import { state } from '../state/state.js';
+import { elements } from '../dom/elements.js';
+import { showError } from '../ui/popup.js';
+import { updateCoordinatesDisplay } from '../features/select-dimension.js';
+
+export const ALLOWED_VARIABLES = CONFIG.TRANSFORMATION_CONFIG.VALUE_PROCESSING.ALLOWED_VARIABLES;
 const ALL_LETTERS = `[${ALLOWED_VARIABLES.join('')}]`;
-const PATTERNS = {
-    DECIMAL: /-?\d+\.\d+/,                     // 小数格式（支持未知数）
-    FRACTION: /^-?\d+\/\d+$/,               // 分数格式
+
+export const PATTERNS = {
+    DECIMAL: /-?\d+\.\d+/,
+    FRACTION: /^-?\d+\/\d+$/,
     ALL_LETTERS: new RegExp(`[${ALLOWED_VARIABLES.join('')}]`),
-    COMPLEX_FRACTION: new RegExp(`^-?(\\d+${ALL_LETTERS}+)\\/(-?\\d+${ALL_LETTERS}+)$`), // 复杂分数（含未知数，支持多个未知数组合）
-    PURE_NUMBER: /^-?\d+$/,                 // 纯数字
-    PURE_NUMBER_OR_DECIMAL: /^-?\d+(\.\d+)?$/, // 纯数字或小数
-    LETTERS: new RegExp(`[${ALLOWED_VARIABLES.join('')}]`, 'g'), // 字母匹配
-    NUMERIC_PART: /-?\d+/,                  // 数字部分
-    // 新增：表达式验证相关模式
-    VALID_CHARS: new RegExp(`^[0-9${ALL_LETTERS}+\-\*\.\/\(\)\^]+$`), // 有效字符集
-    ENDS_WITH_OPERATOR: /[+\-]$/,           // 以运算符结尾
-    CONSECUTIVE_OPERATORS: /[+\-]{2,}/,     // 连续运算符
-    CONSECUTIVE_SLASHES: /\/{2,}/,          // 连续斜杠
-    STARTS_OR_ENDS_WITH_SLASH: /^\/|\/$/,   // 以斜杠开头或结尾
+    COMPLEX_FRACTION: new RegExp(`^-?(\\d+${ALL_LETTERS}+)\\/(-?\\d+${ALL_LETTERS}+)$`),
+    PURE_NUMBER: /^-?\d+$/,
+    PURE_NUMBER_OR_DECIMAL: /^-?\d+(\.\d+)?$/,
+    LETTERS: new RegExp(`[${ALLOWED_VARIABLES.join('')}]`, 'g'),
+    NUMERIC_PART: /-?\d+/,
+    VALID_CHARS: new RegExp(`^[0-9${ALL_LETTERS}+\\-\\*\\.\\/\\(\\)\\^]+$`),
+    ENDS_WITH_OPERATOR: /[+\-]$/,
+    CONSECUTIVE_OPERATORS: /[+\-]{2,}/,
+    CONSECUTIVE_SLASHES: /\/{2,}/,
+    STARTS_OR_ENDS_WITH_SLASH: /^\/|\/$/,
 };
 
-// ==================== 公共函数定义 ====================
-// 注意：math.fraction()无法识别包含未知数的系数，所以这里手搓了两个函数，用于处理带未知数的系数转换
-/**
- * 小数转分数处理 
- * @param {string} decimal - 小数字符串（支持带未知数，如1.2x）
- * @returns {Object} {success: boolean, formattedValue: string, error: string}
- */
-function convertDecimalToFraction(decimal) {
+export function convertDecimalToFraction(decimal) {
     try {
-        // 检查是否包含未知数
         const variableMatch = decimal.match(PATTERNS.LETTERS);
 
         if (variableMatch) {
-            // 处理带未知数的小数（如1.2x）
             const decimalPart = decimal.match(PATTERNS.DECIMAL)?.[0];
             const variablePart = decimal.replace(decimalPart, '');
 
@@ -44,7 +35,6 @@ function convertDecimalToFraction(decimal) {
                 const decimalValue = parseFloat(decimalPart);
                 const fraction = math.fraction(decimalValue);
 
-                // 构建带未知数的分数形式
                 if (fraction.d === 1) {
                     return { success: true, formattedValue: fraction.n.toString() + variablePart, error: '' };
                 } else {
@@ -54,11 +44,9 @@ function convertDecimalToFraction(decimal) {
             }
         }
 
-        // 处理纯小数
         const decimalValue = parseFloat(decimal);
         const fraction = math.fraction(decimalValue);
 
-        // 检查分母是否为1，如果是则转换为整数
         if (fraction.d === 1) {
             return { success: true, formattedValue: fraction.n.toString(), error: '' };
         } else {
@@ -70,16 +58,10 @@ function convertDecimalToFraction(decimal) {
     }
 }
 
-/**
- * 分数化简处理 
- * @param {string} fractionStr - 分数字符串
- * @returns {Object} {success: boolean, formattedValue: string, error: string}
- */
-function simplifyFraction(fractionStr) {
+export function simplifyFraction(fractionStr) {
     try {
         const fraction = math.fraction(fractionStr);
 
-        // 检查分母是否为1，如果是则转换为整数
         if (fraction.d === 1) {
             return { success: true, formattedValue: fraction.n.toString(), error: '' };
         } else {
@@ -91,118 +73,35 @@ function simplifyFraction(fractionStr) {
     }
 }
 
-//未使用，功能与simplifyFraction相似
-/**
- * 复杂分数化简处理（包含未知数）
- * @param {string} complexFraction - 包含未知数的分数字符串
- * @returns {string} 化简后的分数字符串
- */
-/*function simplifyComplexFraction(complexFraction) {
-    try {
-        const fractionMatch = complexFraction.match(PATTERNS.COMPLEX_FRACTION);
-        if (!fractionMatch) return complexFraction;
-
-        const numerator = fractionMatch[1];   // 分子
-        const denominator = fractionMatch[2]; // 分母
-
-        // 检查是否为纯数字分数（分子和分母都是数字）
-        const numeratorIsNumber = PATTERNS.PURE_NUMBER.test(numerator);
-        const denominatorIsNumber = PATTERNS.PURE_NUMBER.test(denominator);
-
-        if (numeratorIsNumber && denominatorIsNumber) {
-            // 纯数字分数：使用math.js进行化简
-            const fraction = math.fraction(complexFraction);
-
-            if (fraction.d === 1) {
-                // 分母为1，转换为整数
-                return fraction.n.toString();
-            } else {
-                // 化简分数
-                return math.format(fraction, { fraction: 'ratio' });
-            }
-        } else {
-            // 包含未知数的分数：进行简单的数字部分化简
-            // 提取分子和分母中的数字部分
-            const numNumerator = numerator.match(PATTERNS.NUMERIC_PART)?.[0] || '1';
-            const numDenominator = denominator.match(PATTERNS.NUMERIC_PART)?.[0] || '1';
-
-            // 计算最大公约数
-            const gcd = math.gcd(parseInt(numNumerator), parseInt(numDenominator));
-
-            if (gcd > 1) {
-                // 化简数字部分
-                const simplifiedNum = parseInt(numNumerator) / gcd;
-                const simplifiedDen = parseInt(numDenominator) / gcd;
-
-                // 重新构建分数
-                const simplifiedNumerator = numerator.replace(numNumerator, simplifiedNum.toString());
-                const simplifiedDenominator = denominator.replace(numDenominator, simplifiedDen.toString());
-
-                return `${simplifiedNumerator}/${simplifiedDenominator}`;
-            }
-        }
-    } catch (error) {
-        // 如果化简失败，保持原样
-        console.warn(`复杂分数化简失败: ${complexFraction}`, error);
-        return complexFraction;
-    }
-
-    return complexFraction;
-}*/
-
-/**
- * 只负责格式化（预处理）
- * 处理小数转分数、分数化简、空值补零、小数补零、**到^转换等预处理操作
- * @param {string} value - 输入的数值字符串
- * @returns {Object} {success: boolean, formattedValue: string, error: string}
- */
-function formatMatrixValue(value) {
-    // 空值补零
+export function formatMatrixValue(value) {
     if (!value || value.trim() === '') {
         return { success: true, formattedValue: '0', error: '' };
     }
     value = value.trim();
-    // 小数补零
     const leadingDotPattern = /^\.\d+$/;
     if (CONFIG.TRANSFORMATION_CONFIG.VALUE_PROCESSING.LEADING_ZERO_FOR_DECIMAL && leadingDotPattern.test(value)) {
         value = '0' + value;
     }
-    // 将**替换为^
     value = value.replace(/\*\*/g, '^');
-    // 小数转分数处理
     if (PATTERNS.DECIMAL.test(value)) {
         return convertDecimalToFraction(value);
     }
-    // 分数化简处理
     if (PATTERNS.FRACTION.test(value)) {
         return simplifyFraction(value);
     }
 
-    // 其他格式保持原样
     return { success: true, formattedValue: value, error: '' };
 }
 
-/**
- * 只负责校验
- * 检查字符串是否为有效矩阵元素
- * 支持：数字、分数、小数、未知数、包含未知数的多项式
- * 未知数只能是abcdmnxyz和λ中的单个字符
- * @param {string} str - 要检查的字符串
- * @returns {Object} {success: boolean, formattedValue: string, error: string}
- */
-function ValidMatrixElement(str) {
-    // 步骤1：空字符串视为0
+export function ValidMatrixElement(str) {
     if (str === '') {
         return { success: true, formattedValue: str, error: '' };
     }
 
-    // 步骤2：纯数字（整数、小数）
     if (/^-?\d+(\.\d+)?$/.test(str)) {
         return { success: true, formattedValue: str, error: '' };
     }
 
-    // 步骤3：字符串形式检测未知数是否都是允许的
-    // 匹配所有可能的字母字符（包括非法未知数）
     const lettersInStr = str.match(PATTERNS.ALL_LETTERS);
     if (lettersInStr) {
         const invalidLetters = lettersInStr.filter(v => !ALLOWED_VARIABLES.includes(v));
@@ -215,21 +114,18 @@ function ValidMatrixElement(str) {
         }
     }
 
-    // 步骤4：分数（支持正负分数，支持未知数作为分子或分母）
     const fractionPattern = new RegExp(`^-?([\\da-dm-nxyzλ]+)/([\\da-dm-nxyzλ]+)$`);
     const fractionMatch = str.match(fractionPattern);
     if (fractionMatch) {
-        const denominator = fractionMatch[2]; // 分母
+        const denominator = fractionMatch[2];
         if (denominator === '0') {
             return { success: false, formattedValue: str, error: '分母不能为0' };
         }
         return { success: true, formattedValue: str, error: '' };
     }
 
-    // 步骤5：剩余无法识别的矩阵元素先进行基本格式检查，再交给math.parse处理
     const cleanedStr = str.replace(/\s/g, '');
 
-    // 基本字符集检查
     const validCharsPattern = /^[0-9a-dm-nxyzλ+\-\*\.\/\(\)\^]+$/;
     if (!validCharsPattern.test(cleanedStr)) {
         return {
@@ -238,7 +134,6 @@ function ValidMatrixElement(str) {
             error: '格式错误，只能包含数字、未知数、加减号、乘号、乘方符号(^或**)、小数点、斜杠和括号'
         };
     }
-    // 基本结构检查
     if (/[+\-]$/.test(cleanedStr)) {
         return { success: false, formattedValue: str, error: '不能以加减号结尾' };
     }
@@ -251,7 +146,6 @@ function ValidMatrixElement(str) {
     if (/^\/|\/$/.test(cleanedStr)) {
         return { success: false, formattedValue: str, error: '不能以斜杠开头或结尾' };
     }
-    // 括号匹配检查
     let bracketCount = 0;
     for (let char of cleanedStr) {
         if (char === '(') bracketCount++;
@@ -266,7 +160,6 @@ function ValidMatrixElement(str) {
     if (/\(\)/.test(cleanedStr)) {
         return { success: false, formattedValue: str, error: '括号内不能为空' };
     }
-    // 使用math.js进行最终验证
     try {
         math.parse(cleanedStr);
         return { success: true, formattedValue: str, error: '' };
@@ -279,24 +172,13 @@ function ValidMatrixElement(str) {
     }
 }
 
-/**
- * 验证并格式化矩阵元素 
- * 结合formatMatrixValue和ValidMatrixElement的功能
- * @param {string} value - 输入的数值字符串
- * @param {boolean} validate - 是否进行有效性校验
- * @returns {Object} {success: boolean, formattedValue: string, error: string}
- */
-function validateAndFormatMatrixValue(value, validate = true) {
-    // 保存原始值用于错误信息
+export function validateAndFormatMatrixValue(value, validate = true) {
     const originalValue = value;
-    // 调用formatMatrixValue进行格式化处理
     const formatResult = formatMatrixValue(value);
-    // 如果格式化失败，直接返回错误
     if (!formatResult.success) {
         return formatResult;
     }
 
-    // 如果需要校验，对格式化后的值进行有效性检查
     if (validate) {
         const validationResult = ValidMatrixElement(formatResult.formattedValue);
         if (!validationResult.success) {
@@ -311,41 +193,27 @@ function validateAndFormatMatrixValue(value, validate = true) {
     return formatResult;
 }
 
-
-// ==================== 逻辑处理 =================
-/**
- * 处理数据校验的总入口函数
- */
-function handleDataValidation() {
-
+export function handleDataValidation() {
     if (state.currentState !== CONFIG.STATES.INPUT_ELEMENTS) {
         return false;
     }
 
-    // 1. 收集矩阵数据（确保数据已收集）
     collectMatrixData();
 
-    // 2. 执行数据校验（去除空数据校验，改为自动补零）
     const validationResult = validateMatrixData();
     if (!validationResult.isValid) {
-        // 校验失败：提示错误并终止流程
         showError(validationResult.message);
-        return false; // 返回处理失败
+        return false;
     }
-    // 4. 更新坐标显示和全局UI
     updateCoordinatesDisplay(`${state.matrixData.rows}×${state.matrixData.cols}`);
-    
-    // 5. 保存初始矩阵数据，用于撤销到初始状态
+
     state.initialMatrixData = JSON.parse(JSON.stringify(state.matrixData));
     console.log('初始矩阵数据已保存:', state.initialMatrixData);
-    
-    return true; // 返回处理成功
+
+    return true;
 }
 
-/**
- * 收集矩阵数据
- */
-function collectMatrixData() {
+export function collectMatrixData() {
     const inputs = Array.from(elements.windowDiv.querySelectorAll('.grid-cell-input'));
 
     inputs.forEach(input => {
@@ -355,43 +223,30 @@ function collectMatrixData() {
     });
 }
 
-/**
- * 矩阵数据校验与预处理函数
- * 支持小数转分数、自动补零和多种数据格式验证
- * @param {boolean} useDOM - 是否从DOM元素中读取数据（否则从state.matrixData.elements读取）
- * @returns {Object} {isValid: boolean, message: string}
- */
-function validateMatrixData(useDOM = false) {
-    // 检查矩阵数据是否存在
+export function validateMatrixData(useDOM = false) {
     if (!state.matrixData || !state.matrixData.elements) {
         return {
-            isValid: true, // 不再进行空数据校验，直接返回通过
+            isValid: true,
             message: '数据处理完成'
         };
     }
 
     const { rows, cols } = state.matrixData;
-    let elements = [];
+    let elementsArr = [];
     let inputs = [];
-    // 选择数据来源
     if (useDOM) {
-        // 从DOM中读取数据
         inputs = Array.from(elements.windowDiv.querySelectorAll('.grid-cell-input'));
     } else {
-        // 从state中读取数据
-        elements = state.matrixData.elements;
+        elementsArr = state.matrixData.elements;
     }
 
-    // 遍历数据进行处理
     if (useDOM) {
-        // DOM数据源处理（一维数组）
         for (let i = 0; i < inputs.length; i++) {
             const input = inputs[i];
             let value = input.value.trim();
             const row = Math.floor(i / cols) + 1;
             const col = (i % cols) + 1;
 
-            // 验证并格式化函数处理数据
             const formatResult = validateAndFormatMatrixValue(value, true);
 
             if (!formatResult.success) {
@@ -401,16 +256,13 @@ function validateMatrixData(useDOM = false) {
                 };
             }
 
-            // 更新输入框的值
             input.value = formatResult.formattedValue;
         }
     } else {
-        // State数据源处理（二维数组）
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
-                let value = elements[row][col]?.trim() || '';
+                let value = elementsArr[row][col]?.trim() || '';
 
-                // 使用增强的格式化函数处理数据
                 const formatResult = validateAndFormatMatrixValue(value, true);
 
                 if (!formatResult.success) {
@@ -420,30 +272,21 @@ function validateMatrixData(useDOM = false) {
                     };
                 }
 
-                // 更新矩阵数据
-                elements[row][col] = formatResult.formattedValue;
+                elementsArr[row][col] = formatResult.formattedValue;
             }
         }
     }
 
-    // 始终返回验证通过
     return {
         isValid: true,
         message: '数据处理完成'
     };
 }
 
-/**
- * 检验并解析二维数组字符串
- * @param {string} input - 输入的二维数组字符串
- * @returns {Object} {isValid: boolean, message: string, rows: number, cols: number, elements: Array}
- */
-function validateAndParseMatrix(input) {
+export function validateAndParseMatrix(input) {
     try {
-        // 步骤1: 以字符串形式解析整个输入框传来的值
         const cleanedInput = input.replace(/\s+/g, ' ').trim();
 
-        // 检查是否为有效的二维数组格式
         if (!cleanedInput.startsWith('[') || !cleanedInput.endsWith(']')) {
             return {
                 isValid: false,
@@ -451,7 +294,6 @@ function validateAndParseMatrix(input) {
             };
         }
 
-        // 步骤2: 对字母进行校验，检验是否是未知数
         const allLetters = cleanedInput.match(PATTERNS.LETTERS) || [];
         const invalidLetters = [...new Set(allLetters)].filter(letter =>
             !ALLOWED_VARIABLES.includes(letter.toLowerCase())
@@ -464,8 +306,6 @@ function validateAndParseMatrix(input) {
             };
         }
 
-        // 步骤3: 将整个输入框传来的值切割，按矩阵元素遍历解析
-        // 手动解析二维数组格式
         const matrixData = parseMatrixManually(cleanedInput);
         if (!matrixData.isValid) {
             return matrixData;
@@ -473,14 +313,12 @@ function validateAndParseMatrix(input) {
 
         const { rows, cols, elements: rawElements } = matrixData;
 
-        // 步骤4: 统一处理所有元素（包含格式化和校验）
-        const elements = [];
+        const elementsArr = [];
         for (let i = 0; i < rows; i++) {
-            elements[i] = [];
+            elementsArr[i] = [];
             for (let j = 0; j < cols; j++) {
                 let element = rawElements[i][j].trim();
 
-                // 一次性完成格式化和校验
                 const formatResult = validateAndFormatMatrixValue(element, true);
                 if (!formatResult.success) {
                     return {
@@ -489,17 +327,16 @@ function validateAndParseMatrix(input) {
                     };
                 }
 
-                elements[i][j] = formatResult.formattedValue;
+                elementsArr[i][j] = formatResult.formattedValue;
             }
         }
 
-        // 步骤6: 返回解析结果供显示矩阵使用
         return {
             isValid: true,
             message: '解析成功',
             rows: rows,
             cols: cols,
-            elements: elements
+            elements: elementsArr
         };
 
     } catch (error) {
@@ -510,23 +347,15 @@ function validateAndParseMatrix(input) {
     }
 }
 
-/**
- * 手动解析矩阵字符串（不使用JSON.parse）
- * @param {string} matrixStr - 矩阵字符串
- * @returns {Object} 解析结果
- */
-function parseMatrixManually(matrixStr) {
+export function parseMatrixManually(matrixStr) {
     try {
-        // 去除最外层的中括号
         const innerStr = matrixStr.slice(1, -1).trim();
         if (innerStr === '') {
             return { isValid: false, message: '矩阵不能为空' };
         }
 
-        // 分割行（按], [分割）
         const rowStrings = innerStr.split(/\s*\]\s*,\s*\[\s*/);
 
-        // 处理第一行和最后一行
         if (rowStrings.length > 0) {
             rowStrings[0] = rowStrings[0].replace(/^\[\s*/, '');
             rowStrings[rowStrings.length - 1] = rowStrings[rowStrings.length - 1].replace(/\s*\]$/, '');
@@ -542,7 +371,6 @@ function parseMatrixManually(matrixStr) {
                 return { isValid: false, message: `第${i + 1}行为空` };
             }
 
-            // 分割列（按逗号分割，但要注意保护字符串内的逗号）
             const columnElements = splitColumns(rowStr);
 
             if (i === 0) {
@@ -572,12 +400,7 @@ function parseMatrixManually(matrixStr) {
     }
 }
 
-/**
- * 分割列元素，支持保护字符串内的逗号
- * @param {string} rowStr - 行字符串
- * @returns {Array} 列元素数组
- */
-function splitColumns(rowStr) {
+export function splitColumns(rowStr) {
     const elements = [];
     let currentElement = '';
     let inQuotes = false;
@@ -594,7 +417,6 @@ function splitColumns(rowStr) {
             inQuotes = false;
             currentElement += char;
         } else if (char === ',' && !inQuotes) {
-            // 遇到逗号且不在引号内，完成当前元素
             elements.push(currentElement.trim());
             currentElement = '';
         } else {
@@ -602,7 +424,6 @@ function splitColumns(rowStr) {
         }
     }
 
-    // 添加最后一个元素
     if (currentElement.trim() !== '') {
         elements.push(currentElement.trim());
     }
