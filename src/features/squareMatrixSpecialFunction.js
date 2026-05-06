@@ -1,3 +1,4 @@
+import { renderToString } from 'katex';
 import { CONFIG } from '../config.js';
 import { state } from '../state/state.js';
 import { elements } from '../dom/elements.js';
@@ -113,7 +114,7 @@ export function computeDiagonalProduct() {
         }
         const value = result || '0';
         const latexStr = String(value);
-        const formulaHtml = katex.renderToString(latexStr, {
+        const formulaHtml = renderToString(latexStr, {
             throwOnError: false,
             errorColor: '#d32f2f'
         });

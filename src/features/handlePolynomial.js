@@ -1,3 +1,7 @@
+import { simplify, rationalize, format } from 'mathjs';
+const math = { simplify, rationalize, format };
+import nerdamer from 'nerdamer';
+import 'nerdamer/Algebra';
 import { state } from '../state/state.js';
 import { popupCentreManager, showError, showSuccess, showWarning } from '../ui/popup.js';
 import { validateAndFormatMatrixValue } from '../utils/validation.js';

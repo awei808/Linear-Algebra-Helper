@@ -1,3 +1,4 @@
+import 'katex/dist/katex.min.css';
 import { CONFIG } from './config.js';
 import { VERSION, displayVersionInfo, showVersionAndUpdateTime } from './version.js';
 import { state } from './state/state.js';

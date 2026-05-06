@@ -1,3 +1,5 @@
+import { fraction, format, parse } from 'mathjs';
+const math = { fraction, format, parse };
 import { CONFIG } from '../config.js';
 import { state } from '../state/state.js';
 import { elements } from '../dom/elements.js';

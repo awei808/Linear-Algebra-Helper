@@ -1,3 +1,6 @@
+import { format } from 'mathjs';
+const math = { format };
+import { render } from 'katex';
 import { state } from '../state/state.js';
 import { elements } from '../dom/elements.js';
 import { showSuccess } from '../ui/popup.js';
@@ -53,7 +56,7 @@ export function createMatrixDisplayTable() {
             });
 
             const latexStr = String(value);
-            katex.render(latexStr, td, {
+            render(latexStr, td, {
                 displayMode: true,
                 throwOnError: false,
                 errorColor: '#d32f2f'
