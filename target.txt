@@ -4,6 +4,8 @@
 node update-version.js
 git checkout ...
 npm run dev
+npm run build:normal
+npm run build:single
 
 待实现功能：
 1. 固定中心确认弹窗 ok

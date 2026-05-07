@@ -12,3 +12,4 @@ CLAUDE.md
 node_modules/
 试错区.code-workspace
 dist/
+dist-single/
