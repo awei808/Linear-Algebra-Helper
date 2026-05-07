@@ -1,3 +1,5 @@
+// ==================== 初等变换UI模块 ====================
+// 矩阵表格展示、行列索引事件、选择器管理、预览矩阵
 import { format, parse, simplify } from 'mathjs';
 const math = { format, parse, simplify };
 import { render } from 'katex';
@@ -5,6 +7,9 @@ import { state } from '../state/state.js';
 import { elements } from '../dom/elements.js';
 import { showSuccess } from '../ui/popup.js';
 
+/**
+ * 禁用所有输入框交互
+ */
 export function disableInputInteraction() {
     const inputs = Array.from(elements.windowDiv.querySelectorAll('.grid-cell-input'));
     inputs.forEach(input => {
@@ -15,6 +20,9 @@ export function disableInputInteraction() {
     });
 }
 
+/**
+ * 解除行列索引事件绑定
+ */
 export function unbindRowColumnIndexEvents() {
     if (state.rowColumnIndexEventListener) {
         elements.windowDiv.removeEventListener('pointerup', state.rowColumnIndexEventListener);
@@ -24,6 +32,10 @@ export function unbindRowColumnIndexEvents() {
     }
 }
 
+/**
+ * 调整布局以适应初等变换状态
+ * 显示操作按钮组，更新坐标显示
+ */
 export function reorganizeLayoutForElementaryTransformation() {
     const operatorButtons = document.querySelectorAll('.operator-buttons');
 
@@ -37,6 +49,12 @@ export function reorganizeLayoutForElementaryTransformation() {
     }
 }
 
+/**
+ * 渲染矩阵表格（纯渲染，无事件绑定，无状态修改）
+ * 使用KaTeX渲染每个单元格的数学表达式
+ * @param {Object} matrixData - { rows, cols, elements }
+ * @returns {HTMLTableElement} 完整的表格元素（含行列标签）
+ */
 export function renderMatrixTable(matrixData) {
     const { rows, cols, elements: matrixElements } = matrixData;
 
@@ -44,6 +62,7 @@ export function renderMatrixTable(matrixData) {
     table.style.borderCollapse = 'collapse';
     table.style.margin = '0px auto';
 
+    // 渲染数据行
     for (let row = 0; row < rows; row++) {
         const tr = document.createElement('tr');
 
@@ -51,6 +70,7 @@ export function renderMatrixTable(matrixData) {
             const td = document.createElement('td');
             let value = matrixElements[row][col] || '0';
 
+            // 科学计数法 → fixed格式
             value = value.replace(/\b\d+\.?\d*[eE][+-]?\d+\b/g, match => {
                 return math.format(Number(match), { notation: 'fixed' });
             });
@@ -69,6 +89,7 @@ export function renderMatrixTable(matrixData) {
             tr.appendChild(td);
         }
 
+        // 行标签（r1, r2, ...）
         const rowIndexTd = document.createElement('td');
         rowIndexTd.className = 'row-label';
         rowIndexTd.textContent = `r${row + 1}`;
@@ -76,6 +97,7 @@ export function renderMatrixTable(matrixData) {
         table.appendChild(tr);
     }
 
+    // 列标签行（c1, c2, ...）
     const colTr = document.createElement('tr');
 
     for (let col = 0; col < cols; col++) {
@@ -93,9 +115,14 @@ export function renderMatrixTable(matrixData) {
     return table;
 }
 
+/**
+ * 创建矩阵展示表格并替换windowDiv内容
+ * 绑定单元格点击事件用于元素选中，完成后触发预览更新
+ */
 export function createMatrixDisplayTable() {
     const table = renderMatrixTable(state.matrixData);
 
+    // 绑定单元格点击事件（矩阵元素选中）
     table.addEventListener('pointerup', (event) => {
         const target = event.target;
 
@@ -111,6 +138,7 @@ export function createMatrixDisplayTable() {
 
     state.selectedMatrixElements = [];
 
+    // 延迟调整尺寸（等待KaTeX渲染完成）
     setTimeout(() => {
         const windowWidth = table.offsetWidth;
         const windowHeight = table.offsetHeight;
@@ -122,9 +150,14 @@ export function createMatrixDisplayTable() {
         console.log('createMatrixDisplayTable 完成表格显示');
     }, 0);
 
+    // 同步更新预览矩阵
     updatePreviewMatrix();
 }
 
+/**
+ * 绑定行列索引事件
+ * 点击行列标签（r1, c2等）时更新目标行/列或参数行/列
+ */
 export function bindRowColumnIndexEvents() {
     if (state.isRowColumnIndexEventsBound && state.rowColumnIndexEventListener) {
         return;
@@ -141,6 +174,7 @@ export function bindRowColumnIndexEvents() {
             target.className.includes('row-label') || target.className.includes('col-label')) {
             const fullValue = target.textContent;
 
+            // 根据当前激活的是目标还是参数来更新对应字段
             if (state.targetIsActive) {
                 state.transformTarget = fullValue;
                 showSuccess(`目标行/列已更新：${fullValue}`);
@@ -158,6 +192,12 @@ export function bindRowColumnIndexEvents() {
     state.isRowColumnIndexEventsBound = true;
 }
 
+/**
+ * 向目标行/列和参数行/列下拉选择器添加选项
+ * 根据矩阵维度动态生成 r1..rn, c1..cn
+ * @param {number} rows - 矩阵行数
+ * @param {number} cols - 矩阵列数
+ */
 export function addRowColumnIndexOptions(rows, cols) {
     const targetSelect = elements.transformTarget;
     const paramSelect = elements.transformParam;
@@ -167,6 +207,7 @@ export function addRowColumnIndexOptions(rows, cols) {
         return;
     }
 
+    // 清除旧选项（保留第一个"无"选项）
     while (targetSelect.options.length > 1) {
         targetSelect.remove(1);
     }
@@ -174,6 +215,7 @@ export function addRowColumnIndexOptions(rows, cols) {
         paramSelect.remove(1);
     }
 
+    // 添加行选项
     for (let i = 0; i < rows; i++) {
         const rowValue = `r${i + 1}`;
 
@@ -184,6 +226,7 @@ export function addRowColumnIndexOptions(rows, cols) {
         paramSelect.add(paramOption);
     }
 
+    // 添加列选项
     for (let i = 0; i < cols; i++) {
         const colValue = `c${i + 1}`;
 
@@ -197,6 +240,11 @@ export function addRowColumnIndexOptions(rows, cols) {
     console.log(`已添加 ${rows} 个行选项和 ${cols} 个列选项到选择器中`);
 }
 
+/**
+ * 处理下拉选择器的值变更
+ * @param {string} selectorType - 'target' 或 'param'
+ * @param {string} value - 选中的值
+ */
 export function handleSelectorChange(selectorType, value) {
     if (selectorType !== 'target' && selectorType !== 'param') {
         console.error('无效的选择器类型:', selectorType);
@@ -215,6 +263,9 @@ export function handleSelectorChange(selectorType, value) {
     updatePreviewMatrix();
 }
 
+/**
+ * 同步下拉选择器显示值与state中的值
+ */
 export function updateTransformationUIDisplay() {
     const transformTarget = elements.transformTarget;
     const transformParam = elements.transformParam;
@@ -228,6 +279,10 @@ export function updateTransformationUIDisplay() {
     }
 }
 
+/**
+ * 显示初等变换UI
+ * 创建表格、绑定事件、填充选择器、设置预览
+ */
 export function showElementaryTransformationUI() {
     state.transformTarget = null;
     state.transformParam = null;
@@ -256,21 +311,29 @@ export function showElementaryTransformationUI() {
     updatePreviewMatrix();
 }
 
+/**
+ * 处理矩阵元素点击事件（选中/取消选中）
+ * @param {number} row - 行索引（0-based）
+ * @param {number} col - 列索引（0-based）
+ * @param {HTMLElement} element - 被点击的td元素
+ */
 export function handleMatrixElementClick(row, col, element) {
     if (state.currentState !== 'elementary_transformation') {
         return;
     }
     const cols = state.matrixData.cols;
-    const elementIndex = row * cols + col + 1;
+    const elementIndex = row * cols + col + 1; // 元素编号从1开始
 
     const isAlreadySelected = state.selectedMatrixElements.includes(elementIndex);
 
     if (isAlreadySelected) {
+        // 取消选中
         state.selectedMatrixElements = state.selectedMatrixElements.filter(index =>
             index !== elementIndex
         );
         element.classList.remove('selected-matrix-element');
     } else {
+        // 选中
         state.selectedMatrixElements.push(elementIndex);
         element.classList.add('selected-matrix-element');
     }
@@ -278,6 +341,13 @@ export function handleMatrixElementClick(row, col, element) {
     console.log('选中元素索引:', state.selectedMatrixElements);
 }
 
+// ==================== 预览矩阵相关 ====================
+
+/**
+ * 从DOM读取当前选中的运算符
+ * 通过查找activeButton类名来判断
+ * @returns {string} 运算符字符（↔、+、−、×），或空字符串
+ */
 function getCurrentOperator() {
     const activeBtn = document.querySelector('#arithmetic-symbols button.activeButton');
     if (!activeBtn) return '';
@@ -286,6 +356,11 @@ function getCurrentOperator() {
     return text;
 }
 
+/**
+ * 检查初等变换提示信息是否齐全
+ * 根据运算符类型判断所需参数是否都已填写
+ * @returns {{complete: boolean, hintText: string}}
+ */
 export function isTransformationInfoComplete() {
     const operator = getCurrentOperator();
     const target = state.transformTarget;
@@ -304,6 +379,7 @@ export function isTransformationInfoComplete() {
 
     switch (operator) {
         case '↔': {
+            // 交换操作需要目标 + 参数
             const param = state.transformParam;
             if (!param) return { complete: false, hintText: '' };
             const paramMatch = param.match(/^([rc])(\d+)$/i);
@@ -312,6 +388,7 @@ export function isTransformationInfoComplete() {
         }
         case '+':
         case '−': {
+            // 加减操作需要目标 + 参数；系数默认为1
             const param = state.transformParam;
             if (!param) return { complete: false, hintText: '' };
             const paramMatch = param.match(/^([rc])(\d+)$/i);
@@ -320,6 +397,7 @@ export function isTransformationInfoComplete() {
             return { complete: true, hintText: `${target} ${operator} ${coeffDisplay}×${param}` };
         }
         case '×': {
+            // 倍乘操作需要目标 + 系数
             if (!coefficient) return { complete: false, hintText: '' };
             return { complete: true, hintText: `${target} × ${coefficient}` };
         }
@@ -328,6 +406,10 @@ export function isTransformationInfoComplete() {
     }
 }
 
+/**
+ * 在副本矩阵上应用变换（不修改原始state）
+ * 使用mathjs parse/simplify进行多项式计算
+ */
 function applyTransformationToMatrix(matrix, rows, cols, targetType, targetIndex, paramType, paramIndex, coefficient, operator) {
     switch (operator) {
         case '↔':
@@ -418,6 +500,11 @@ function applyTransformationToMatrix(matrix, rows, cols, targetType, targetIndex
     }
 }
 
+/**
+ * 计算预览结果矩阵
+ * 深拷贝当前矩阵 → 应用变换 → 返回结果（不修改state）
+ * @returns {Object|null} { rows, cols, elements } 或 null
+ */
 function computePreviewResult() {
     const operator = getCurrentOperator();
     const target = state.transformTarget;
@@ -435,6 +522,7 @@ function computePreviewResult() {
     let paramIndex = null;
     let coefficient = null;
 
+    // 根据运算符解析所需参数
     switch (operator) {
         case '↔': {
             const param = state.transformParam;
@@ -467,15 +555,21 @@ function computePreviewResult() {
             return null;
     }
 
+    // 深拷贝矩阵元素，在副本上执行变换
     const matrix = JSON.parse(JSON.stringify(state.matrixData.elements));
     applyTransformationToMatrix(matrix, rows, cols, targetType, targetIndex, paramType, paramIndex, coefficient, operator);
 
     return { rows, cols, elements: matrix };
 }
 
+/**
+ * 更新预览矩阵区域
+ * 桌面端 + 初等变换状态下显示；参数齐全时计算并显示预览；不全时显示灰色遮罩
+ */
 export function updatePreviewMatrix() {
     if (!elements.matrixPreviewRow) return;
 
+    // 非桌面端或非初等变换状态：隐藏预览
     if (state.isMobile || state.currentState !== 'elementary_transformation') {
         elements.previewArrowSection.style.display = 'none';
         elements.previewTableWrapper.style.display = 'none';
@@ -487,11 +581,13 @@ export function updatePreviewMatrix() {
 
     const infoResult = isTransformationInfoComplete();
 
+    // 更新变换提示文本
     if (elements.previewHintText) {
         elements.previewHintText.textContent = infoResult.hintText;
     }
 
     if (infoResult.complete) {
+        // 信息齐全：计算并显示预览结果
         const previewData = computePreviewResult();
         if (previewData && elements.previewTable) {
             elements.previewTable.innerHTML = '';
@@ -502,6 +598,7 @@ export function updatePreviewMatrix() {
             elements.previewMask.classList.add('hide-mask');
         }
     } else {
+        // 信息不全：渲染当前矩阵供遮罩覆盖（确保遮罩有正确的尺寸）
         if (elements.previewTable && state.matrixData) {
             elements.previewTable.innerHTML = '';
             const dimTable = renderMatrixTable(state.matrixData);
@@ -515,6 +612,10 @@ export function updatePreviewMatrix() {
 
 let previewListenersSetup = false;
 
+/**
+ * 设置预览相关的监听器
+ * 系数输入框变化 → 更新预览；运算符变化事件 → 更新预览
+ */
 function setupPreviewListeners() {
     if (!elements.transformCoefficient || previewListenersSetup) return;
 
@@ -523,6 +624,9 @@ function setupPreviewListeners() {
     previewListenersSetup = true;
 }
 
+/**
+ * 通知运算符已变更（通过自定义事件，避免循环导入）
+ */
 export function notifyOperatorChanged() {
     document.dispatchEvent(new CustomEvent('transformOperatorChanged'));
 }

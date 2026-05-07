@@ -1,3 +1,5 @@
+// ==================== 方阵特色功能模块 ====================
+// 对角线乘积、增广单位矩阵、含λ矩阵、重置
 import { renderToString } from 'katex';
 import { CONFIG } from '../config.js';
 import { state } from '../state/state.js';
@@ -9,6 +11,12 @@ import { popupCentreManager, showError, showSuccess } from '../ui/popup.js';
 import { parseAndSimplifyPolynomial, validatePolynomialVariables, updateHistoryTransformation } from './transformation.js';
 import { handleQuickInputClick, handleQuickInputMatrix } from './matrix-input.js';
 
+/**
+ * 验证当前矩阵是否为方阵
+ * 非方阵时弹出对应操作的错误提示
+ * @param {string} operationType - 操作类型标识
+ * @returns {boolean} 是否为方阵
+ */
 export function validateMatrixForOperation(operationType) {
     if (!state.matrixData) {
         showError('请先输入矩阵');
@@ -35,11 +43,17 @@ export function validateMatrixForOperation(operationType) {
     return true;
 }
 
+/**
+ * 重置到初始状态
+ * 清空所有数据、DOM、历史记录，恢复初始网格
+ */
 export function resetToInitialState() {
+    // 清空结果显示区域
     if (elements.result) {
         elements.result.innerHTML = '';
     }
 
+    // 恢复窗口为初始网格
     if (elements.windowDiv) {
         elements.windowDiv.innerHTML = '';
         elements.windowDiv.classList.remove('dynamic');
@@ -50,6 +64,7 @@ export function resetToInitialState() {
         elements.windowDiv.style.display = 'grid';
     }
 
+    // 重置所有状态变量
     state.gridInputs = [];
     state.matrixData = null;
     state.lastSelectedDimension = '0×0';
@@ -66,12 +81,14 @@ export function resetToInitialState() {
     state.transformCoefficient = null;
     state.transformParam = null;
 
+    // 清空历史记录
     HistoryManager.clearAllHistory();
 
     if (elements.historyTransformation) {
         elements.historyTransformation.innerText = '初等变换历史记录：暂无';
     }
 
+    // 隐藏操作按钮和结果区域
     if (elements.operatorButtons) {
         elements.operatorButtons.classList.add('hidden');
     }
@@ -79,11 +96,13 @@ export function resetToInitialState() {
         elements.result.classList.add('hidden');
     }
 
+    // 移除快速录入输入框
     if (elements.quickInput) {
         elements.quickInput.remove();
         elements.quickInput = null;
     }
 
+    // 重新创建初始网格
     createGrid();
 
     if (elements.coordinatesDiv) {
@@ -99,6 +118,10 @@ export function resetToInitialState() {
     updateHistoryTransformation();
 }
 
+/**
+ * 计算对角线乘积
+ * 将主对角线元素连乘，使用parseAndSimplifyPolynomial简化结果
+ */
 export function computeDiagonalProduct() {
     try {
         let expression = '1';
@@ -114,6 +137,7 @@ export function computeDiagonalProduct() {
         }
         const value = result || '0';
         const latexStr = String(value);
+        // 使用KaTeX渲染结果
         const formulaHtml = renderToString(latexStr, {
             throwOnError: false,
             errorColor: '#d32f2f'
@@ -129,6 +153,10 @@ export function computeDiagonalProduct() {
     }
 }
 
+/**
+ * 生成增广单位矩阵（在原矩阵右侧添加单位矩阵）
+ * 用于求逆矩阵
+ */
 export function createAugmentedIdentity() {
     try {
         const tempMatrix = JSON.parse(JSON.stringify(state.matrixData.elements));
@@ -137,6 +165,7 @@ export function createAugmentedIdentity() {
 
         resetToInitialState();
 
+        // 在每行右侧添加单位矩阵列
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
                 if (i === j) {
@@ -147,6 +176,7 @@ export function createAugmentedIdentity() {
             }
         }
 
+        // 构建二维数组字符串
         const matrixArray = [];
         for (let i = 0; i < tempMatrix.length; i++) {
             const row = [];
@@ -158,6 +188,7 @@ export function createAugmentedIdentity() {
 
         const matrixString = `[${matrixArray.join(', ')}]`;
 
+        // 通过快速录入重新导入增广矩阵
         if (!elements.quickInput) {
             handleQuickInputClick();
 
@@ -180,6 +211,10 @@ export function createAugmentedIdentity() {
     }
 }
 
+/**
+ * 生成含λ的矩阵（对角线元素变为 原值 - λ）
+ * 用于特征值计算
+ */
 export function addLamada() {
     try {
         const tempMatrix = JSON.parse(JSON.stringify(state.matrixData.elements));
@@ -188,6 +223,7 @@ export function addLamada() {
 
         resetToInitialState();
 
+        // 对角线元素添加 -λ
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
                 if (i === j) {
@@ -234,6 +270,11 @@ export function addLamada() {
     }
 }
 
+// ==================== 对外入口函数 ====================
+
+/**
+ * 执行重置操作（含确认弹窗）
+ */
 export function performReset() {
     popupCentreManager.showConfirmPopup("此操作将完全重置网页，确定重置？", () => {
         resetToInitialState();
@@ -241,6 +282,9 @@ export function performReset() {
     });
 }
 
+/**
+ * 执行对角线乘积计算
+ */
 export function performDiagonalProduct() {
     const isValid = validateMatrixForOperation('diagonalProduct');
     if (!isValid) {
@@ -249,6 +293,9 @@ export function performDiagonalProduct() {
     computeDiagonalProduct();
 }
 
+/**
+ * 执行增广单位矩阵生成（含确认弹窗）
+ */
 export function performAugmentedIdentity() {
     const isValid = validateMatrixForOperation('augmentedIdentity');
     if (!isValid) {
@@ -259,6 +306,9 @@ export function performAugmentedIdentity() {
     });
 }
 
+/**
+ * 执行含λ矩阵生成（含确认弹窗）
+ */
 export function performAddLamada() {
     const isValid = validateMatrixForOperation('addLamada');
     if (!isValid) {

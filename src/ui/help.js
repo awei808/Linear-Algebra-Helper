@@ -1,7 +1,10 @@
+// ==================== 帮助系统 ====================
+// 内置帮助内容、翻页切换、显示控制
 import { CONFIG } from '../config.js';
 import { elements } from '../dom/elements.js';
 import { state } from '../state/state.js';
 
+// 帮助内容数组，每条内容对应一页
 const helpContent = [
     '<h4>怎样录入矩阵？</h4><p>1.点击页面顶部的"录入矩阵"按钮，点击网格来选择矩阵的行数和列数；选好后点击下一步。</p><p>2.点击对应单元格输入矩阵元素，点击下一步完成录入。</p><p>3.若发现输入的元素有误，或矩阵维度错误，可以点击上一步到对应页面修改。</p>',
 
@@ -26,6 +29,10 @@ const helpContent = [
     '<h4>发现程序有bug，在哪里反馈？</h4><p>在"更多"中，点击"跳转github仓库"，在issue页面反馈。</p>',
 ];
 
+/**
+ * 切换帮助内容（上一页/下一页）
+ * @param {boolean} isNext - true为下一页，false为上一页
+ */
 export function switchContent(isNext) {
     if (isNext) {
         state.helpContentIndex = (state.helpContentIndex + 1) % helpContent.length;
@@ -38,12 +45,16 @@ export function switchContent(isNext) {
     updateNavigationDots();
 }
 
+/**
+ * 创建导航小点（底部圆点指示器）
+ */
 export function createNavigationDots() {
     if (!elements.helpDiv) {
         console.log('helpDiv不存在');
         return;
     }
 
+    // 避免重复创建
     if (document.getElementById('navigation-dots')) {
         return;
     }
@@ -72,6 +83,7 @@ export function createNavigationDots() {
             transition: background-color 0.2s ease;
         `;
 
+        // 点击小点直接跳转到对应内容
         dot.addEventListener('pointerup', function () {
             state.helpContentIndex = parseInt(this.dataset.index);
             elements.contentbox.innerHTML = helpContent[state.helpContentIndex];
@@ -98,6 +110,10 @@ export function createNavigationDots() {
     console.log('导航小点创建完成，共创建了', helpContent.length, '个小点');
 }
 
+/**
+ * 更新导航小点高亮状态
+ * 当前页对应的小点显示为深色
+ */
 export function updateNavigationDots() {
     const dots = document.querySelectorAll('.nav-dot');
     dots.forEach((dot, index) => {
@@ -109,6 +125,9 @@ export function updateNavigationDots() {
     });
 }
 
+/**
+ * 根据配置控制帮助板块显示/隐藏
+ */
 export function updateDisplayHelp() {
     if (CONFIG.UI_CONFIG.DISPLAY_HELP) {
         elements.helpDiv.style.display = 'block';

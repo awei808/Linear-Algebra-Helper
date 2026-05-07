@@ -10,8 +10,10 @@
 
 ### 本地运行
 1. 下载或克隆项目到本地
-2. 使用任意现代浏览器打开 `index.html` 文件，无需安装任何依赖，开箱即用
-   - 手机、平板由于浏览器限制，建议使用在线版本
+2. 安装依赖：`npm install`
+3. 启动开发服务器：`npm run dev`
+4. 浏览器访问 `http://localhost:5173`
+5. 构建生产版本：`npm run build`（输出至 `dist/`）
 
 ## 功能特性
 
@@ -65,10 +67,9 @@
 ## 技术特点
 
 ### 前端技术
-- 纯HTML/CSS/JavaScript实现
+- ES6 模块化 + Vite 构建工具
 - 响应式布局设计
-- 无框架依赖，轻量高效
-- 模块化代码结构，易于维护和扩展
+- 清晰的模块结构
 
 ### 数学处理
 - 支持分数、小数、未知数（a, b, c, d, m, n, x, y, z, λ）等复杂矩阵元素
@@ -87,36 +88,44 @@
 
 ## 项目结构
 ```
-父文件夹/
-├── index.html          # 主页面
-├── script/             # JavaScript脚本
-│   ├── main.js         # dom获取，事件绑定和一些简单事件处理
-│   ├── config.js       # 配置文件
-│   ├── state.js        # 状态管理核心逻辑
-│   ├── vaildAndPreprocess.js # 数据验证和预处理
-│   ├── HandlePolynomial.js  # 多项式处理功能
-│   ├── elementary-transformation.js # 状态切换：初等变换状态
-│   ├── transformation.js # 初等变换操作
-│   ├── popup.js        # 弹窗功能
-│   ├── select-dimension.js # 状态切换：维度选择状态
-│   ├── input-elements.js # 状态切换：输入元素状态
-│   ├── squareMatriSpecialFunctionx.js # 方阵特色功能
-│   ├── historyManager.js # 历史记录管理
-│   ├── help.js         # 帮助系统
-│   └── test.js         # 测试功能
-├── style/              # 样式文件
-│   ├── base.css        # 基础样式
-│   ├── components.css  # 组件样式
-│   ├── popup.css       # 弹窗样式
-│   ├── responsive.css  # 响应式样式（未来将被合并）
-│   ├── transformation.css # 变换操作样式
-│   ├── help.css        # 帮助系统样式
-│   └── window-and-grid.css # 窗口和网格样式
-├── third-party-script/ # 第三方库
-│   ├── katex/          # 数学公式渲染库
-│   ├── mathjs/         # 数学计算库
-│   └── nerdamer/       # 补充mathjs不足的代数运算库
-└── readme.md          # 项目说明
+├── index.html               # 主页面
+├── src/                     # ES6 模块源码
+│   ├── main.js              # 入口：init()、事件绑定、DOMContentLoaded
+│   ├── config.js            # CONFIG 对象（纯配置，零应用依赖）
+│   ├── version.js           # VERSION 对象 + 版本显示函数
+│   ├── dom/
+│   │   └── elements.js      # elements DOM 引用集合（纯 DOM 查询）
+│   ├── state/
+│   │   ├── state.js         # state 数据对象
+│   │   └── stateMachine.js  # Next/Undo/updateUIForCurrentState（编排层）
+│   ├── features/
+│   │   ├── select-dimension.js        # Grid 创建、维度选择、坐标显示
+│   │   ├── input-elements.js          # 输入元素状态、restoreGridForInputElements
+│   │   ├── elementary-transformation.js # 矩阵展示表格、事件绑定、预览矩阵
+│   │   ├── transformation.js          # 初等变换核心逻辑、撤销/重做
+│   │   ├── handlePolynomial.js        # 多项式展开/因式分解/元素替换
+│   │   ├── squareMatrixSpecialFunction.js # 方阵特色功能
+│   │   ├── matrix-input.js            # 快速导入矩阵
+│   │   └── test.js                    # 测试调试（由 TEST_MODE 控制）
+│   ├── ui/
+│   │   ├── popup.js          # PopupManager、showError/Success/Warning
+│   │   └── help.js           # 帮助内容、切换、显示控制
+│   ├── utils/
+│   │   ├── validation.js     # 数据校验和预处理
+│   │   └── dom-utils.js      # 屏幕尺寸检测、输入框宽度调整
+│   └── history/
+│       └── historyManager.js # HistoryManager（变换级撤销/重做双栈）
+├── style/                   # 样式文件
+│   ├── base.css
+│   ├── components.css
+│   ├── popup.css
+│   ├── responsive.css
+│   ├── transformation.css
+│   ├── help.css
+│   └── window-and-grid.css
+├── update-version.js        # 版本信息更新脚本
+├── vite.config.js           # Vite 构建配置
+└── readme.md
 ```
 
 ## 技术依赖

@@ -1,0 +1,31 @@
+{
+  "name": "linear-algebra-helper",
+  "version": "1.0.0",
+  "description": "一个功能强大的基于Web的线性代数学习辅助工具，专注于矩阵的初等变换操作和多项式处理，为线性代数学习提供直观、高效的实践环境。",
+  "main": "index.js",
+  "devDependencies": {
+    "vite": "^8.0.10"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/awei808/Linear-Algebra-Helper.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/awei808/Linear-Algebra-Helper/issues"
+  },
+  "homepage": "https://github.com/awei808/Linear-Algebra-Helper#readme",
+  "dependencies": {
+    "katex": "^0.16.45",
+    "mathjs": "^15.2.0",
+    "nerdamer": "^1.1.13"
+  }
+}

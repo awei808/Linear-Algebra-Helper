@@ -1,6 +1,12 @@
+// ==================== DOM工具函数 ====================
 import { CONFIG } from '../config.js';
 import { state } from '../state/state.js';
 
+/**
+ * 获取当前设备上输入框的实际CSS尺寸
+ * 通过创建临时元素并读取计算样式来获取精确尺寸
+ * @returns {Object} 包含width和height的对象
+ */
 export function getInputElementDimensions() {
     const tempInput = document.createElement('input');
     tempInput.className = 'grid-cell-input';
@@ -16,6 +22,10 @@ export function getInputElementDimensions() {
     return dimensions;
 }
 
+/**
+ * 获取当前屏幕尺寸类型并更新state.isMobile
+ * @returns {string} 屏幕尺寸类型：'mobile', 'tablet', 'desktop'
+ */
 export function getScreenSizeType() {
     const width = window.innerWidth;
     if (width <= CONFIG.SCREEN_SIZES.MOBILE_MAX) {
@@ -30,6 +40,12 @@ export function getScreenSizeType() {
     return 'desktop';
 }
 
+/**
+ * 计算文本的渲染宽度（用于输入框宽度自适应）
+ * @param {string} text - 待测量的文本
+ * @param {string} font - CSS字体字符串
+ * @returns {number} 文本宽度（像素）
+ */
 export function getTextWidth(text, font) {
     const span = document.createElement('span');
     span.style.font = font || getComputedStyle(document.body).font;
@@ -43,6 +59,11 @@ export function getTextWidth(text, font) {
     return width;
 }
 
+/**
+ * 根据输入内容自动调整输入框宽度
+ * 同时同步同列所有输入框的宽度，保持列对齐
+ * @param {HTMLInputElement} input - 输入框元素
+ */
 export function adjustInputWidth(input) {
     if (!input || !input.value) return;
 
@@ -65,7 +86,7 @@ export function adjustInputWidth(input) {
             }
         });
 
-        // 更新网格列模板
+        // 更新网格列模板以匹配新宽度
         if (cols > 0) {
             const gap = 0;
             const colWidths = [];

@@ -1,18 +1,24 @@
+// ==================== 全局配置文件 ====================
+// 所有配置常量集中管理，零应用依赖
 export const CONFIG = {
+    // 网格配置
     GRID_SIZE: 10,
     INITIAL_DIMENSION: '0×0',
 
+    // 屏幕大小定义（与CSS断点一致）
     SCREEN_SIZES: {
         MOBILE_MAX: 768,
         TABLET_MAX: 1024,
         DESKTOP_MIN: 1025
     },
 
+    // 输入框默认尺寸（备用）
     DEFAULT_INPUT_DIMENSIONS: {
         width: 60,
         height: 50
     },
 
+    // 状态定义
     STATES: {
         INIT: 'init',
         SELECT_DIMENSION: 'select_dimension',
@@ -20,27 +26,30 @@ export const CONFIG = {
         ELEMENTARY_TRANSFORMATION: 'elementary_transformation'
     },
 
+    // 弹窗配置
     POPUP_CONFIG: {
-        MAX_POPUPS: 3,
-        TIMEOUT: 2500,
+        MAX_POPUPS: 3,                           // 最大弹窗数量
+        TIMEOUT: 2500,                           // 弹窗显示时间（毫秒）
         STYLES: {
             SUCCESS: 'success-popup',
             ERROR: 'error-popup',
             WARNING: 'warning-popup'
         },
         ANIMATION: {
-            DURATION: 300,
+            DURATION: 300,                       // 动画持续时间（毫秒）
             EASING: 'ease-out'
         },
     },
 
+    // 快速录入配置
     QUICK_INPUT_CONFIG: {
         MAX_LENGTH: 200
     },
 
+    // 初等变换配置
     TRANSFORMATION_CONFIG: {
         VALUE_PROCESSING: {
-            ALLOWED_VARIABLES: ['a', 'b', 'c', 'd', 'm', 'n', 'x', 'y', 'z', 'λ'],
+            ALLOWED_VARIABLES: ['a', 'b', 'c', 'd', 'm', 'n', 'x', 'y', 'z', 'λ'], // 允许作为未知数的字符
             LEADING_ZERO_FOR_DECIMAL: true,
         },
 
@@ -56,11 +65,12 @@ export const CONFIG = {
             INACTIVE: 'inactiveButton'
         },
         HISTORY: {
-            MAX_UNDO_STACK_SIZE: 20,
-            MAX_REDO_STACK_SIZE: 20,
+            MAX_UNDO_STACK_SIZE: 20,             // 最大撤销栈大小
+            MAX_REDO_STACK_SIZE: 20,             // 最大重做栈大小
         }
     },
 
+    // 矩阵配置
     MATRIX_CONFIG: {
         MAX_ROWS: 10,
         MAX_COLS: 10,
@@ -69,6 +79,7 @@ export const CONFIG = {
         DEFAULT_VALUE: '0'
     },
 
+    // UI配置
     UI_CONFIG: {
         BUTTON_STATES: {
             ENABLED: {
@@ -85,9 +96,9 @@ export const CONFIG = {
             NORMAL: '#f0f0f0',
             BORDER: '#ccc'
         },
-        DISPLAY_HELP: true,
+        DISPLAY_HELP: true,                      // 是否显示帮助板块
     },
     TEST_CONFIG: {
-        TEST_MODE: false,
+        TEST_MODE: false,                        // 测试模式开关
     },
 };

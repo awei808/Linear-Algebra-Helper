@@ -1,3 +1,5 @@
+// ==================== 多项式处理模块 ====================
+// 多项式展开、因式分解、矩阵元素替换
 import { simplify, rationalize, format } from 'mathjs';
 const math = { simplify, rationalize, format };
 import nerdamer from 'nerdamer';
@@ -8,6 +10,10 @@ import { validateAndFormatMatrixValue } from '../utils/validation.js';
 import { createMatrixDisplayTable } from './elementary-transformation.js';
 import { clearSelectedMatrixElements } from './input-elements.js';
 
+/**
+ * 确认多项式展开操作
+ * 需要先选中矩阵元素
+ */
 export function confirmForceExpand() {
     if (state.selectedMatrixElements.length === 0) {
         showWarning('请先选择要展开的矩阵元素');
@@ -23,6 +29,10 @@ export function confirmForceExpand() {
     );
 }
 
+/**
+ * 确认因式分解操作
+ * 需要先选中矩阵元素
+ */
 export function confirmForceFactorize() {
     if (state.selectedMatrixElements.length === 0) {
         showWarning('请先选择要因式分解的矩阵元素');
@@ -37,6 +47,10 @@ export function confirmForceFactorize() {
     );
 }
 
+/**
+ * 确认替换矩阵元素操作
+ * 只能替换单个元素
+ */
 export function confirmReplaceElement() {
     if (state.selectedMatrixElements.length === 0) {
         showWarning('请先选择要替换的矩阵元素');
@@ -57,6 +71,11 @@ export function confirmReplaceElement() {
     );
 }
 
+/**
+ * 二次确认替换（当新旧值化简结果不同时）
+ * 显示化简后的新旧值对比，让用户二次输入确认
+ * @param {string} newValue - 待替换的新值
+ */
 export function confirmReplaceElementDifferent(newValue) {
     const elementCount = state.selectedMatrixElements;
     const cols = state.matrixData.cols;
@@ -95,6 +114,10 @@ export function confirmReplaceElementDifferent(newValue) {
     );
 }
 
+/**
+ * 执行多项式展开
+ * 对选中的元素逐一调用 rationalize 进行展开
+ */
 export function handleExpand() {
     let hasChanges = false;
 
@@ -129,6 +152,10 @@ export function handleExpand() {
     }
 }
 
+/**
+ * 执行一元多项式因式分解
+ * 使用nerdamer进行因式分解，mathjs进行化简
+ */
 export function handleFactorize() {
     let hasChanges = false;
     const cols = state.matrixData.cols;
@@ -139,6 +166,7 @@ export function handleFactorize() {
         const originalValue = state.matrixData.elements[row][col];
 
         try {
+            // nerdamer因式分解 → mathjs化简
             const factoredStr = math.simplify(nerdamer('factor(' + originalValue + ')').toString()).toString()
                 .replace(/\b\d+\.?\d*[eE][+-]?\d+\b/g, match => math.format(Number(match), { notation: 'fixed' }));
             if (factoredStr !== originalValue) {
@@ -159,6 +187,12 @@ export function handleFactorize() {
     }
 }
 
+/**
+ * 处理替换元素（含等价性检测）
+ * 先通过 simplify 和 rationalize 比较新旧值是否数学等价
+ * 若等价则直接替换，否则进入二次确认
+ * @param {string} inputValue - 用户输入的替换值
+ */
 export function handleReplaceElement(inputValue) {
     if (!inputValue) {
         showWarning('请输入替换值');
@@ -180,11 +214,13 @@ export function handleReplaceElement(inputValue) {
     const originalValue = state.matrixData.elements[row][col];
     console.log(`尝试替换: ${originalValue} -> ${validationResult.formattedValue}`);
     try {
+        // 完全相同的字符串直接替换
         if (validationResult.formattedValue === originalValue) {
             replaceElement(validationResult.formattedValue, row, col);
             return;
         }
 
+        // 通过 simplify 比较是否数学等价
         const simplifiedNew = math.simplify(validationResult.formattedValue).toString();
         const simplifiedOld = math.simplify(originalValue).toString();
 
@@ -193,12 +229,14 @@ export function handleReplaceElement(inputValue) {
             return;
         }
 
+        // 通过 rationalize 进一步比较（处理分式等价）
         const rationalNew = math.rationalize(validationResult.formattedValue).toString();
         const rationalOld = math.rationalize(originalValue).toString();
 
         if (rationalNew === rationalOld) {
             replaceElement(validationResult.formattedValue, row, col);
         } else {
+            // 无法确认等价，进入二次确认
             confirmReplaceElementDifferent(validationResult.formattedValue);
         }
 
@@ -208,6 +246,12 @@ export function handleReplaceElement(inputValue) {
     }
 }
 
+/**
+ * 执行实际的元素替换操作
+ * @param {string} inputValue - 替换后的值
+ * @param {number} row - 行索引（可选，默认从selectedMatrixElements推算）
+ * @param {number} col - 列索引（可选，默认从selectedMatrixElements推算）
+ */
 export function replaceElement(inputValue, row = -1, col = -1) {
     if (row == -1 || col == -1) {
         const index = state.selectedMatrixElements[0];

@@ -3,7 +3,6 @@ yangli.txt
 初等变换1.0 copy.html
 
 destoryed/
-update-version.js
 文件结构.md
 
 CLAUDE.md
@@ -13,5 +12,3 @@ CLAUDE.md
 node_modules/
 试错区.code-workspace
 dist/
-package-lock.json
-package.json
