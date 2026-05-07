@@ -84,5 +84,70 @@
     margin-left: auto; /* 水平居中 */
     margin-right: auto; /* 水平居中 */
     max-width: 100%; /* 防止溢出父容器 */
-    box-sizing: border-box; 
+    box-sizing: border-box;
+}
+
+/* 预览矩阵区域 - 三列并列布局 */
+#matrix-preview-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+
+#preview-arrow-section {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+#preview-hint-text {
+    font-size: 16px;
+    font-weight: bold;
+    color: #4a6fa5;
+    white-space: nowrap;
+    min-height: 24px;
+}
+
+#preview-arrow-icon {
+    font-size: 48px;
+    color: #4a6fa5;
+    line-height: 1;
+}
+
+#preview-table-wrapper {
+    display: none;
+    position: relative;
+}
+
+#preview-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgb(200, 200, 200);
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#preview-mask.hide-mask {
+    display: none;
+}
+
+/* 非桌面端强制隐藏预览 */
+@media (max-width: 1024px) {
+    #preview-arrow-section,
+    #preview-table-wrapper {
+        display: none !important;
+    }
 }

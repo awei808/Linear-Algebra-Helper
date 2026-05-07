@@ -1,6 +1,7 @@
+// 自动生成版本信息
 export const VERSION = {
-    NUMBER: '81c7bbb',
-    DATE: '2026-04-27',
+    NUMBER: 'e4cb244',
+    DATE: '2026-05-06',
     DESCRIPTION: '初等变换辅助学习',
     VERSION: '3.1',
 };

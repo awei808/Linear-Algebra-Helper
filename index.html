@@ -47,7 +47,17 @@
     <div id="InputMatrix" class="hidden">
         <h1 id="tip"></h1>
         <div>
-            <div id="window"></div>
+            <div id="matrix-preview-row">
+                <div id="window"></div>
+                <div id="preview-arrow-section">
+                    <div id="preview-hint-text"></div>
+                    <div id="preview-arrow-icon">→</div>
+                </div>
+                <div id="preview-table-wrapper">
+                    <div id="preview-table"></div>
+                    <div id="preview-mask" class="preview-mask">预览矩阵，输入完整初等变换后显示</div>
+                </div>
+            </div>
             <p id="coordinates">矩阵维度: 0×0</p>
             <p id="matrixDataDisplay" class="matrix-data-display" style="display: none;"></p>
         </div>

@@ -115,6 +115,12 @@ export function disableGridInteraction() {
 export function hideElementaryTransformationUI() {
     elements.operatorButtons.classList.add('hidden');
     unbindRowColumnIndexEvents();
+    if (elements.previewArrowSection) {
+        elements.previewArrowSection.style.display = 'none';
+    }
+    if (elements.previewTableWrapper) {
+        elements.previewTableWrapper.style.display = 'none';
+    }
 }
 
 export function restoreGridForInputElements() {

@@ -50,4 +50,12 @@ export const elements = {
     scrollRight: document.getElementById('scroll-right'),
 
     result: document.getElementById('result'),
+
+    matrixPreviewRow: document.getElementById('matrix-preview-row'),
+    previewArrowSection: document.getElementById('preview-arrow-section'),
+    previewHintText: document.getElementById('preview-hint-text'),
+    previewArrowIcon: document.getElementById('preview-arrow-icon'),
+    previewTableWrapper: document.getElementById('preview-table-wrapper'),
+    previewTable: document.getElementById('preview-table'),
+    previewMask: document.getElementById('preview-mask'),
 };

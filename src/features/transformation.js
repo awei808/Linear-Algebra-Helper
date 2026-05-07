@@ -5,7 +5,7 @@ import { state } from '../state/state.js';
 import { elements } from '../dom/elements.js';
 import { HistoryManager } from '../history/historyManager.js';
 import { ALLOWED_VARIABLES } from '../utils/validation.js';
-import { createMatrixDisplayTable } from './elementary-transformation.js';
+import { createMatrixDisplayTable, notifyOperatorChanged } from './elementary-transformation.js';
 import { updateUIForCurrentState } from '../state/stateMachine.js';
 import { showError, showSuccess } from '../ui/popup.js';
 
@@ -36,6 +36,8 @@ export function setActiveSymbol(symbol, activeButton) {
             button.classList.remove(CONFIG.TRANSFORMATION_CONFIG.BUTTON_STYLES.ACTIVE);
         }
     });
+
+    notifyOperatorChanged();
 }
 
 export function resetButtonStyles() {

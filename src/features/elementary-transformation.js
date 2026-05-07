@@ -1,5 +1,5 @@
-import { format } from 'mathjs';
-const math = { format };
+import { format, parse, simplify } from 'mathjs';
+const math = { format, parse, simplify };
 import { render } from 'katex';
 import { state } from '../state/state.js';
 import { elements } from '../dom/elements.js';
@@ -37,8 +37,8 @@ export function reorganizeLayoutForElementaryTransformation() {
     }
 }
 
-export function createMatrixDisplayTable() {
-    const { rows, cols, elements: matrixElements } = state.matrixData;
+export function renderMatrixTable(matrixData) {
+    const { rows, cols, elements: matrixElements } = matrixData;
 
     const table = document.createElement('table');
     table.style.borderCollapse = 'collapse';
@@ -72,7 +72,6 @@ export function createMatrixDisplayTable() {
         const rowIndexTd = document.createElement('td');
         rowIndexTd.className = 'row-label';
         rowIndexTd.textContent = `r${row + 1}`;
-        rowIndexTd.id = `add_r${row + 1}`;
         tr.appendChild(rowIndexTd);
         table.appendChild(tr);
     }
@@ -83,7 +82,6 @@ export function createMatrixDisplayTable() {
         const colTd = document.createElement('td');
         colTd.className = 'col-label';
         colTd.textContent = `c${col + 1}`;
-        colTd.id = `add_c${col + 1}`;
         colTr.appendChild(colTd);
     }
 
@@ -91,6 +89,12 @@ export function createMatrixDisplayTable() {
     colTr.appendChild(emptyTd);
 
     table.appendChild(colTr);
+
+    return table;
+}
+
+export function createMatrixDisplayTable() {
+    const table = renderMatrixTable(state.matrixData);
 
     table.addEventListener('pointerup', (event) => {
         const target = event.target;
@@ -117,6 +121,8 @@ export function createMatrixDisplayTable() {
         elements.inputMatrixDiv.classList.remove('hidden');
         console.log('createMatrixDisplayTable 完成表格显示');
     }, 0);
+
+    updatePreviewMatrix();
 }
 
 export function bindRowColumnIndexEvents() {
@@ -144,6 +150,7 @@ export function bindRowColumnIndexEvents() {
             }
         }
         updateTransformationUIDisplay();
+        updatePreviewMatrix();
     };
 
     elements.windowDiv.addEventListener('pointerup', eventListener);
@@ -205,6 +212,7 @@ export function handleSelectorChange(selectorType, value) {
     }
 
     updateTransformationUIDisplay();
+    updatePreviewMatrix();
 }
 
 export function updateTransformationUIDisplay() {
@@ -243,6 +251,9 @@ export function showElementaryTransformationUI() {
     }
 
     reorganizeLayoutForElementaryTransformation();
+
+    setupPreviewListeners();
+    updatePreviewMatrix();
 }
 
 export function handleMatrixElementClick(row, col, element) {
@@ -265,4 +276,253 @@ export function handleMatrixElementClick(row, col, element) {
     }
 
     console.log('选中元素索引:', state.selectedMatrixElements);
+}
+
+function getCurrentOperator() {
+    const activeBtn = document.querySelector('#arithmetic-symbols button.activeButton');
+    if (!activeBtn) return '';
+    const text = activeBtn.textContent.trim();
+    if (text === '−') return '−';
+    return text;
+}
+
+export function isTransformationInfoComplete() {
+    const operator = getCurrentOperator();
+    const target = state.transformTarget;
+
+    if (!operator || !target) {
+        return { complete: false, hintText: '' };
+    }
+
+    const targetMatch = target.match(/^([rc])(\d+)$/i);
+    if (!targetMatch) {
+        return { complete: false, hintText: '' };
+    }
+
+    const coefficientInput = elements.transformCoefficient;
+    const coefficient = coefficientInput ? coefficientInput.value.trim() : '';
+
+    switch (operator) {
+        case '↔': {
+            const param = state.transformParam;
+            if (!param) return { complete: false, hintText: '' };
+            const paramMatch = param.match(/^([rc])(\d+)$/i);
+            if (!paramMatch) return { complete: false, hintText: '' };
+            return { complete: true, hintText: `${target} ↔ ${param}` };
+        }
+        case '+':
+        case '−': {
+            const param = state.transformParam;
+            if (!param) return { complete: false, hintText: '' };
+            const paramMatch = param.match(/^([rc])(\d+)$/i);
+            if (!paramMatch) return { complete: false, hintText: '' };
+            const coeffDisplay = coefficient || '1';
+            return { complete: true, hintText: `${target} ${operator} ${coeffDisplay}×${param}` };
+        }
+        case '×': {
+            if (!coefficient) return { complete: false, hintText: '' };
+            return { complete: true, hintText: `${target} × ${coefficient}` };
+        }
+        default:
+            return { complete: false, hintText: '' };
+    }
+}
+
+function applyTransformationToMatrix(matrix, rows, cols, targetType, targetIndex, paramType, paramIndex, coefficient, operator) {
+    switch (operator) {
+        case '↔':
+            if (targetType === 'r') {
+                const temp = matrix[targetIndex];
+                matrix[targetIndex] = matrix[paramIndex];
+                matrix[paramIndex] = temp;
+            } else {
+                for (let i = 0; i < rows; i++) {
+                    const temp = matrix[i][targetIndex];
+                    matrix[i][targetIndex] = matrix[i][paramIndex];
+                    matrix[i][paramIndex] = temp;
+                }
+            }
+            break;
+
+        case '+':
+        case '−': {
+            const isAdd = operator === '+';
+            const coeff = coefficient || '1';
+            if (targetType === 'r') {
+                for (let j = 0; j < cols; j++) {
+                    try {
+                        const expr = isAdd
+                            ? `(${matrix[targetIndex][j]}) + (${coeff})*(${matrix[paramIndex][j]})`
+                            : `(${matrix[targetIndex][j]}) - (${coeff})*(${matrix[paramIndex][j]})`;
+                        const result = math.simplify(math.parse(expr)).toString()
+                            .replace(/lambda/g, 'λ')
+                            .replace(/\(([a-zA-Zλ]+)\)/g, '$1')
+                            .replace(/\((\d+)\)/g, '$1');
+                        matrix[targetIndex][j] = result;
+                    } catch (e) {
+                        matrix[targetIndex][j] = isAdd
+                            ? `(${matrix[targetIndex][j]})+${coeff}*(${matrix[paramIndex][j]})`
+                            : `(${matrix[targetIndex][j]})-${coeff}*(${matrix[paramIndex][j]})`;
+                    }
+                }
+            } else {
+                for (let i = 0; i < rows; i++) {
+                    try {
+                        const expr = isAdd
+                            ? `(${matrix[i][targetIndex]}) + (${coeff})*(${matrix[i][paramIndex]})`
+                            : `(${matrix[i][targetIndex]}) - (${coeff})*(${matrix[i][paramIndex]})`;
+                        const result = math.simplify(math.parse(expr)).toString()
+                            .replace(/lambda/g, 'λ')
+                            .replace(/\(([a-zA-Zλ]+)\)/g, '$1')
+                            .replace(/\((\d+)\)/g, '$1');
+                        matrix[i][targetIndex] = result;
+                    } catch (e) {
+                        matrix[i][targetIndex] = isAdd
+                            ? `(${matrix[i][targetIndex]})+${coeff}*(${matrix[i][paramIndex]})`
+                            : `(${matrix[i][targetIndex]})-${coeff}*(${matrix[i][paramIndex]})`;
+                    }
+                }
+            }
+            break;
+        }
+
+        case '×':
+            if (targetType === 'r') {
+                for (let j = 0; j < cols; j++) {
+                    try {
+                        const expr = `(${coefficient})*(${matrix[targetIndex][j]})`;
+                        const result = math.simplify(math.parse(expr)).toString()
+                            .replace(/lambda/g, 'λ')
+                            .replace(/\(([a-zA-Zλ]+)\)/g, '$1')
+                            .replace(/\((\d+)\)/g, '$1');
+                        matrix[targetIndex][j] = result;
+                    } catch (e) {
+                        matrix[targetIndex][j] = `${coefficient}*(${matrix[targetIndex][j]})`;
+                    }
+                }
+            } else {
+                for (let i = 0; i < rows; i++) {
+                    try {
+                        const expr = `(${coefficient})*(${matrix[i][targetIndex]})`;
+                        const result = math.simplify(math.parse(expr)).toString()
+                            .replace(/lambda/g, 'λ')
+                            .replace(/\(([a-zA-Zλ]+)\)/g, '$1')
+                            .replace(/\((\d+)\)/g, '$1');
+                        matrix[i][targetIndex] = result;
+                    } catch (e) {
+                        matrix[i][targetIndex] = `${coefficient}*(${matrix[i][targetIndex]})`;
+                    }
+                }
+            }
+            break;
+    }
+}
+
+function computePreviewResult() {
+    const operator = getCurrentOperator();
+    const target = state.transformTarget;
+
+    if (!operator || !target || !state.matrixData) return null;
+
+    const targetMatch = target.match(/^([rc])(\d+)$/i);
+    if (!targetMatch) return null;
+
+    const targetType = targetMatch[1].toLowerCase();
+    const targetIndex = parseInt(targetMatch[2]) - 1;
+    const { rows, cols } = state.matrixData;
+
+    let paramType = null;
+    let paramIndex = null;
+    let coefficient = null;
+
+    switch (operator) {
+        case '↔': {
+            const param = state.transformParam;
+            if (!param) return null;
+            const paramMatch = param.match(/^([rc])(\d+)$/i);
+            if (!paramMatch) return null;
+            paramType = paramMatch[1].toLowerCase();
+            paramIndex = parseInt(paramMatch[2]) - 1;
+            if (targetType !== paramType) return null;
+            break;
+        }
+        case '+':
+        case '−': {
+            const param = state.transformParam;
+            if (!param) return null;
+            const paramMatch = param.match(/^([rc])(\d+)$/i);
+            if (!paramMatch) return null;
+            paramType = paramMatch[1].toLowerCase();
+            paramIndex = parseInt(paramMatch[2]) - 1;
+            if (targetType !== paramType) return null;
+            coefficient = elements.transformCoefficient.value.trim() || '1';
+            break;
+        }
+        case '×': {
+            coefficient = elements.transformCoefficient.value.trim();
+            if (!coefficient) return null;
+            break;
+        }
+        default:
+            return null;
+    }
+
+    const matrix = JSON.parse(JSON.stringify(state.matrixData.elements));
+    applyTransformationToMatrix(matrix, rows, cols, targetType, targetIndex, paramType, paramIndex, coefficient, operator);
+
+    return { rows, cols, elements: matrix };
+}
+
+export function updatePreviewMatrix() {
+    if (!elements.matrixPreviewRow) return;
+
+    if (state.isMobile || state.currentState !== 'elementary_transformation') {
+        elements.previewArrowSection.style.display = 'none';
+        elements.previewTableWrapper.style.display = 'none';
+        return;
+    }
+
+    elements.previewArrowSection.style.display = 'flex';
+    elements.previewTableWrapper.style.display = 'block';
+
+    const infoResult = isTransformationInfoComplete();
+
+    if (elements.previewHintText) {
+        elements.previewHintText.textContent = infoResult.hintText;
+    }
+
+    if (infoResult.complete) {
+        const previewData = computePreviewResult();
+        if (previewData && elements.previewTable) {
+            elements.previewTable.innerHTML = '';
+            const previewTable = renderMatrixTable(previewData);
+            elements.previewTable.appendChild(previewTable);
+        }
+        if (elements.previewMask) {
+            elements.previewMask.classList.add('hide-mask');
+        }
+    } else {
+        if (elements.previewTable && state.matrixData) {
+            elements.previewTable.innerHTML = '';
+            const dimTable = renderMatrixTable(state.matrixData);
+            elements.previewTable.appendChild(dimTable);
+        }
+        if (elements.previewMask) {
+            elements.previewMask.classList.remove('hide-mask');
+        }
+    }
+}
+
+let previewListenersSetup = false;
+
+function setupPreviewListeners() {
+    if (!elements.transformCoefficient || previewListenersSetup) return;
+
+    elements.transformCoefficient.addEventListener('input', updatePreviewMatrix);
+    document.addEventListener('transformOperatorChanged', updatePreviewMatrix);
+    previewListenersSetup = true;
+}
+
+export function notifyOperatorChanged() {
+    document.dispatchEvent(new CustomEvent('transformOperatorChanged'));
 }
