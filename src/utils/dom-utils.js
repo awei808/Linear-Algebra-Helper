@@ -1,6 +1,7 @@
 // ==================== DOM工具函数 ====================
 import { CONFIG } from '../config.js';
 import { state } from '../state/state.js';
+import { elements } from '../dom/elements.js';
 
 /**
  * 获取当前设备上输入框的实际CSS尺寸
@@ -65,39 +66,57 @@ export function getTextWidth(text, font) {
  * @param {HTMLInputElement} input - 输入框元素
  */
 export function adjustInputWidth(input) {
-    if (!input || !input.value) return;
+    if (!input) return;
 
-    const font = getComputedStyle(input).font;
-    const textWidth = getTextWidth(input.value, font);
-    const minWidth = 40;
-    const maxWidth = 200;
-    const paddingWidth = 16;
-    const newWidth = Math.min(Math.max(textWidth + paddingWidth, minWidth), maxWidth);
+    // 记录原始CSS宽度作为下限，防止缩小到比默认宽度还小
+    if (!input.dataset.minWidth) {
+        input.dataset.minWidth = window.getComputedStyle(input).width;
+    }
+    const originalMinWidth = Math.max(40, parseFloat(input.dataset.minWidth) || 40);
 
-    input.style.width = newWidth + 'px';
+    if (input.value) {
+        const font = getComputedStyle(input).font;
+        const textWidth = getTextWidth(input.value, font);
+        const maxWidth = 200;
+        const paddingWidth = 16;
+        const newWidth = Math.min(Math.max(textWidth + paddingWidth, originalMinWidth), maxWidth);
+        input.style.width = newWidth + 'px';
+    } else {
+        input.style.width = originalMinWidth + 'px';
+    }
 
-    // 同步同列输入框宽度
+    // 同步同列输入框宽度：取该列所有输入的最大宽度
     const col = parseInt(input.dataset.x);
     if (!isNaN(col)) {
         const cols = state.matrixData ? state.matrixData.cols : 0;
-        state.gridInputs.forEach(otherInput => {
-            if (parseInt(otherInput.dataset.x) === col) {
-                otherInput.style.width = newWidth + 'px';
-            }
-        });
-
-        // 更新网格列模板以匹配新宽度
         if (cols > 0) {
-            const gap = 0;
-            const colWidths = [];
-            for (let c = 0; c < cols; c++) {
-                const sameColInput = state.gridInputs.find(inp => parseInt(inp.dataset.x) === c);
-                colWidths.push(sameColInput ? sameColInput.style.width || '40px' : '40px');
-            }
-            const elements = document.getElementById('window');
-            if (elements) {
-                elements.style.gridTemplateColumns = colWidths.join(' ');
-            }
+            syncColumnWidths(cols);
         }
     }
+}
+
+function syncColumnWidths(cols) {
+    // 计算每列的最大宽度
+    const colMaxWidths = [];
+    for (let c = 0; c < cols; c++) {
+        let maxW = 0;
+        state.gridInputs.forEach(inp => {
+            if (parseInt(inp.dataset.x) === c) {
+                const w = parseFloat(inp.style.width) || 40;
+                maxW = Math.max(maxW, w);
+            }
+        });
+        colMaxWidths.push(maxW);
+    }
+
+    // 同步同列所有输入框到最大宽度
+    state.gridInputs.forEach(inp => {
+        const c = parseInt(inp.dataset.x);
+        if (!isNaN(c) && colMaxWidths[c]) {
+            inp.style.width = colMaxWidths[c] + 'px';
+        }
+    });
+
+    // 更新网格列模板
+    elements.windowDiv.style.gridTemplateColumns = colMaxWidths.map(w => w + 'px').join(' ');
 }
