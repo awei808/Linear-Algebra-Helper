@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build:normal": "vite build",
+    "build": "vite build",
     "build:single": "vite build --mode single",
     "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
